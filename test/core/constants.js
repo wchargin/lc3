@@ -8,15 +8,15 @@ describe('Constants', () => {
     describe('Constants.REGISTER_NAMES', () => {
         const names = Constants.REGISTER_NAMES;
 
-        it("should exist", () => {
+        it("exists", () => {
             expect(names).to.be.ok;
         });
 
-        it("should have an 'all' field", () => {
+        it("has an 'all' field", () => {
             expect(names.get("all")).to.be.ok;
         });
 
-        it("should have 'all' be the union of all other fields", () => {
+        it("has 'all' be the union of all other fields", () => {
             const all = names.get("all");
             names.forEach(list => {
                 expect(list.isSubset(all)).to.be.true;
