@@ -22,6 +22,12 @@ describe('LC3', () => {
             Constants.REGISTER_NAMES.get("all").size);
     });
 
+    it("has the program counter set to 0x3000", () => {
+        const registers = lc3.get("registers");
+        const pc = registers.get("PC");
+        expect(pc).to.equal(0x3000);
+    });
+
     it("has a symbol table", () => {
         const symbolTable = lc3.get("symbolTable");
         expect(symbolTable).to.be.ok;

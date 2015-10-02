@@ -6,8 +6,14 @@ import LC3 from './core/lc3';
 export function createInitialState() {
     return Map({
         lc3: LC3(),
-        assemblerBuffer: "",
-        rawInputBuffer: "",
+        editorBuffers: Map({
+            assembler: "",
+            rawInput: "",
+        }),
+        viewOptions: Map({
+            topAddressShown: 0x3000,
+            followPC: true,
+        }),
     });
 }
 

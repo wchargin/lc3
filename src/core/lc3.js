@@ -24,7 +24,7 @@ function createRegisters() {
     });
 
     return Map(Constants.REGISTER_NAMES.get("all").map(
-            name => [name, registerDefaults[name] || 0]));
+            name => [name, registerDefaults.get(name) || 0]));
 }
 
 /*

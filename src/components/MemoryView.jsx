@@ -6,15 +6,18 @@ import {Panel, Table} from 'react-bootstrap';
 class MemoryView extends Component {
 
     render() {
-        const rowsToShow = 16;
-        const {lc3, startAtRow, activeRow} = this.props;
+        const {lc3, viewOptions} = this.props;
 
         const memory = lc3.get("memory");
-        const firstVisibleRow = Math.min(startAtRow, memory.size - rowsToShow);
-        const memoryInView = memory.skip(firstVisibleRow).take(rowsToShow);
+        const rowsToShow = 16;
+        const nominalTopRow = viewOptions.get("topAddressShown");
+        const topRow = Math.min(nominalTopRow, memory.size - rowsToShow);
+        const memoryInView = memory.skip(topRow).take(rowsToShow);
+
+        const activeRow = lc3.getIn(["registers", "PC"]);
 
         const memoryRows = memoryInView.map((value, index) => {
-            const address = firstVisibleRow + index;
+            const address = topRow + index;
             const style = address !== activeRow ? {} :
                 { background: "yellow" };
             return <tr key={index} style={style}>
@@ -46,10 +49,7 @@ class MemoryView extends Component {
 function mapStateToProps(state) {
     return {
         lc3: state.get("lc3"),
-
-        // TODO(william): use real values here
-        startAtRow: 0x10000 - 10,
-        activeRow: 0x10000 - 10,
+        viewOptions: state.get("viewOptions"),
     };
 }
 
