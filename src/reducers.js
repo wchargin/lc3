@@ -21,6 +21,10 @@ function setPC(state, newPC) {
     return state.setIn(["lc3", "registers", "PC"], newPC);
 }
 
+function setMemory(state, address, value) {
+    return state.setIn(["lc3", "memory", address], value);
+}
+
 export default function reducer(state, action) {
     if (state === undefined) {
         state = createInitialState();
@@ -29,6 +33,8 @@ export default function reducer(state, action) {
     switch (action.type) {
         case "SET_PC":
             return setPC(state, action.newPC);
+        case "SET_MEMORY":
+            return setMemory(state, action.address, action.value);
     }
 
     return state;

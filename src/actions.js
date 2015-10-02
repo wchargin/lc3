@@ -4,3 +4,11 @@ export function setPC(newPC) {
         newPC,
     };
 }
+
+export function setMemory(address, value) {
+    return {
+        type: "SET_MEMORY",
+        address,
+        value,
+    };
+}
