@@ -4,9 +4,32 @@
 <head>
 <title>Hello</title>
 <link rel="stylesheet" href="styles/bootstrap.min.css" />
+
+<style>
+body {
+    overflow-y: scroll;
+}
+</style>
+
 </head>
 
 <body>
+
+<nav class="navbar navbar-inverse navbar-static-top">
+  <div class="container">
+    <span class="navbar-brand">LC-3 Simulator</span>
+  </div>
+</nav>
+
+<div class="container" id="container-wait">
+    <div class="col-md-12">
+      <div class="alert alert-info" role="alert" id="wait-alert">
+        <strong>Initializing</strong> the LC-3.
+        Please wait&hellip;
+      </div>
+    </div>
+</div>
+
 <div id="app"></div>
 <script src="bundle.js"></script>
 </body>

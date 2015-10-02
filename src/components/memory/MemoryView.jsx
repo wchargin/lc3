@@ -31,7 +31,7 @@ class MemoryView extends Component {
         });
 
         return <div className="memory-view">
-            <h1>Memory</h1>
+            <h2>Memory</h2>
             <Panel header="<SearchBar> goes here">
                 <Table hover>
                     <thead>
