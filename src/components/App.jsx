@@ -1,7 +1,26 @@
 import React, {Component} from 'react';
 
+import LC3 from '../core/lc3';
+import MemoryView from './MemoryView';
+
 export default class App extends Component {
-    render() {
-        return <h1>App</h1>;
+
+    constructor() {
+        super();
+        this.state = {
+            lc3: LC3()
+        };
     }
+
+    render() {
+        const lc3 = this.state.lc3;
+        const row = lc3.get("memory").size - 10;
+
+        return <MemoryView
+            lc3={lc3}
+            startAtRow={row}
+            activeRow={row}
+        />;
+    }
+
 }
