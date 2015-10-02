@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import {Panel, Table} from 'react-bootstrap';
+import {setPC} from '../../actions';
 
+import {Panel, Table} from 'react-bootstrap';
 import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
 
 class MemoryView extends Component {
@@ -20,13 +21,13 @@ class MemoryView extends Component {
 
         const memoryRows = memoryInView.map((value, index) => {
             const address = topRow + index;
-            const props = {
-                address,
-                value,
-                active: address === activeRow,
-                key: index,
-            };
-            return <MemoryRow {...props} />;
+            return <MemoryRow
+                address={address}
+                value={value}
+                active={address === activeRow}
+                onSetPC={() => this.props.onSetPC(address)}
+                key={index}
+            />;
         });
 
         return <div className="memory-view">
@@ -53,4 +54,10 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(mapStateToProps)(MemoryView);
+function mapDispatchToProps(dispatch) {
+    return {
+        onSetPC: (newPC) => dispatch(setPC(newPC)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MemoryView);
