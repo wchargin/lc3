@@ -14,18 +14,11 @@ export default class App extends Component {
     }
 
     render() {
-        const lc3 = this.state.lc3;
-        const row = lc3.get("memory").size - 10;
-
         return <div>
             <Navbar brand="LC-3 Simulator" inverse staticTop />
             <div className="container">
                 <Col md={6}>
-                    <MemoryView
-                        lc3={lc3}
-                        startAtRow={row}
-                        activeRow={row}
-                    />;
+                    <MemoryView />;
                 </Col>
             </div>
         </div>;

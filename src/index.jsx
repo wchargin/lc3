@@ -1,9 +1,16 @@
 import React from 'react';
-import App from './components/App';
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
 
+import reducer from './reducers';
+
+import App from './components/App';
 import LC3 from './core/lc3';
 
-React.render(<App />, document.getElementById('app'));
+const store = createStore(reducer);
 
-// STOPSHIP
-window.LC3 = LC3;
+const component = <Provider store={store}>
+    {() => <App />}
+</Provider>;
+
+React.render(component, document.getElementById('app'));

@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
+
 import {Panel, Table} from 'react-bootstrap';
 
-export default class MemoryView extends Component {
+class MemoryView extends Component {
 
     render() {
         const rowsToShow = 16;
@@ -40,3 +42,15 @@ export default class MemoryView extends Component {
     }
 
 }
+
+function mapStateToProps(state) {
+    return {
+        lc3: state.get("lc3"),
+
+        // TODO(william): use real values here
+        startAtRow: 0x10000 - 10,
+        activeRow: 0x10000 - 10,
+    };
+}
+
+export default connect(mapStateToProps)(MemoryView);
