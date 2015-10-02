@@ -17,9 +17,18 @@ export function createInitialState() {
     });
 }
 
+function setPC(state, newPC) {
+    return state.setIn(["lc3", "registers", "PC"], newPC);
+}
+
 export default function reducer(state, action) {
     if (state === undefined) {
         state = createInitialState();
+    }
+
+    switch (action.type) {
+        case "SET_PC":
+            return setPC(state, action.newPC);
     }
 
     return state;
