@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Panel, Table} from 'react-bootstrap';
 
 export default class MemoryView extends Component {
 
@@ -22,19 +23,20 @@ export default class MemoryView extends Component {
 
         return <div className="memory-view">
             <h1>Memory</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <td>Address</td>
-                        <td>Hex</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {memoryRows}
-                </tbody>
-            </table>
+            <Panel header="<SearchBar> goes here">
+                <Table hover>
+                    <thead>
+                        <tr>
+                            <th>Address</th>
+                            <th>Hex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {memoryRows}
+                    </tbody>
+                </Table>
+            </Panel>
         </div>;
-        return <h1>MemoryView</h1>;
     }
 
 }
