@@ -6,13 +6,6 @@ import MemoryView from './memory/MemoryView';
 
 export default class App extends Component {
 
-    constructor() {
-        super();
-        this.state = {
-            lc3: LC3()
-        };
-    }
-
     render() {
         return <div>
             <Navbar brand="LC-3 Simulator" inverse staticTop />
