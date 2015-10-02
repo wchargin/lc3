@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 
 import {DropdownButton, MenuItem} from 'react-bootstrap';
+import NumericValue from '../NumericValue';
 
 const firstColumnStyle = {
     width: "1px",
@@ -13,7 +14,7 @@ export class MemoryHeaderRow extends Component {
             <th style={firstColumnStyle}>
                 {/* for the row options dropdown (no header needed) */}
             </th>
-            <th>Address</th>
+            <th>0x</th>
             <th>Hex</th>
         </tr>;
     }
@@ -38,8 +39,20 @@ export class MemoryRow extends Component {
 
         return <tr key={key}>
             <td style={firstColumnStyle}>{setPC}</td>
-            <td>{address}</td>
-            <td>{value}</td>
+            <td>
+                <NumericValue
+                    value={address}
+                    signed={false}
+                    id={"address-" + address}
+                />
+            </td>
+            <td>
+                <NumericValue
+                    value={value}
+                    signed={true}
+                    id={"value-" + address}
+                />
+            </td>
         </tr>;
     }
 
