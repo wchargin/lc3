@@ -3,6 +3,8 @@ import {connect} from 'react-redux';
 
 import {Panel, Table} from 'react-bootstrap';
 
+import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
+
 class MemoryView extends Component {
 
     render() {
@@ -18,12 +20,13 @@ class MemoryView extends Component {
 
         const memoryRows = memoryInView.map((value, index) => {
             const address = topRow + index;
-            const style = address !== activeRow ? {} :
-                { background: "yellow" };
-            return <tr key={index} style={style}>
-                <td>{address}</td>
-                <td>{value}</td>
-            </tr>;
+            const props = {
+                address,
+                value,
+                active: address === activeRow,
+                key: index,
+            };
+            return <MemoryRow {...props} />;
         });
 
         return <div className="memory-view">
@@ -31,10 +34,7 @@ class MemoryView extends Component {
             <Panel header="<SearchBar> goes here">
                 <Table hover>
                     <thead>
-                        <tr>
-                            <th>Address</th>
-                            <th>Hex</th>
-                        </tr>
+                        <MemoryHeaderRow />
                     </thead>
                     <tbody>
                         {memoryRows}

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Col, Navbar} from 'react-bootstrap';
 
 import LC3 from '../core/lc3';
-import MemoryView from './MemoryView';
+import MemoryView from './memory/MemoryView';
 
 export default class App extends Component {
 
