@@ -69,4 +69,37 @@ describe('utils', () => {
 
     });
 
+    describe('toInt16', () => {
+        const test = (input, expected) => () => {
+            expect(Utils.toInt16(input)).to.equal(expected);
+        };
+
+        it("is the identity for 0", test(0, 0));
+        it("is the identity for 1", test(1, 1));
+        it("is the identity for -1", test(-1, -1));
+
+        it("takes 0x10000 to 0", test(0x10000, 0));
+        it("takes 0x20000 to 0", test(0x20000, 0));
+        it("takes 0x1FFFF to -1", test(0x1FFFF, -1));
+        it("takes 0x54321 to 0x4321", test(0x54321, 0x4321));
+        it("takes 0xABCDE to 0xBCDE - 0x10000",
+            test(0xABCDE, 0xBCDE - 0x10000));
+    });
+
+    describe('toUint16', () => {
+        const test = (input, expected) => () => {
+            expect(Utils.toUint16(input)).to.equal(expected);
+        };
+
+        it("is the identity for 0", test(0, 0));
+        it("is the identity for 1", test(1, 1));
+        it("takes -1 to 0xFFFF", test(-1, 0xFFFF));
+
+        it("takes 0x10000 to 0", test(0x10000, 0));
+        it("takes 0x20000 to 0", test(0x20000, 0));
+        it("takes 0x1FFFF to 0xFFFF", test(0x1FFFF, 0xFFFF));
+        it("takes 0x54321 to 0x4321", test(0x54321, 0x4321));
+        it("takes 0xABCDE to 0xBCDE", test(0xABCDE, 0xBCDE));
+    });
+
 });

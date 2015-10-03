@@ -1,3 +1,5 @@
+import {WORD_BITS} from './constants';
+
 /*
  * Convert a decimal or hex string to a number.
  * Return NaN on failure.
@@ -44,4 +46,25 @@ export function toHexString(number, padLength=4, prefix='x') {
         hex = Array(padLength - hex.length + 1).join('0') + hex;
     }
     return prefix + hex;
+}
+
+/*
+ * Convert a number possibly outside the [-32768, 32767] range
+ * to a 16-bit signed integer.
+ */
+export function toInt16(n) {
+    n = (n % (1 << WORD_BITS)) & ((1 << WORD_BITS) - 1);
+    if (n & (1 << WORD_BITS - 1)) {
+        return n - (1 << WORD_BITS);
+    }
+    return n;
+}
+
+/*
+ * Convert a number possibly outside the [-32768, 32767] range
+ * to a 16-bit unsigned signed integer.
+ */
+export function toUint16(n) {
+    const int16 = this.toInt16(n);
+    return int16 < 0 ? int16 + (1 << WORD_BITS) : int16;
 }
