@@ -1,6 +1,11 @@
 import {expect} from 'chai';
 
-import LC3, {getConditionCode, formatConditionCode} from '../../src/core/lc3';
+import {Map, List} from 'immutable';
+
+import LC3, {
+    getConditionCode, formatConditionCode,
+    mergeMemory,
+} from '../../src/core/lc3';
 import Constants from '../../src/core/constants';
 
 describe('LC3', () => {
@@ -68,6 +73,66 @@ describe('LC3', () => {
         it("fails when none of the bits is set", test(0x8000, "Invalid"));
         it("fails when two of the bits are set", test(0x8003, "Invalid"));
         it("fails when all the bits are set", test(0x8007, "Invalid"));
+    });
+
+    describe('mergeMemory', () => {
+        const lc3 = LC3();
+
+        it("merges machine code", () => {
+            const data = Map({
+                orig: 0x3000,
+                machineCode: List([0x5260, 0x1468, 0x1262, 0x1642]),
+            });
+            const newLC3 = mergeMemory(lc3, data);
+
+            expect(newLC3).to.be.ok;
+            expect(newLC3.get("memory").slice(0x2FFE, 0x3006)).
+                to.equal(List([0, 0, 0x5260, 0x1468, 0x1262, 0x1642, 0, 0]));
+
+            const data2 = Map({
+                orig: 0x3002,
+                machineCode: List([0xABCD, 0xBCDE, 0xCDEF]),
+            });
+            const newerLC3 = mergeMemory(newLC3, data2);
+
+            expect(newerLC3).to.be.ok;
+            expect(newerLC3.get("memory").slice(0x2FFE, 0x3006)).
+                to.equal(List(
+                    [0, 0, 0x5260, 0x1468, 0xABCD, 0xBCDE, 0xCDEF, 0]
+                ));
+        });
+
+        it("merges a symbol table", () => {
+            const data = Map({
+                orig: 0x3000,
+                machineCode: List([]),
+                symbolTable: Map({
+                    "START": 0x3000,
+                    "DATA": 0x3100,
+                }),
+            });
+            const newLC3 = mergeMemory(lc3, data);
+
+            expect(newLC3).to.be.ok;
+            expect(newLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
+            expect(newLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3100);
+
+            const data2 = Map({
+                orig: 0x3002,
+                machineCode: List([]),
+                symbolTable: Map({
+                    "DATA": 0x3200,
+                    "MORE": 0x3300,
+                }),
+            });
+            const newerLC3 = mergeMemory(newLC3, data2);
+
+            expect(newerLC3).to.be.ok;
+            expect(newerLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
+            expect(newerLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3200);
+            expect(newerLC3.getIn(["symbolTable", "MORE"])).to.equal(0x3300);
+        });
+
     });
 
 });

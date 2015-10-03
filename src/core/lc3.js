@@ -83,3 +83,25 @@ export function formatConditionCode(psr) {
             return "P";
     }
 }
+
+/*
+ * Given a description of machine data to import,
+ * in the form of an immutable map with key/value pairs including
+ *     orig: integer,
+ *     machineCode: List<Integer>,
+ *     and symbolTable: Map<String, Integer>,
+ * merge that data description into the given LC3 machine.
+ */
+export function mergeMemory(lc3, data) {
+    const orig = data.get("orig");
+    const machineCode = data.get("machineCode");
+    const symbolTable = data.get("symbolTable") || Map();
+    const length = machineCode.size;
+
+    return lc3.update("memory", mem => mem.withMutations(mem => {
+        for (let i = 0; i < length; i++) {
+            mem.set(orig + i, machineCode.get(i));
+        }
+        return mem;
+    })).update("symbolTable", table => table.concat(symbolTable));
+}
