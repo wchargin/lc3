@@ -1,7 +1,7 @@
 import redux from 'redux';
-import {Map} from 'immutable';
+import {Map, fromJS} from 'immutable';
 
-import LC3 from './core/lc3';
+import LC3, * as LC3Utils from './core/lc3';
 
 export function createInitialState() {
     return Map({
@@ -25,6 +25,11 @@ function setMemory(state, address, value) {
     return state.setIn(["lc3", "memory", address], value);
 }
 
+function setMemoryBlock(state, orig, machineCode, symbolTable) {
+    const data = fromJS({orig, machineCode, symbolTable});
+    return state.update("lc3", lc3 => LC3Utils.mergeMemory(lc3, data));
+}
+
 export default function reducer(state, action) {
     if (state === undefined) {
         state = createInitialState();
@@ -35,6 +40,9 @@ export default function reducer(state, action) {
             return setPC(state, action.newPC);
         case "SET_MEMORY":
             return setMemory(state, action.address, action.value);
+        case "SET_MEMORY_BLOCK":
+            return setMemoryBlock(
+                state, action.orig, action.machineCode, action.symbolTable);
     }
 
     return state;

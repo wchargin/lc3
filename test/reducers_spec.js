@@ -1,5 +1,7 @@
 import {expect} from 'chai';
 
+import {List} from 'immutable';
+
 import reducer from '../src/reducers';
 
 describe('reducer', () => {
@@ -51,6 +53,26 @@ describe('reducer', () => {
         expect(newerState).to.be.ok;
         expect(newerLC3.get("memory").get(0x4001)).to.equal(0xABCD);
         expect(newerLC3.get("memory").get(0x4002)).to.equal(0xBCDE);
+    });
+
+    it("handles SET_MEMORY_BLOCK", () => {
+        const action = {
+            type: "SET_MEMORY_BLOCK",
+            orig: 0x3000,
+            machineCode: [0x1234, 0x2345, 0x3456],
+            symbolTable: {
+                "START": 0x3000,
+                "DATA": 0x3100,
+            },
+        };
+        const newState = reducer(initialState, action);
+        const newLC3 = newState.get("lc3");
+
+        expect(newState).to.be.ok;
+        expect(newLC3.get("memory").slice(0x3000, 0x3003))
+            .to.equal(List([0x1234, 0x2345, 0x3456]));
+        expect(newLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
+        expect(newLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3100);
     });
 
 });

@@ -12,3 +12,12 @@ export function setMemory(address, value) {
         value,
     };
 }
+
+export function setMemoryBlock(orig, machineCode, symbolTable={}) {
+    return {
+        type: "SET_MEMORY_BLOCK",
+        orig,
+        machineCode,
+        symbolTable,
+    };
+}
