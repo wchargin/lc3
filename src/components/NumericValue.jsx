@@ -1,6 +1,6 @@
 import React, {PropTypes, Component} from 'react';
 
-import {toHexString} from '../core/utils';
+import * as Utils from '../core/utils';
 
 import {OverlayTrigger, Tooltip} from 'react-bootstrap';
 
@@ -9,12 +9,17 @@ export default class NumericValue extends Component {
     render() {
         const {value} = this.props;
 
+        const decimalValue = this.props.signed ?
+            Utils.toInt16(value) :
+            Utils.toUint16(value);
+
         const tooltip = <Tooltip placement="top" id={this.props.id}>
-            decimal {value}
-            {/* TODO(william): incorporate signedness */}
+            decimal {decimalValue}
+            {" "}
+            {this.props.signed ? "(signed)" : "(unsigned)"}
         </Tooltip>;
 
-        const number = <tt>{toHexString(value)}</tt>;
+        const number = <tt>{Utils.toHexString(value)}</tt>;
 
         if (this.props.showTooltip) {
             return <OverlayTrigger placement="top" overlay={tooltip}>
