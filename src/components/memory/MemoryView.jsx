@@ -5,6 +5,7 @@ import {setPC} from '../../actions';
 
 import {Panel, Table} from 'react-bootstrap';
 import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
+import FullBleedPanel from '../FullBleedPanel';
 
 class MemoryView extends Component {
 
@@ -30,9 +31,12 @@ class MemoryView extends Component {
             />;
         });
 
+        const header = "Search bar goes here";  // TODO(william)
+        const footer = "Import/export go here"; // TODO(william)
+
         return <div className="memory-view">
             <h2>Memory</h2>
-            <Panel header="<SearchBar> goes here">
+            <FullBleedPanel header={header} footer={footer}>
                 <Table hover>
                     <thead>
                         <MemoryHeaderRow />
@@ -41,7 +45,7 @@ class MemoryView extends Component {
                         {memoryRows}
                     </tbody>
                 </Table>
-            </Panel>
+            </FullBleedPanel>
         </div>;
     }
 
