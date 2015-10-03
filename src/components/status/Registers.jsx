@@ -38,7 +38,7 @@ export default class Registers extends Component {
             {REGISTER_NAMES.get("standard").map(name =>
                 makeNumericRegister(name, true)).toJS()}
             {REGISTER_NAMES.get("special").map(name =>
-                makeNumericRegister(name, true)).toJS()}
+                makeNumericRegister(name, false)).toJS()}
             <Register name="CC">
                 {formatConditionCode(registers["PSR"])}
             </Register>
