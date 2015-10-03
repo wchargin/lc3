@@ -26,7 +26,7 @@ export default class Registers extends Component {
         const {registers} = this.props;
 
         const makeNumericRegister = (name, signed) =>
-            <Register name={name}>
+            <Register name={name} key={name}>
                 <NumericValue
                     value={registers[name]}
                     signed={signed}
