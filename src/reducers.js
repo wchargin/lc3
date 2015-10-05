@@ -5,7 +5,7 @@ import LC3, * as LC3Utils from './core/lc3';
 
 export function createInitialState() {
     return Map({
-        lc3: LC3(),
+        lc3: new LC3(),
         editorBuffers: Map({
             assembler: "",
             rawInput: "",
@@ -27,7 +27,7 @@ function setMemory(state, address, value) {
 
 function setMemoryBlock(state, orig, machineCode, symbolTable) {
     const data = fromJS({orig, machineCode, symbolTable});
-    return state.update("lc3", lc3 => LC3Utils.mergeMemory(lc3, data));
+    return state.update("lc3", lc3 => lc3.mergeMemory(data));
 }
 
 export default function reducer(state, action) {
