@@ -1,13 +1,22 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import {setPC} from '../../actions';
+import {setPC, setMemoryBlock} from '../../actions';
 
-import {Panel, Table} from 'react-bootstrap';
+import {Button, Panel, Table} from 'react-bootstrap';
 import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
 import FullBleedPanel from '../FullBleedPanel';
 
+import RawModal from './RawModal';
+
 class MemoryView extends Component {
+
+    constructor() {
+        super();
+        this.state = {
+            showRawModal: false,
+        };
+    }
 
     render() {
         const {lc3, viewOptions} = this.props;
@@ -32,7 +41,7 @@ class MemoryView extends Component {
         });
 
         const header = "Search bar goes here";  // TODO(william)
-        const footer = "Import/export go here"; // TODO(william)
+        const footer = this.renderFooter();
 
         return <div className="memory-view">
             <h2>Memory</h2>
@@ -49,6 +58,35 @@ class MemoryView extends Component {
         </div>;
     }
 
+    renderFooter() {
+        // TODO(william): Add the rest of the input/expor tlogic
+        return <div>
+            <Button onClick={() => this.setState({ showRawModal: true })}>
+                Raw
+            </Button>
+            <RawModal
+                show={this.state.showRawModal}
+                onHide={() => this.setState({ showRawModal: false })}
+                onLoadIntoLC3={this.handleLoadIntoLC3.bind(this)}
+                onDownloadObject={this.handleDownloadObject.bind(this)}
+            />
+        </div>;
+    }
+
+    handleLoadIntoLC3(data) {
+        this.props.onSetMemoryBlock(data.orig, data.machineCode, data.symbolTable);
+        this.setState({
+            showRawModal: false,
+        });
+    }
+
+    handleDownloadObject(data) {
+        console.log("Downloading not yet implemented");  // TODO(william)
+        this.setState({
+            showRawModal: false,
+        });
+    }
+
 }
 
 function mapStateToProps(state) {
@@ -61,6 +99,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         onSetPC: (newPC) => dispatch(setPC(newPC)),
+        onSetMemoryBlock:
+            (orig, mc, st) => dispatch(setMemoryBlock(orig, mc, st)),
     };
 }
 
