@@ -8,9 +8,11 @@ describe('parseRaw', () => {
     const success = (input, orig, data) => () => {
         const output = parseRaw(input);
         expect(output.status).to.equal("success");
-        expect(output.orig).to.equal(orig);
-        expect(fromJS(output.machineCode)).to.equal(fromJS(data));
-        expect(fromJS(output.symbolTable)).to.equal(fromJS({}));
+
+        const result = output.result;
+        expect(result.orig).to.equal(orig);
+        expect(fromJS(result.machineCode)).to.equal(fromJS(data));
+        expect(fromJS(result.symbolTable)).to.equal(fromJS({}));
     };
 
     const failure = (input, message) => () => {

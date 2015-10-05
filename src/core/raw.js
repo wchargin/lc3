@@ -12,15 +12,7 @@ export default function parseRaw(data) {
     const inputType = maybeInputType.type;
 
     const answer = extractData(contents, inputType);
-    if (answer.status === "error") {
-        return answer;
-    }
-
-    return {
-        symbolTable: {},
-        ...answer,
-        status: "success",
-    };
+    return answer;
 }
 
 /*
@@ -104,7 +96,11 @@ function extractData(lines, inputType) {
     const base = inputType === "hex" ? 16 : 2;
     const machineCode = words.map(word => parseInt(word, base));
     return {
-        orig: machineCode[0],
-        machineCode: machineCode.slice(1),
+        status: "success",
+        result: {
+            orig: machineCode[0],
+            machineCode: machineCode.slice(1),
+            symbolTable: {},
+        },
     };
 };
