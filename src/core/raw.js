@@ -42,8 +42,16 @@ function guessInputType(input) {
         }
 
         const badCharacter = match[0];
+        const charCode = badCharacter.charCodeAt(0);
         const message =
-            `Invalid character "${badCharacter}" at line ${i + 1}`;
+            `It looks like you have an invalid character at line ${i + 1}: ` +
+            `namely, "${badCharacter}" (code point ${charCode}). ` +
+            "Your input should only contain ones and zeros " +
+            "(if you're writing binary) " +
+            "or digits and letters A through F " +
+            "(if you're writing hexadecimal). " +
+            "If you're trying to write a comment, " +
+            "remember to start it with a semicolon.";
         return {
             status: "error",
             message,
@@ -59,9 +67,11 @@ function guessInputType(input) {
             "character" : "characters";
         const dataType = isHex ? "hexadecimal" : "binary";
         const message =
-            `Found a total of ${justData.length} ${characterNoun}, ` +
-            `but expected length to be a multiple of ${shouldDivide} ` +
-            `for ${dataType} data.`;
+            `I count a total of ${justData.length} ${characterNoun}, ` +
+            `but I expected to find some multiple of ${shouldDivide} ` +
+            `for ${dataType} data. ` +
+            "You either left out some part of an instruction " +
+            "or have a few extras hanging around!";
         return {
             status: "error",
             message,
