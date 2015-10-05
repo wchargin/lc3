@@ -56,6 +56,7 @@ export default class RawModal extends Component {
                     ref="code"
                     type="textarea"
                     defaultValue={this.state.previousText || ""}
+                    rows={16}
                     style={{
                         fontFamily: "monospace",
                     }}
