@@ -35,9 +35,9 @@ export default class RegisterView extends Component {
             </Register>;
 
         return <Panel header="Registers">
-            {RegisterSet.numericRegisterNames().map(name =>
+            {RegisterSet.numericRegisterNames.map(name =>
                 makeNumericRegister(name, true))}
-            {RegisterSet.specialRegisterNames().map(name =>
+            {RegisterSet.specialRegisterNames.map(name =>
                 makeNumericRegister(name, false))}
             <Register name="CC">
                 {formatConditionCode(registers.psr)}

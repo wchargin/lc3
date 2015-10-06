@@ -3,9 +3,10 @@ import {expect} from 'chai';
 
 import {Map, List} from 'immutable';
 
+import Constants from '../../src/core/constants';
 import LC3, { getConditionCode, formatConditionCode } from '../../src/core/lc3';
 import LC3Program from '../../src/core/program';
-import Constants from '../../src/core/constants';
+import RegisterSet from '../../src/core/register_set';
 
 describe('LC3', () => {
 
@@ -23,9 +24,9 @@ describe('LC3', () => {
         });
 
         it("has the right number of registers", () => {
-            const registers = lc3.get("registers");
+            const registers = lc3.registers;
             expect(registers.size).to.equal(
-                Constants.REGISTER_NAMES.get("all").size);
+                RegisterSet.allRegisterNames.length);
         });
 
         it("has the program counter set to 0x3000", () => {
