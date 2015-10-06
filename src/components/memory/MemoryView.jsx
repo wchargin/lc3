@@ -34,7 +34,7 @@ class MemoryView extends Component {
         const topRow = Math.min(nominalTopRow, memory.size - rowsToShow);
         const memoryInView = memory.skip(topRow).take(rowsToShow);
 
-        const activeRow = lc3.getIn(["registers", "PC"]);
+        const activeRow = lc3.registers.pc;
 
         const memoryRows = memoryInView.map((value, index) => {
             const address = topRow + index;

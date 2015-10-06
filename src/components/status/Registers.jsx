@@ -1,7 +1,7 @@
 import React, {PropTypes, Component} from 'react';
 import {Map} from 'immutable';
 
-import {REGISTER_NAMES} from '../../core/constants';
+import RegisterSet from '../../core/register_set';
 import {formatConditionCode} from '../../core/lc3';
 
 import {Col, Panel} from 'react-bootstrap';
@@ -26,7 +26,7 @@ export default class Registers extends Component {
         const {registers} = this.props;
 
         const makeNumericRegister = (name, signed) =>
-            <Register name={name} key={name}>
+            <Register name={name.toUpperCase()} key={name}>
                 <NumericValue
                     value={registers[name]}
                     signed={signed}
@@ -35,12 +35,12 @@ export default class Registers extends Component {
             </Register>;
 
         return <Panel header="Registers">
-            {REGISTER_NAMES.get("standard").map(name =>
-                makeNumericRegister(name, true)).toJS()}
-            {REGISTER_NAMES.get("special").map(name =>
-                makeNumericRegister(name, false)).toJS()}
+            {RegisterSet.numericRegisterNames().map(name =>
+                makeNumericRegister(name, true))}
+            {RegisterSet.specialRegisterNames().map(name =>
+                makeNumericRegister(name, false))}
             <Register name="CC">
-                {formatConditionCode(registers["PSR"])}
+                {formatConditionCode(registers.psr)}
             </Register>
         </Panel>;
     }
@@ -48,9 +48,5 @@ export default class Registers extends Component {
 }
 
 Registers.propTypes = {
-    registers: (function() {
-        const names = REGISTER_NAMES.get("all");
-        const types = Map(names.map(x => [x, PropTypes.number.isRequired]));
-        return PropTypes.shape(types.toJS()).isRequired;
-    })(),
+    registers: PropTypes.instanceOf(RegisterSet).isRequired,
 };

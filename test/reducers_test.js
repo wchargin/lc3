@@ -24,7 +24,7 @@ describe('reducer', () => {
         const newLC3 = newState.get("lc3");
 
         expect(newState).to.be.ok;
-        expect(newLC3.getIn(["registers", "PC"])).to.equal(0x9001);
+        expect(newLC3.registers.pc).to.equal(0x9001);
     });
 
     it("handles SET_MEMORY", () => {

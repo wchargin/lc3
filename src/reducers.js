@@ -15,7 +15,7 @@ export function createInitialState() {
 }
 
 function setPC(state, newPC) {
-    return state.setIn(["lc3", "registers", "PC"], newPC);
+    return state.setIn(["lc3", "registers", "pc"], newPC);
 }
 
 function setMemory(state, address, value) {
@@ -28,7 +28,7 @@ function loadProgram(state, program) {
 }
 
 function scrollToPC(state) {
-    const pc = state.get("lc3").getIn(["registers", "PC"]);
+    const pc = state.get("lc3").getIn(["registers", "pc"]);
     return state.setIn(["viewOptions", "topAddressShown"], pc);
 }
 

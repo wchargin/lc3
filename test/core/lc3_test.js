@@ -29,9 +29,7 @@ describe('LC3', () => {
         });
 
         it("has the program counter set to 0x3000", () => {
-            const registers = lc3.get("registers");
-            const pc = registers.get("PC");
-            expect(pc).to.equal(0x3000);
+            expect(lc3.registers.pc).to.equal(0x3000);
         });
 
         it("has a symbol table", () => {
@@ -140,11 +138,11 @@ describe('LC3', () => {
                     "HELLO": 0x1234,
                 },
             });
-            const newLC3 = lc3.setIn(["registers", "PC"], 0x1111)
+            const newLC3 = lc3.setIn(["registers", "pc"], 0x1111)
                 .loadProgram(data);
 
             expect(newLC3).to.be.ok;
-            expect(newLC3.registers.get("PC")).to.equal(0x4321);
+            expect(newLC3.registers.pc).to.equal(0x4321);
         });
 
         it("leaves the PC alone when not merging machine code", () => {
@@ -155,11 +153,11 @@ describe('LC3', () => {
                     "HELLO": 0x1234,
                 },
             });
-            const newLC3 = lc3.setIn(["registers", "PC"], 0x1111)
+            const newLC3 = lc3.setIn(["registers", "pc"], 0x1111)
                 .loadProgram(data);
 
             expect(newLC3).to.be.ok;
-            expect(newLC3.registers.get("PC")).to.equal(0x1111);
+            expect(newLC3.registers.pc).to.equal(0x1111);
         });
 
     });

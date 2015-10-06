@@ -1,6 +1,7 @@
-import {List, Map, Record} from 'immutable';
+import {List, Map, Record, fromJS} from 'immutable';
 
 import Constants from './constants';
+import RegisterSet from './register_set';
 
 /*
  * Create the initial memory for the LC3.
@@ -10,21 +11,6 @@ function createMemory() {
     let memory = List(Array(Constants.MEMORY_SIZE)).map(() => 0);
     // TODO(william): load the OS memory here.
     return memory;
-}
-
-/*
- * Create the map of initial register values for the LC3.
- * Returns: an Immutable.Map from register name to word value,
- * for each register in Constants.REGISTER_NAMES.all.
- */
-function createRegisters() {
-    const registerDefaults = Map({
-        "PC": 0x3000,
-        "PSR": 0x8002,
-    });
-
-    return Map(Constants.REGISTER_NAMES.get("all").map(
-            name => [name, registerDefaults.get(name) || 0]));
 }
 
 /*
@@ -39,17 +25,17 @@ function createSymbolTable() {
 
 export default class LC3 extends Record({
     memory: createMemory(),
-    registers: createRegisters(),
+    registers: new RegisterSet(),
     symbolTable: createSymbolTable(),
     consoleBuffer: "",
 }) {
 
     getConditionCode() {
-        return getConditionCode(this.getIn(["registers", "psr"]));
+        return getConditionCode(this.registers.psr);
     }
 
     formatConditionCode() {
-        return formatConditionCode(this.getIn(["registers", "psr"]));
+        return formatConditionCode(this.registers.psr);
     }
 
     /*
@@ -63,7 +49,7 @@ export default class LC3 extends Record({
 
         // Only move the PC if we actually loaded instructions.
         // This prevents moving the PC if we, say, just load a symbol table.
-        const newPC = length > 0 ? orig : this.getIn(["registers", "PC"]);
+        const newPC = length > 0 ? orig : this.registers.pc;
 
         return this
             .update("memory", mem => mem.withMutations(mem => {
@@ -73,7 +59,7 @@ export default class LC3 extends Record({
                 return mem;
             }))
             .update("symbolTable", table => table.concat(symbolTable))
-            .setIn(["registers", "PC"], newPC);
+            .setIn(["registers", "pc"], newPC);
     }
 
 }
