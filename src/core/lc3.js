@@ -61,12 +61,19 @@ export default class LC3 extends Record({
         const symbolTable = program.get("symbolTable") || Map();
         const length = machineCode.size;
 
-        return this.update("memory", mem => mem.withMutations(mem => {
-            for (let i = 0; i < length; i++) {
-                mem.set(orig + i, machineCode.get(i));
-            }
-            return mem;
-        })).update("symbolTable", table => table.concat(symbolTable));
+        // Only move the PC if we actually loaded instructions.
+        // This prevents moving the PC if we, say, just load a symbol table.
+        const newPC = length > 0 ? orig : this.getIn(["registers", "PC"]);
+
+        return this
+            .update("memory", mem => mem.withMutations(mem => {
+                for (let i = 0; i < length; i++) {
+                    mem.set(orig + i, machineCode.get(i));
+                }
+                return mem;
+            }))
+            .update("symbolTable", table => table.concat(symbolTable))
+            .setIn(["registers", "PC"], newPC);
     }
 
 }

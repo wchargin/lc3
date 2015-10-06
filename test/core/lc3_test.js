@@ -132,6 +132,36 @@ describe('LC3', () => {
             expect(newerLC3.getIn(["symbolTable", "MORE"])).to.equal(0x3300);
         });
 
+        it("jumps the PC when merging machine code", () => {
+            const data = new LC3Program({
+                orig: 0x4321,
+                machineCode: List([0x5260, 0x1468, 0x1262, 0x1642]),
+                symbolTable: {
+                    "HELLO": 0x1234,
+                },
+            });
+            const newLC3 = lc3.setIn(["registers", "PC"], 0x1111)
+                .loadProgram(data);
+
+            expect(newLC3).to.be.ok;
+            expect(newLC3.registers.get("PC")).to.equal(0x4321);
+        });
+
+        it("leaves the PC alone when not merging machine code", () => {
+            const data = new LC3Program({
+                orig: 0x4321,
+                machineCode: List([]),
+                symbolTable: {
+                    "HELLO": 0x1234,
+                },
+            });
+            const newLC3 = lc3.setIn(["registers", "PC"], 0x1111)
+                .loadProgram(data);
+
+            expect(newLC3).to.be.ok;
+            expect(newLC3.registers.get("PC")).to.equal(0x1111);
+        });
+
     });
 
 });
