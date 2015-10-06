@@ -30,14 +30,6 @@ export default class LC3 extends Record({
     consoleBuffer: "",
 }) {
 
-    getConditionCode() {
-        return getConditionCode(this.registers.psr);
-    }
-
-    formatConditionCode() {
-        return formatConditionCode(this.registers.psr);
-    }
-
     /*
      * Merge the given LC3Program into this machine.
      */
@@ -62,38 +54,4 @@ export default class LC3 extends Record({
             .setIn(["registers", "pc"], newPC);
     }
 
-}
-
-/*
- * Get the condition code as -1, 0, or 1,
- * or null if the PSR is in an invalid state.
- */
-export function getConditionCode(psr) {
-    const [n, z, p] = [psr & 0x4, psr & 0x2, psr & 0x1];
-
-    // Make sure exactly one condition code is set.
-    if (!!n + !!z + !!p !== 1) {
-        return null;
-    }
-
-    return n ? -1 : p ? 1 : 0;
-}
-
-/*
- * Get the condition code as "N", "Z", or "P",
- * or "Invalid" if the PSR is in an invalid state.
- *
- * This just uses the result of getConditionCode.
- */
-export function formatConditionCode(psr) {
-    switch (getConditionCode(psr)) {
-        case null:
-            return "Invalid";
-        case -1:
-            return "N";
-        case 0: 
-            return "Z";
-        case 1:
-            return "P";
-    }
 }
