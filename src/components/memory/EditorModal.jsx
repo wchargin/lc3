@@ -76,7 +76,7 @@ export default class EditorModal extends Component {
                     <Alert bsStyle="danger">
                         <strong>Oh no!</strong>
                         {" "}
-                        {this.state.parseError}
+                        {result && result.errorMessage}
                     </Alert>
                 </Collapse>
                 <Collapse in={result && result.success}>
