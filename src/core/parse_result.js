@@ -61,7 +61,11 @@ export default class ParseResult extends Record({
     }
 
     static fromJS(js) {
-        return new ParseResult(fromJS(js));
+        return new ParseResult({
+            success: js.success,
+            errorMessage: js.errorMessage,
+            program: LC3Program.fromJS(js.program),
+        });
     }
 
 }

@@ -107,4 +107,30 @@ describe('ParseResult', () => {
 
     });
 
+    describe('fromJS', () => {
+
+        it("deserializes JavaScript objects properly", () => {
+            const pr = ParseResult.fromJS({
+                success: true,
+                errorMessage: null,
+                program: {
+                    orig: 0x3000,
+                    machineCode: [0x1234, 0xFEDC],
+                    symbolTable: {"START": 0x3001},
+                },
+            });
+
+            expect(pr).to.be.ok;
+            expect(pr.success).to.be.true;
+            expect(pr.errorMessage).to.be.null;
+            expect(pr.program).to.be.an.instanceof(LC3Program);
+            expect(pr.program.orig).to.equal(0x3000);
+            expect(pr.program.machineCode.toJS()).to.deep.equal(
+                [0x1234, 0xFEDC]);
+            expect(pr.program.symbolTable.toJS()).to.deep.equal(
+                {"START": 0x3001});
+        });
+
+    });
+
 });
