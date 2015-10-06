@@ -2,6 +2,7 @@ import {Map} from 'immutable';
 
 import LC3 from './core/lc3';
 import LC3Program from './core/program';
+import * as Constants from './core/constants';
 
 export function createInitialState() {
     return Map({
@@ -32,7 +33,8 @@ function scrollToPC(state) {
 }
 
 function scrollBy(state, delta) {
-    return state.updateIn(["viewOptions", "topAddressShown"], x => x + delta);
+    return state.updateIn(["viewOptions", "topAddressShown"],
+        x => Math.max(0, Math.min(x + delta, Constants.MEMORY_SIZE - 1)));
 }
 
 export default function reducer(state, action) {

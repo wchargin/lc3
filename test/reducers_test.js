@@ -7,6 +7,7 @@ import reducer from '../src/reducers';
 import * as actions from '../src/actions';
 
 import LC3Program from '../src/core/program';
+import * as Constants from '../src/core/constants';
 
 describe('reducer', () => {
 
@@ -73,20 +74,38 @@ describe('reducer', () => {
         expect(state.getIn(["viewOptions", "topAddressShown"])).to.equal(0x1234);
     });
 
-    it("handles SCROLL_BY", () => {
+    describe("SCROLL_BY", () => {
         // First set an absolute location so we know where we're starting.
         const state0 = [
             actions.setPC(0x9001),
             actions.scrollToPC(),
         ].reduce(reducer, initialState);
 
-        const state1 = reducer(state0, actions.scrollBy(0x10));
-        expect(state1).to.be.ok;
-        expect(state1.getIn(["viewOptions", "topAddressShown"])).to.equal(0x9011);
+        const testScrollBy = (delta, expected) => () => {
+            const state = reducer(state0, actions.scrollBy(delta));
+            expect(state).to.be.ok;
+            expect(state.getIn(["viewOptions", "topAddressShown"])).to.equal(expected);
+        };
 
-        const state2 = reducer(state1, actions.scrollBy(0x8));
-        expect(state2).to.be.ok;
-        expect(state2.getIn(["viewOptions", "topAddressShown"])).to.equal(0x9019);
+        it("scrolls forward", testScrollBy(0x10, 0x9011));
+        it("scrolls backward", testScrollBy(-0x8, 0x8FF9));
+        it("scrolls backward a lot", testScrollBy(-0x9000, 0x1));
+        it("scrolls backward to 0x0000", testScrollBy(-0x9001, 0x0));
+        it("doesn't scroll past 0x0000", testScrollBy(-0x9002, 0x0));
+        it("doesn't scroll past 0x0000 no matter how hard you try",
+            testScrollBy(-0x19002, 0x0));
+
+        const maxAddress = Constants.MEMORY_SIZE - 1;
+        const distanceToEnd = maxAddress - 0x9001;
+
+        it("scrolls to near the end of memory",
+            testScrollBy(distanceToEnd - 1, maxAddress - 1));
+        it("scrolls to the very end of memory",
+            testScrollBy(distanceToEnd, maxAddress));
+        it("doesn't scroll past the end of memory",
+            testScrollBy(distanceToEnd + 1, maxAddress));
+        it("doesn't scroll past the end of memory, no matter how hard you try",
+            testScrollBy(distanceToEnd + 0x10000, maxAddress));
     });
 
 });
