@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import Registers from './Registers';
+import RegisterView from './RegisterView';
 
 class StatusView extends Component {
 
     render() {
         return <div className="status-view">
             <h2>Status</h2>
-            <Registers registers={this.props.lc3.registers} />
+            <RegisterView registers={this.props.lc3.registers} />
         </div>;
     }
 

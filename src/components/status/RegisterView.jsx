@@ -20,7 +20,7 @@ class Register extends Component {
 
 }
 
-export default class Registers extends Component {
+export default class RegisterView extends Component {
 
     render() {
         const {registers} = this.props;
@@ -47,6 +47,6 @@ export default class Registers extends Component {
 
 }
 
-Registers.propTypes = {
+RegisterView.propTypes = {
     registers: PropTypes.instanceOf(RegisterSet).isRequired,
 };
