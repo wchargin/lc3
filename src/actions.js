@@ -13,11 +13,9 @@ export function setMemory(address, value) {
     };
 }
 
-export function setMemoryBlock(orig, machineCode, symbolTable={}) {
+export function setMemoryBlock(program) {
     return {
         type: "SET_MEMORY_BLOCK",
-        orig,
-        machineCode,
-        symbolTable,
+        program: program.toJS(),
     };
 }

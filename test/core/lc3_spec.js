@@ -3,6 +3,7 @@ import {expect} from 'chai';
 import {Map, List} from 'immutable';
 
 import LC3, { getConditionCode, formatConditionCode } from '../../src/core/lc3';
+import LC3Program from '../../src/core/program';
 import Constants from '../../src/core/constants';
 
 describe('LC3', () => {
@@ -76,7 +77,7 @@ describe('LC3', () => {
         const lc3 = new LC3();
 
         it("merges machine code", () => {
-            const data = Map({
+            const data = new LC3Program({
                 orig: 0x3000,
                 machineCode: List([0x5260, 0x1468, 0x1262, 0x1642]),
             });
@@ -86,7 +87,7 @@ describe('LC3', () => {
             expect(newLC3.get("memory").slice(0x2FFE, 0x3006)).
                 to.equal(List([0, 0, 0x5260, 0x1468, 0x1262, 0x1642, 0, 0]));
 
-            const data2 = Map({
+            const data2 = new LC3Program({
                 orig: 0x3002,
                 machineCode: List([0xABCD, 0xBCDE, 0xCDEF]),
             });
@@ -100,7 +101,7 @@ describe('LC3', () => {
         });
 
         it("merges a symbol table", () => {
-            const data = Map({
+            const data = new LC3Program({
                 orig: 0x3000,
                 machineCode: List([]),
                 symbolTable: Map({
@@ -114,7 +115,7 @@ describe('LC3', () => {
             expect(newLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
             expect(newLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3100);
 
-            const data2 = Map({
+            const data2 = new LC3Program({
                 orig: 0x3002,
                 machineCode: List([]),
                 symbolTable: Map({

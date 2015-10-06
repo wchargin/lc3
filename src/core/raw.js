@@ -2,17 +2,37 @@
  * Parse raw binary or hexadecimal data.
  */
 
+import ParseResult from './parse_result';
+import LC3Program from './program';
+
 export default function parseRaw(data) {
     const contents = removeComments(data);
 
     const maybeInputType = guessInputType(contents);
-    if (maybeInputType.status === "error") {
-        return maybeInputType;
+    if (!maybeInputType.success) {
+        return new ParseResult({
+            success: false,
+            errorMessage: maybeInputType.message,
+        });
     }
     const inputType = maybeInputType.type;
 
     const answer = extractData(contents, inputType);
-    return answer;
+    if (!answer.success) {
+        return new ParseResult({
+            success: false,
+            errorMessage: answer.message,
+        });
+    }
+
+    return new ParseResult({
+        success: true,
+        program: new LC3Program({
+            orig: answer.orig,
+            machineCode: answer.machineCode,
+            symbolTable: {},
+        }),
+    });
 }
 
 /*
@@ -53,7 +73,7 @@ function guessInputType(input) {
             "If you're trying to write a comment, " +
             "remember to start it with a semicolon.";
         return {
-            status: "error",
+            success: false,
             message,
         };
     }
@@ -73,13 +93,13 @@ function guessInputType(input) {
             "You either left out some part of an instruction " +
             "or have a few extras hanging around!";
         return {
-            status: "error",
+            success: false,
             message,
         };
     }
 
     return {
-        status: "success",
+        success: true,
         type: isHex ? "hex" : "binary",
     };
 };
@@ -93,7 +113,7 @@ function extractData(lines, inputType) {
         const message = "Your raw data is empty! " +
             "You need to at least have an origin (.ORIG) address.";
         return {
-            status: "error",
+            success: false,
             message,
         };
     }
@@ -106,11 +126,8 @@ function extractData(lines, inputType) {
     const base = inputType === "hex" ? 16 : 2;
     const machineCode = words.map(word => parseInt(word, base));
     return {
-        status: "success",
-        result: {
-            orig: machineCode[0],
-            machineCode: machineCode.slice(1),
-            symbolTable: {},
-        },
+        success: true,
+        orig: machineCode[0],
+        machineCode: machineCode.slice(1),
     };
 };

@@ -108,23 +108,20 @@ export default class RawModal extends Component {
         const code = this.refs.code.getValue();
         const result = parseRaw(code);
 
-        const state = result.status;
-
-        if (state === "error") {
+        if (result.success) {
+            this.setState({
+                parseState: "success",
+                parseError: null,
+                parseResult: result.program,
+            });
+        } else {
             this.setState({
                 parseState: "error",
-                parseError: result.message,
+                parseError: result.errorMessage,
                 parseResult: null,
             });
         }
 
-        if (state === "success") {
-            this.setState({
-                parseState: "success",
-                parseError: null,
-                parseResult: result.result,
-            });
-        }
     }
 
     handleLoadIntoLC3() {

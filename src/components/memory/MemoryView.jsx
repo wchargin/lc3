@@ -74,7 +74,7 @@ class MemoryView extends Component {
     }
 
     handleLoadIntoLC3(data) {
-        this.props.onSetMemoryBlock(data.orig, data.machineCode, data.symbolTable);
+        this.props.onSetMemoryBlock(data);
         this.setState({
             showRawModal: false,
         });
@@ -99,8 +99,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         onSetPC: (newPC) => dispatch(setPC(newPC)),
-        onSetMemoryBlock:
-            (orig, mc, st) => dispatch(setMemoryBlock(orig, mc, st)),
+        onSetMemoryBlock: (program) => dispatch(setMemoryBlock(program)),
     };
 }
 

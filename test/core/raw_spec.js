@@ -1,33 +1,32 @@
 import {expect} from 'chai';
 
-import {fromJS} from 'immutable';
-
 import parseRaw from '../../src/core/raw';
 
 describe('parseRaw', () => {
     const success = (input, orig, data) => () => {
         const output = parseRaw(input);
-        expect(output.status).to.equal("success");
+        expect(output.success).to.be.true;
 
-        const result = output.result;
-        expect(result.orig).to.equal(orig);
-        expect(fromJS(result.machineCode)).to.equal(fromJS(data));
-        expect(fromJS(result.symbolTable)).to.equal(fromJS({}));
+        const program = output.program;
+        expect(program.orig).to.equal(orig);
+        expect(program.machineCode).to.deep.equal(data);
+        expect(program.symbolTable).to.deep.equal({});
     };
 
     const failure = (input, message) => () => {
         const output = parseRaw(input);
-        expect(output.status).to.equal("error");
+        expect(output.success).to.be.false;
+        expect(output.errorMessage).to.be.ok;
         if (message) {
-            expect(output.message).to.contain(message);
+            expect(output.errorMessage).to.contain(message);
         }
     }
 
     it("should fail when given empty data", failure("", "empty"));
     it("should fail when given binary data of a bad length",
-        failure("0000", "length"));
+        failure("0000", "multiple of 16"));
     it("should fail when given hex data of a bad length",
-        failure("abc", "length"));
+        failure("abc", "multiple of 4"));
     it("should fail when given non-hex characters",
         failure("efg", "character"));
 
