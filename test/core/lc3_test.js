@@ -19,7 +19,7 @@ describe('LC3', () => {
         });
 
         it("has a memory buffer of the right length", () => {
-            const memory = lc3.get("memory");
+            const memory = lc3.memory;
             expect(memory.size).to.equal(Constants.MEMORY_SIZE);
         });
 
@@ -34,12 +34,12 @@ describe('LC3', () => {
         });
 
         it("has a symbol table", () => {
-            const symbolTable = lc3.get("symbolTable");
+            const symbolTable = lc3.symbolTable;
             expect(symbolTable).to.be.ok;
         });
 
         it("starts with an empty console buffer", () => {
-            const consoleBuffer = lc3.get("consoleBuffer");
+            const consoleBuffer = lc3.consoleBuffer;
             expect(consoleBuffer).to.equal("");
         });
 
@@ -84,7 +84,7 @@ describe('LC3', () => {
             const newLC3 = lc3.loadProgram(data);
 
             expect(newLC3).to.be.ok;
-            expect(newLC3.get("memory").slice(0x2FFE, 0x3006)).
+            expect(newLC3.memory.slice(0x2FFE, 0x3006)).
                 to.equal(List([0, 0, 0x5260, 0x1468, 0x1262, 0x1642, 0, 0]));
 
             const data2 = new LC3Program({
@@ -94,7 +94,7 @@ describe('LC3', () => {
             const newerLC3 = newLC3.loadProgram(data2);
 
             expect(newerLC3).to.be.ok;
-            expect(newerLC3.get("memory").slice(0x2FFE, 0x3006)).
+            expect(newerLC3.memory.slice(0x2FFE, 0x3006)).
                 to.equal(List(
                     [0, 0, 0x5260, 0x1468, 0xABCD, 0xBCDE, 0xCDEF, 0]
                 ));
@@ -112,8 +112,8 @@ describe('LC3', () => {
             const newLC3 = lc3.loadProgram(data);
 
             expect(newLC3).to.be.ok;
-            expect(newLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
-            expect(newLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3100);
+            expect(newLC3.symbolTable.get("START")).to.equal(0x3000);
+            expect(newLC3.symbolTable.get("DATA")).to.equal(0x3100);
 
             const data2 = new LC3Program({
                 orig: 0x3002,
@@ -126,9 +126,9 @@ describe('LC3', () => {
             const newerLC3 = newLC3.loadProgram(data2);
 
             expect(newerLC3).to.be.ok;
-            expect(newerLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
-            expect(newerLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3200);
-            expect(newerLC3.getIn(["symbolTable", "MORE"])).to.equal(0x3300);
+            expect(newerLC3.symbolTable.get("START")).to.equal(0x3000);
+            expect(newerLC3.symbolTable.get("DATA")).to.equal(0x3200);
+            expect(newerLC3.symbolTable.get("MORE")).to.equal(0x3300);
         });
 
         it("jumps the PC when merging machine code", () => {
