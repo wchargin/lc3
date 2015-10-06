@@ -70,6 +70,10 @@ export default class EditorModal extends Component {
                     rows={16}
                     style={{
                         fontFamily: "monospace",
+
+                        // This is so you can't drag the little expando widget
+                        // and make the text box wider than the modal.
+                        maxWidth: "100%",
                     }}
                 />
                 <Collapse in={result && !result.success}>
