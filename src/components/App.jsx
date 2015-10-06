@@ -9,10 +9,6 @@ import StatusView from './status/StatusView';
 
 export default class App extends Component {
 
-    constructor() {
-        super();
-    }
-
     componentDidMount() {
         // Replace the static loading message
         // with a dynamic React component,
