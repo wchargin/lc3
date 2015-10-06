@@ -1,4 +1,4 @@
-import {Record, fromJS} from 'immutable';
+import {Record} from 'immutable';
 
 import LC3Program from './program';
 
