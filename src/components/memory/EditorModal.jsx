@@ -31,12 +31,7 @@ export default class EditorModal extends Component {
 
     constructor() {
         super();
-
-        // TODO(william): Get rid of this extra layer of indirection
-        // and just store the first three properties as a ParseResult.
         this.state = {
-            parseState: "none",
-            parseError: null,
             parseResult: null,
             previousText: "",
         };
@@ -53,8 +48,6 @@ export default class EditorModal extends Component {
         // so we store that manually and will restore it if shown again.
         if (this.props.show && !newProps.show) {
             this.setState({
-                parseState: "none",
-                parseError: null,
                 parseResult: null,
                 previousText: this.refs.code ? this.refs.code.getValue() : "",
             });
@@ -62,6 +55,8 @@ export default class EditorModal extends Component {
     }
 
     render() {
+        const result = this.state.parseResult;
+
         return <Modal show={this.props.show} onHide={this.props.onHide}>
             <Modal.Header closeButton>
                 <Modal.Title>{this.props.title}</Modal.Title>
@@ -77,14 +72,14 @@ export default class EditorModal extends Component {
                         fontFamily: "monospace",
                     }}
                 />
-                <Collapse in={this.state.parseState === "error"}>
+                <Collapse in={result && !result.success}>
                     <Alert bsStyle="danger">
                         <strong>Oh no!</strong>
                         {" "}
                         {this.state.parseError}
                     </Alert>
                 </Collapse>
-                <Collapse in={this.state.parseState === "success"}>
+                <Collapse in={result && result.success}>
                     <Alert bsStyle="success">
                         {this.props.successMessage}
                         <AlertButtonToolbar>
@@ -124,40 +119,26 @@ export default class EditorModal extends Component {
 
     process() {
         const code = this.refs.code.getValue();
-        const result = this.props.parser(code);
-
-        if (result.success) {
-            this.setState({
-                parseState: "success",
-                parseError: null,
-                parseResult: result.program,
-            });
-        } else {
-            this.setState({
-                parseState: "error",
-                parseError: result.errorMessage,
-                parseResult: null,
-            });
-        }
-
+        const parseResult = this.props.parser(code);
+        this.setState({ parseResult });
     }
 
     hasSymbolTable() {
-        return this.state.parseState === "success" &&
-            this.state.parseResult &&
-            this.state.parseResult.symbolTable.size > 0;
+        const result = this.state.parseResult;
+        return result && result.program && result.program.symbolTable.size > 0;
     }
 
+
     handleLoadIntoLC3() {
-        this.props.onLoadIntoLC3(this.state.parseResult);
+        this.props.onLoadIntoLC3(this.state.parseResult.program);
     }
 
     handleDownloadObject() {
-        this.props.onDownloadObject(this.state.parseResult);
+        this.props.onDownloadObject(this.state.parseResult.program);
     }
 
     handleDownloadSymbolTable() {
-        this.props.onDownloadSymbolTable(this.state.parseResult);
+        this.props.onDownloadSymbolTable(this.state.parseResult.program);
     }
 
 }
