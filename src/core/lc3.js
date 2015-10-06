@@ -7,7 +7,7 @@ import Constants from './constants';
  * Returns: an Immutable.List with one entry per address, in order.
  */
 function createMemory() {
-    let memory = List(Array(Constants.MEMORY_SIZE)).map(x => 0);
+    let memory = List(Array(Constants.MEMORY_SIZE)).map(() => 0);
     // TODO(william): load the OS memory here.
     return memory;
 }

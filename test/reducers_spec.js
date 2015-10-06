@@ -1,3 +1,4 @@
+import {describe, it} from 'mocha';
 import {expect} from 'chai';
 
 import {List} from 'immutable';
@@ -12,10 +13,6 @@ describe('reducer', () => {
     const initialState = reducer(undefined, {});
 
     it("provides a reasonable initial state", () => {
-        const dummyAction = {
-            type: "Ignore me; I'm not a real action",
-        };
-
         expect(initialState).to.be.ok;
         expect(initialState.get("lc3")).to.be.ok;
     });

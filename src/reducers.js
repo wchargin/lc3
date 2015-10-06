@@ -1,7 +1,6 @@
-import redux from 'redux';
-import {Map, fromJS} from 'immutable';
+import {Map} from 'immutable';
 
-import LC3, * as LC3Utils from './core/lc3';
+import LC3 from './core/lc3';
 import LC3Program from './core/program';
 
 export function createInitialState() {

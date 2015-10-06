@@ -1,3 +1,4 @@
+import {describe, it} from 'mocha';
 import {expect} from 'chai';
 
 import parseRaw from '../../src/core/raw';
@@ -20,7 +21,7 @@ describe('parseRaw', () => {
         if (message) {
             expect(output.errorMessage).to.contain(message);
         }
-    }
+    };
 
     it("should fail when given empty data", failure("", "empty"));
     it("should fail when given binary data of a bad length",

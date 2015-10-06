@@ -1,5 +1,5 @@
+import {describe, it} from 'mocha';
 import {expect} from 'chai';
-import {fromJS, List, Map} from 'immutable';
 
 import Constants from '../../src/core/constants';
 

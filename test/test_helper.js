@@ -5,6 +5,7 @@ import chaiImmutable from 'chai-immutable';
 const doc = jsdom.jsdom('<!DOCTYPE html><html><body></body></html>');
 const win = doc.defaultView;
 
+/* global global */
 global.document = doc;
 global.window = win;
 

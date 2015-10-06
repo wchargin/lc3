@@ -44,7 +44,7 @@ function removeComments(text) {
         // (i.e., everything before the comment starts).
         return line.split(";")[0];
     }).join("\n");
-};
+}
 
 /*
  * Guess whether this is binary or hex, or fail if neither matches.
@@ -102,7 +102,7 @@ function guessInputType(input) {
         success: true,
         type: isHex ? "hex" : "binary",
     };
-};
+}
 
 function extractData(lines, inputType) {
     const justData = lines.replace(/\s/g, "");
@@ -130,4 +130,4 @@ function extractData(lines, inputType) {
         orig: machineCode[0],
         machineCode: machineCode.slice(1),
     };
-};
+}
