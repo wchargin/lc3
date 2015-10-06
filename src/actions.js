@@ -19,3 +19,16 @@ export function loadProgram(program) {
         program: program.toJS(),
     };
 }
+
+export function scrollToPC() {
+    return {
+        type: "SCROLL_TO_PC",
+    };
+}
+
+export function scrollBy(delta) {
+    return {
+        type: "SCROLL_BY",
+        delta,
+    };
+}

@@ -63,4 +63,30 @@ describe('reducer', () => {
         expect(newLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3100);
     });
 
+    it("handles SCROLL_TO_PC", () => {
+        const state = [
+            actions.setPC(0x1234),
+            actions.scrollToPC(),
+        ].reduce(reducer, initialState);
+
+        expect(state).to.be.ok;
+        expect(state.getIn(["viewOptions", "topAddressShown"])).to.equal(0x1234);
+    });
+
+    it("handles SCROLL_BY", () => {
+        // First set an absolute location so we know where we're starting.
+        const state0 = [
+            actions.setPC(0x9001),
+            actions.scrollToPC(),
+        ].reduce(reducer, initialState);
+
+        const state1 = reducer(state0, actions.scrollBy(0x10));
+        expect(state1).to.be.ok;
+        expect(state1.getIn(["viewOptions", "topAddressShown"])).to.equal(0x9011);
+
+        const state2 = reducer(state1, actions.scrollBy(0x8));
+        expect(state2).to.be.ok;
+        expect(state2.getIn(["viewOptions", "topAddressShown"])).to.equal(0x9019);
+    });
+
 });

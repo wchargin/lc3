@@ -26,6 +26,15 @@ function loadProgram(state, program) {
     return state.update("lc3", lc3 => lc3.loadProgram(data));
 }
 
+function scrollToPC(state) {
+    const pc = state.get("lc3").getIn(["registers", "PC"]);
+    return state.setIn(["viewOptions", "topAddressShown"], pc);
+}
+
+function scrollBy(state, delta) {
+    return state.updateIn(["viewOptions", "topAddressShown"], x => x + delta);
+}
+
 export default function reducer(state, action) {
     if (state === undefined) {
         state = createInitialState();
@@ -38,6 +47,10 @@ export default function reducer(state, action) {
             return setMemory(state, action.address, action.value);
         case "LOAD_PROGRAM":
             return loadProgram(state, action.program);
+        case "SCROLL_TO_PC":
+            return scrollToPC(state);
+        case "SCROLL_BY":
+            return scrollBy(state, action.delta);
     }
 
     return state;
