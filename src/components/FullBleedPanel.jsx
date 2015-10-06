@@ -6,7 +6,7 @@
 
 import React, {PropTypes, Component} from 'react';
 
-export default class FullBleedPanel {
+export default class FullBleedPanel extends Component {
 
     render() {
         return <div className="panel panel-default">

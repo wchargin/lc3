@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
 import {Col} from 'react-bootstrap';
 
 import LoadingMessage from './LoadingMessage';
@@ -12,7 +13,7 @@ export default class App extends Component {
         // with a dynamic React component,
         // which will immediately fade out.
         const target = document.getElementById('container-wait');
-        React.render(<LoadingMessage />, target);
+        ReactDOM.render(<LoadingMessage />, target);
     }
 
     render() {

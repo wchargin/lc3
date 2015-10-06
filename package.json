@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "immutable": "^3.7.5",
-    "react": "^0.13.3",
+    "react": "^0.14.0-rc1",
     "react-bootstrap": "0.25.x",
     "react-redux": "^3.0.1",
     "redux": "^3.0.2"

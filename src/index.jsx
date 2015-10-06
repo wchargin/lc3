@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import {createStore} from 'redux';
 import {Provider} from 'react-redux';
 
@@ -10,7 +11,7 @@ import LC3 from './core/lc3';
 const store = createStore(reducer);
 
 const component = <Provider store={store}>
-    {() => <App />}
+    <App />
 </Provider>;
 
-React.render(component, document.getElementById('app'));
+ReactDOM.render(component, document.getElementById('app'));
