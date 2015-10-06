@@ -1,7 +1,5 @@
 import React, {Component} from 'react';
-import {Col, Navbar} from 'react-bootstrap';
-
-import LC3 from '../core/lc3';
+import {Col} from 'react-bootstrap';
 
 import LoadingMessage from './LoadingMessage';
 import MemoryView from './memory/MemoryView';
