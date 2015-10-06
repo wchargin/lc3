@@ -73,7 +73,7 @@ describe('LC3', () => {
         it("fails when all the bits are set", test(0x8007, "Invalid"));
     });
 
-    describe('mergeMemory', () => {
+    describe('loadProgram', () => {
         const lc3 = new LC3();
 
         it("merges machine code", () => {
@@ -81,7 +81,7 @@ describe('LC3', () => {
                 orig: 0x3000,
                 machineCode: List([0x5260, 0x1468, 0x1262, 0x1642]),
             });
-            const newLC3 = lc3.mergeMemory(data);
+            const newLC3 = lc3.loadProgram(data);
 
             expect(newLC3).to.be.ok;
             expect(newLC3.get("memory").slice(0x2FFE, 0x3006)).
@@ -91,7 +91,7 @@ describe('LC3', () => {
                 orig: 0x3002,
                 machineCode: List([0xABCD, 0xBCDE, 0xCDEF]),
             });
-            const newerLC3 = newLC3.mergeMemory(data2);
+            const newerLC3 = newLC3.loadProgram(data2);
 
             expect(newerLC3).to.be.ok;
             expect(newerLC3.get("memory").slice(0x2FFE, 0x3006)).
@@ -109,7 +109,7 @@ describe('LC3', () => {
                     "DATA": 0x3100,
                 }),
             });
-            const newLC3 = lc3.mergeMemory(data);
+            const newLC3 = lc3.loadProgram(data);
 
             expect(newLC3).to.be.ok;
             expect(newLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);
@@ -123,7 +123,7 @@ describe('LC3', () => {
                     "MORE": 0x3300,
                 }),
             });
-            const newerLC3 = newLC3.mergeMemory(data2);
+            const newerLC3 = newLC3.loadProgram(data2);
 
             expect(newerLC3).to.be.ok;
             expect(newerLC3.getIn(["symbolTable", "START"])).to.equal(0x3000);

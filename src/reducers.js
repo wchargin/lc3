@@ -26,9 +26,9 @@ function setMemory(state, address, value) {
     return state.setIn(["lc3", "memory", address], value);
 }
 
-function setMemoryBlock(state, program) {
+function loadProgram(state, program) {
     const data = new LC3Program.fromJS(program);
-    return state.update("lc3", lc3 => lc3.mergeMemory(data));
+    return state.update("lc3", lc3 => lc3.loadProgram(data));
 }
 
 export default function reducer(state, action) {
@@ -41,8 +41,8 @@ export default function reducer(state, action) {
             return setPC(state, action.newPC);
         case "SET_MEMORY":
             return setMemory(state, action.address, action.value);
-        case "SET_MEMORY_BLOCK":
-            return setMemoryBlock(state, action.program);
+        case "LOAD_PROGRAM":
+            return loadProgram(state, action.program);
     }
 
     return state;

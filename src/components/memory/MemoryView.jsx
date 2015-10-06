@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import {setPC, setMemoryBlock} from '../../actions';
+import * as actions from '../../actions';
 
 import {Button, Panel, Table} from 'react-bootstrap';
 import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
@@ -74,7 +74,7 @@ class MemoryView extends Component {
     }
 
     handleLoadIntoLC3(data) {
-        this.props.onSetMemoryBlock(data);
+        this.props.onLoadProgram(data);
         this.setState({
             showRawModal: false,
         });
@@ -98,8 +98,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        onSetPC: (newPC) => dispatch(setPC(newPC)),
-        onSetMemoryBlock: (program) => dispatch(setMemoryBlock(program)),
+        onSetPC: (newPC) => dispatch(actions.setPC(newPC)),
+        onLoadProgram: (program) => dispatch(actions.loadProgram(program)),
     };
 }
 

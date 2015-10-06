@@ -47,8 +47,8 @@ describe('reducer', () => {
         expect(newerLC3.get("memory").get(0x4002)).to.equal(0xBCDE);
     });
 
-    it("handles SET_MEMORY_BLOCK", () => {
-        const action = actions.setMemoryBlock(new LC3Program({
+    it("handles LOAD_PROGRAM", () => {
+        const action = actions.loadProgram(new LC3Program({
             orig: 0x3000,
             machineCode: [0x1234, 0x2345, 0x3456],
             symbolTable: {

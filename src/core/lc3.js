@@ -53,17 +53,12 @@ export default class LC3 extends Record({
     }
 
     /*
-     * Given a description of machine data to import,
-     * in the form of an immutable map with key/value pairs including
-     *     orig: integer,
-     *     machineCode: List<Integer>,
-     *     and symbolTable: Map<String, Integer> (or null; default = {}),
-     * merge that data description into this LC3 machine (and return a copy).
+     * Merge the given LC3Program into this machine.
      */
-    mergeMemory(data) {
-        const orig = data.get("orig");
-        const machineCode = data.get("machineCode");
-        const symbolTable = data.get("symbolTable") || Map();
+    loadProgram(program) {
+        const orig = program.get("orig");
+        const machineCode = program.get("machineCode");
+        const symbolTable = program.get("symbolTable") || Map();
         const length = machineCode.size;
 
         return this.update("memory", mem => mem.withMutations(mem => {

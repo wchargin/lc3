@@ -13,9 +13,9 @@ export function setMemory(address, value) {
     };
 }
 
-export function setMemoryBlock(program) {
+export function loadProgram(program) {
     return {
-        type: "SET_MEMORY_BLOCK",
+        type: "LOAD_PROGRAM",
         program: program.toJS(),
     };
 }
