@@ -3,7 +3,14 @@ import {connect} from 'react-redux';
 
 import * as actions from '../../actions';
 
-import {Button, Panel, Table} from 'react-bootstrap';
+import {
+    Button,
+    ButtonGroup,
+    ButtonToolbar,
+    Glyphicon,
+    Panel,
+    Table,
+} from 'react-bootstrap';
 import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
 import FullBleedPanel from '../FullBleedPanel';
 
@@ -59,8 +66,20 @@ class MemoryView extends Component {
     }
 
     renderFooter() {
-        // TODO(william): Add the rest of the input/expor tlogic
-        return <div>
+        // TODO(william): Add the rest of the input/export logic
+        const scrollDelta = 1;
+        return <ButtonToolbar>
+            <ButtonGroup>
+                <Button onClick={() => this.props.scrollBy(-scrollDelta)}>
+                    <Glyphicon glyph="chevron-up" alt="Scroll memory up" />
+                </Button>
+                <Button onClick={() => this.props.scrollBy(scrollDelta)}>
+                    <Glyphicon glyph="chevron-down" alt="Scroll memory down" />
+                </Button>
+                <Button onClick={() => this.props.scrollToPC()}>
+                    Jump to PC
+                </Button>
+            </ButtonGroup>
             <Button onClick={() => this.setState({ showRawModal: true })}>
                 Raw
             </Button>
@@ -70,7 +89,7 @@ class MemoryView extends Component {
                 onLoadIntoLC3={this.handleLoadIntoLC3.bind(this)}
                 onDownloadObject={this.handleDownloadObject.bind(this)}
             />
-        </div>;
+        </ButtonToolbar>;
     }
 
     handleLoadIntoLC3(data) {
@@ -100,6 +119,8 @@ function mapDispatchToProps(dispatch) {
     return {
         onSetPC: (newPC) => dispatch(actions.setPC(newPC)),
         onLoadProgram: (program) => dispatch(actions.loadProgram(program)),
+        scrollBy: (delta) => dispatch(actions.scrollBy(delta)),
+        scrollToPC: () => dispatch(actions.scrollToPC()),
     };
 }
 
