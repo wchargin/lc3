@@ -6,10 +6,6 @@ import LC3Program from './core/program';
 export function createInitialState() {
     return Map({
         lc3: new LC3(),
-        editorBuffers: Map({
-            assembler: "",
-            rawInput: "",
-        }),
         viewOptions: Map({
             topAddressShown: 0x3000,
             followPC: true,
