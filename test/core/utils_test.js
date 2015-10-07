@@ -103,6 +103,21 @@ describe('utils', () => {
         it("takes 0xABCDE to 0xBCDE", test(0xABCDE, 0xBCDE));
     });
 
+    describe('signExtend16', () => {
+        const test = (input, bits, expected) => () => {
+            expect(Utils.signExtend16(input, bits)).to.equal(expected);
+        };
+
+        it("takes bits 00000 to 0",   test(0b00000, 5, 0));
+        it("takes bits 00001 to 1",   test(0b00001, 5, 1));
+        it("takes bits 00010 to 2",   test(0b00010, 5, 2));
+        it("takes bits 01111 to 15",  test(0b01111, 5, 15));
+        it("takes bits 10000 to -16", test(0b10000, 5, -16));
+        it("takes bits 10001 to -15", test(0b10001, 5, -15));
+        it("takes bits 10010 to -14", test(0b10010, 5, -14));
+        it("takes bits 11111 to -1",  test(0b11111, 5, -1));
+    });
+
     describe('getConditionCode', () => {
         const test = (psr, expected) => () => {
             expect(Utils.getConditionCode(psr)).to.equal(expected);

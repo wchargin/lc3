@@ -70,6 +70,22 @@ export function toUint16(n) {
 }
 
 /*
+ * Assuming that the given number represents a signed integer
+ * with the given number of bits,
+ * sign-extend this to a 16-bit number.
+ * For example, the 5-bit signed number 10001 represents -15,
+ * so signExtend(0b10001, 5) === signExtend(17, 5) === -15.
+ */
+export function signExtend16(n, bits) {
+    const justSignBit = n & (1 << (bits - 1));
+    if (justSignBit) {
+        return toInt16(n - (1 << bits));
+    } else {
+        return toInt16(n & (1 << bits) - 1);
+    }
+}
+
+/*
  * Get the condition code as -1, 0, or 1,
  * or null if the PSR is in an invalid state.
  */
