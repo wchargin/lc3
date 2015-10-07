@@ -65,7 +65,7 @@ export function toInt16(n) {
  * to a 16-bit unsigned signed integer.
  */
 export function toUint16(n) {
-    const int16 = this.toInt16(n);
+    const int16 = toInt16(n);
     return int16 < 0 ? int16 + (1 << WORD_BITS) : int16;
 }
 
