@@ -4,15 +4,13 @@ import LC3 from './core/lc3';
 import LC3Program from './core/program';
 import * as Constants from './core/constants';
 
-export function createInitialState() {
-    return Map({
-        lc3: new LC3(),
-        viewOptions: Map({
-            topAddressShown: 0x3000,
-            followPC: true,
-        }),
-    });
-}
+const initialState = Map({
+    lc3: new LC3(),
+    viewOptions: Map({
+        topAddressShown: 0x3000,
+        followPC: true,
+    }),
+});
 
 function setPC(state, newPC) {
     return state.setIn(["lc3", "registers", "pc"], newPC);
@@ -37,10 +35,7 @@ function scrollBy(state, delta) {
         x => Math.max(0, Math.min(x + delta, Constants.MEMORY_SIZE - 1)));
 }
 
-export default function reducer(state, action) {
-    if (state === undefined) {
-        state = createInitialState();
-    }
+export default function reducer(state = initialState, action) {
 
     switch (action.type) {
         case "SET_PC":
