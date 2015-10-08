@@ -1,5 +1,15 @@
 import {WORD_BITS} from './constants';
 
+export default {
+    parseNumber,
+    toHexString,
+    toInt16,
+    toUint16,
+    signExtend16,
+    getConditionCode,
+    formatConditionCode,
+};
+
 /*
  * Convert a decimal or hex string to a number.
  * Return NaN on failure.

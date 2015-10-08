@@ -2,7 +2,7 @@ import {List, Map, Record, fromJS} from 'immutable';
 
 import Constants from './constants';
 import RegisterSet from './register_set';
-import {toHexString} from './utils';
+import Utils from './utils';
 
 /*
  * Create the initial memory for the LC3.
@@ -67,7 +67,7 @@ export default class LC3 extends Record({
         if (label !== undefined) {
             return label;
         } else {
-            return toHexString(address);
+            return Utils.toHexString(address);
         }
     }
 

@@ -1,6 +1,6 @@
 import React, {PropTypes, Component} from 'react';
 
-import * as Utils from '../core/utils';
+import Utils from '../core/utils';
 
 import {OverlayTrigger, Tooltip} from 'react-bootstrap';
 
