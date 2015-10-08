@@ -6,13 +6,11 @@ import * as Utils from '../../src/core/utils';
 describe('utils', () => {
 
     describe('parseNumber', () => {
-        const {parseNumber} = Utils;
-
         const success = (input, expected) => () => {
-            expect(parseNumber(input)).to.equal(expected);
+            expect(Utils.parseNumber(input)).to.equal(expected);
         };
         const failure = (input) => () => {
-            expect(parseNumber(input)).to.be.NaN;
+            expect(Utils.parseNumber(input)).to.be.NaN;
         };
 
         it("fails on the empty string", failure(''));
@@ -30,42 +28,29 @@ describe('utils', () => {
     });
 
     describe('toHexString', () => {
-        const {toHexString} = Utils;
+        const test = (input, expected) => () => {
+            expect(Utils.toHexString(input)).to.equal(expected);
+        };
         
-        it("has a leading 'x' prefix", () => {
-            expect(toHexString(0x1234)).to.equal('x1234');
-        });
-
-        it("zero-pads three-digit strings", () => {
-            expect(toHexString(0x234)).to.equal('x0234');
-        });
-
-        it("zero-pads two-digit strings", () => {
-            expect(toHexString(0x34)).to.equal('x0034');
-        });
-
-        it("zero-pads one-digit strings", () => {
-            expect(toHexString(0x4)).to.equal('x0004');
-        });
-
-        it("zero-pads zero", () => {
-            expect(toHexString(0x0)).to.equal('x0000');
-        });
-
-        it("allows strings more than four digits without clipping", () => {
-            expect(toHexString(0x12345)).to.equal('x12345');
-        });
+        it("has a leading 'x' prefix", test(0x1234, 'x1234'));
+        it("zero-pads three-digit strings", test(0x234, 'x0234'));
+        it("zero-pads two-digit strings", test(0x34, 'x0034'));
+        it("zero-pads one-digit strings", test(0x4, 'x0004'));
+        it("zero-pads zero", test(0x0, 'x0000'));
+        it("allows strings more than four digits without clipping",
+            test(0x12345, 'x12345'));
 
         it("allows other padding values", () => {
-            expect(toHexString(0x1234, 6)).to.equal('x001234');
+            expect(Utils.toHexString(0x1234, 6)).to.equal('x001234');
         });
         
         it("allows other prefixes", () => {
-            expect(toHexString(0x1234, undefined, 'y')).to.equal('y1234');
+            expect(Utils.toHexString(0x1234, undefined, 'y'))
+                .to.equal('y1234');
         });
 
         it("allows other prefixes and padding values together", () => {
-            expect(toHexString(0x1234, 6, 'y')).to.equal('y001234');
+            expect(Utils.toHexString(0x1234, 6, 'y')).to.equal('y001234');
         });
 
     });
