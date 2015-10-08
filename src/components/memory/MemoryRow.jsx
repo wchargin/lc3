@@ -15,6 +15,7 @@ export class MemoryHeaderRow extends Component {
                 {/* for the row options dropdown (no header needed) */}
             </th>
             <th>0x</th>
+            <th>Label</th>
             <th>Hex</th>
         </tr>;
     }
@@ -24,12 +25,10 @@ export class MemoryHeaderRow extends Component {
 export class MemoryRow extends Component {
 
     render() {
-        const {address, value, active, key} = this.props;
-
         const setPC = <DropdownButton
             title=""
-            id={"actions-" + address}
-            bsStyle={active ? "primary" : "default"}
+            id={"actions-" + this.props.address}
+            bsStyle={this.props.active ? "primary" : "default"}
             style={{ padding: "0px 6px" }}
         >
             <MenuItem onSelect={() => this.props.onSetPC()}>
@@ -37,20 +36,21 @@ export class MemoryRow extends Component {
             </MenuItem>
         </DropdownButton>;
 
-        return <tr key={key}>
+        return <tr key={this.props.key}>
             <td style={firstColumnStyle}>{setPC}</td>
             <td>
                 <NumericValue
-                    value={address}
+                    value={this.props.address}
                     signed={false}
-                    id={"address-" + address}
+                    id={"address-" + this.props.address}
                 />
             </td>
+            <td>{this.props.label}</td>
             <td>
                 <NumericValue
-                    value={value}
+                    value={this.props.value}
                     signed={true}
-                    id={"value-" + address}
+                    id={"value-" + this.props.address}
                 />
             </td>
         </tr>;

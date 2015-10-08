@@ -41,6 +41,7 @@ class MemoryView extends Component {
             return <MemoryRow
                 address={address}
                 value={value}
+                label={lc3.symbolTable.keyOf(address)}
                 active={address === activeRow}
                 onSetPC={() => this.props.onSetPC(address)}
                 key={index}
