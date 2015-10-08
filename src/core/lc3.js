@@ -2,6 +2,7 @@ import {List, Map, Record, fromJS} from 'immutable';
 
 import Constants from './constants';
 import RegisterSet from './register_set';
+import {toHexString} from './utils';
 
 /*
  * Create the initial memory for the LC3.
@@ -52,6 +53,22 @@ export default class LC3 extends Record({
             }))
             .update("symbolTable", table => table.concat(symbolTable))
             .setIn(["registers", "pc"], newPC);
+    }
+
+    /*
+     * Given an integer representing an address in the LC3 memory,
+     * return a label associated with this address,
+     * or the address as a hex string if no such label exists.
+     * If there are multiple label for this address,
+     * one will be chosen arbitrarily.
+     */
+    formatAddress(address) {
+        const label = this.symbolTable.keyOf(address);
+        if (label !== undefined) {
+            return label;
+        } else {
+            return toHexString(address);
+        }
     }
 
 }

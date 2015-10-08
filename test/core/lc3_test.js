@@ -135,4 +135,28 @@ describe('LC3', () => {
 
     });
 
+    describe('formatAddress', () => {
+
+        const lc3 = new LC3({
+            symbolTable: Map({
+                "START": 0x3001,
+                "DATA": 0x4000,
+                "STUFF": 0x4000,
+            }),
+        });
+
+        it("should return an unsigned hex string when no label exists", () => {
+            expect(lc3.formatAddress(0x9000)).to.equal("x9000");
+        });
+
+        it("should return the unique label when there is one", () => {
+            expect(lc3.formatAddress(0x3001)).to.equal("START");
+        });
+
+        it("should return the unique label when there is one", () => {
+            expect(["DATA", "STUFF"]).to.contain(lc3.formatAddress(0x4000));
+        });
+
+    });
+
 });
