@@ -2,7 +2,7 @@ import React, {PropTypes, Component} from 'react';
 import {Map} from 'immutable';
 
 import RegisterSet from '../../core/register_set';
-import {formatConditionCode} from '../../core/lc3';
+import Utils from '../../core/utils';
 
 import {Col, Panel} from 'react-bootstrap';
 
@@ -40,7 +40,7 @@ export default class RegisterView extends Component {
             {RegisterSet.specialRegisterNames.map(name =>
                 makeNumericRegister(name, false))}
             <Register name="CC">
-                {formatConditionCode(registers.psr)}
+                {Utils.formatConditionCode(registers.psr)}
             </Register>
         </Panel>;
     }
