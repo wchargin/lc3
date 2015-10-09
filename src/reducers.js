@@ -35,6 +35,10 @@ function scrollBy(state, delta) {
         x => Math.max(0, Math.min(x + delta, Constants.MEMORY_SIZE - 1)));
 }
 
+function step(state) {
+    return state.update("lc3", lc3 => lc3.step());
+}
+
 export default function reducer(state = initialState, action) {
 
     switch (action.type) {
@@ -48,6 +52,8 @@ export default function reducer(state = initialState, action) {
             return scrollToPC(state);
         case "SCROLL_BY":
             return scrollBy(state, action.delta);
+        case "STEP":
+            return step(state);
     }
 
     return state;

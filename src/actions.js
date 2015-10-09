@@ -32,3 +32,9 @@ export function scrollBy(delta) {
         delta,
     };
 }
+
+export function step() {
+    return {
+        type: "STEP",
+    };
+}
