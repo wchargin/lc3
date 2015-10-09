@@ -43,7 +43,7 @@ export default class RegisterSet extends Record({
     }
 
     setNumeric(n, value) {
-        return this.get(_numericRegisterName(n), value);
+        return this.set(_numericRegisterName(n), value);
     }
 
 }
