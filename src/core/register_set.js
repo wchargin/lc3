@@ -38,11 +38,11 @@ export default class RegisterSet extends Record({
         return new Registers(fromJS(js));
     }
 
-    getNumericRegister(n) {
+    getNumeric(n) {
         return this.get(_numericRegisterName(n));
     }
 
-    setNumericRegister(n, value) {
+    setNumeric(n, value) {
         return this.get(_numericRegisterName(n), value);
     }
 
