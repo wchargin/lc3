@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
 import RegisterView from './RegisterView';
+import ControlButtons from './ControlButtons';
+import {step} from '../../actions';
 
 class StatusView extends Component {
 
@@ -9,6 +11,9 @@ class StatusView extends Component {
         return <div className="status-view">
             <h2>Status</h2>
             <RegisterView registers={this.props.lc3.registers} />
+            <ControlButtons
+                onStep={this.props.step}
+            />
         </div>;
     }
 
@@ -22,7 +27,9 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return {};
+    return {
+        step: () => dispatch(step()),
+    };
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(StatusView);
