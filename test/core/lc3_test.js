@@ -7,6 +7,7 @@ import Constants from '../../src/core/constants';
 import LC3, { getConditionCode, formatConditionCode } from '../../src/core/lc3';
 import LC3Program from '../../src/core/program';
 import RegisterSet from '../../src/core/register_set';
+import {toHexString} from '../../src/core/utils';
 
 describe('LC3', () => {
 
@@ -155,6 +156,334 @@ describe('LC3', () => {
 
         it("should return the unique label when there is one", () => {
             expect(["DATA", "STUFF"]).to.contain(lc3.formatAddress(0x4000));
+        });
+
+    });
+
+    describe('step', () => {
+
+        const lc3 = new LC3();
+        const execute = (instruction, lc3 = new LC3()) => lc3
+            .setIn(["memory", lc3.registers.pc], instruction)
+            .step();
+
+        describe("should handle ADD", () => {
+
+            it("in immediate-mode with a positive argument", () => {
+                const oldMachine = lc3.setIn(["registers", "r2"], 10);
+                const instruction = 0b0001011010100001;  // ADD R3, R2, #1
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2).to.equal(10);
+                expect(newMachine.registers.r3).to.equal(11);
+            });
+
+            it("in immediate-mode with a negative argument", () => {
+                const oldMachine = lc3.setIn(["registers", "r2"], 10);
+                const instruction = 0b0001011010111000;  // ADD R3, R2, #-8
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2).to.equal(10);
+                expect(newMachine.registers.r3).to.equal(2);
+            });
+
+            it("in immediate-mode with a negative result", () => {
+                const oldMachine = lc3.setIn(["registers", "r2"], 4);
+                const instruction = 0b0001011010111000;  // ADD R3, R2, #-8
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2).to.equal(4);
+                expect(newMachine.registers.r3).to.equal(-4 + 0x10000);
+            });
+
+            it("in register mode", () => {
+                const oldMachine = lc3.update("registers", rs =>
+                    rs.setNumeric(4, 0x89).setNumeric(5, 0xAB));
+                const instruction = 0b0001111100000101;  // ADD R7, R4, R5
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r4).to.equal(0x89);
+                expect(newMachine.registers.r5).to.equal(0xAB);
+                expect(newMachine.registers.r7).to.equal(0x89 + 0xAB);
+            });
+
+        });
+
+        describe("should handle AND", () => {
+
+            it("in immediate-mode with a positive argument", () => {
+                const oldMachine = lc3.setIn(["registers", "r2"], 0b1010);
+                const instruction = 0b0101011010100011;  // AND R3, R2, x3
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2).to.equal(0b1010);
+                expect(newMachine.registers.r3).to.equal(0b0010);
+            });
+
+            it("in immediate-mode with a negative argument", () => {
+                const oldMachine = lc3.setIn(["registers", "r2"], 0b1010);
+                const instruction = 0b0101011010111100;  // ADD R3, R2, x-4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2).to.equal(0b1010);
+                expect(newMachine.registers.r3).to.equal(0b1000);
+            });
+
+            it("in register mode", () => {
+                const oldMachine = lc3.update("registers", rs =>
+                    rs.setNumeric(4, 0xABCD).setNumeric(5, 0xBCDE));
+                const instruction = 0b0101111100000101;  // AND R7, R4, R5
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r4).to.equal(0xABCD);
+                expect(newMachine.registers.r5).to.equal(0xBCDE);
+                expect(newMachine.registers.r7).to.equal(0xABCD & 0xBCDE);
+            });
+
+        });
+
+        describe("should handle BR0 (unconditional \"don't branch\")", () => {
+            [0x8004, 0x8002, 0x8001].forEach(psr => {
+                const oldMachine = lc3.setIn(["registers", "psr"], psr);
+                const instruction = 0b0000000000001000;  // BR 0x10
+                const newMachine = execute(instruction, oldMachine);
+                it("when the PSR is " + toHexString(psr), () =>
+                    expect(newMachine.registers.pc).to.equal(
+                        oldMachine.registers.pc + 1));
+            });
+        });
+
+        describe("should handle BRnp", () => {
+            const test = (psr, shouldGo) => {
+                const oldMachine = lc3.setIn(["registers", "psr"], psr);
+                const instruction = 0b0000101000010000;  // BRnp 0x10
+                const newMachine = execute(instruction, oldMachine);
+
+                const expectedPC = oldMachine.registers.pc +
+                    (shouldGo ? 0x11 : 0x01);
+
+                it(`by ${shouldGo ? "branching" : "not branching"} ` +
+                   `when the PSR is ${toHexString(psr)}`, () =>
+                    expect(newMachine.registers.pc).to.equal(expectedPC));
+            };
+            test(0x8004, true);
+            test(0x8002, false);
+            test(0x8001, true);
+        });
+
+        describe("should handle BRz", () => {
+            const test = (psr, shouldGo) => {
+                const oldMachine = lc3.setIn(["registers", "psr"], psr);
+                const instruction = 0b0000010000010000;  // BRz 0x10
+                const newMachine = execute(instruction, oldMachine);
+
+                const expectedPC = oldMachine.registers.pc +
+                    (shouldGo ? 0x11 : 0x01);
+
+                it(`by ${shouldGo ? "branching" : "not branching"} ` +
+                   `when the PSR is ${toHexString(psr)}`, () =>
+                    expect(newMachine.registers.pc).to.equal(expectedPC));
+            };
+            test(0x8004, false);
+            test(0x8002, true);
+            test(0x8001, false);
+        });
+
+        describe("should handle JMP", () => {
+
+            it("as JMP R3", () => {
+                const oldMachine = lc3.setIn(["registers", "r3"], 0x1234);
+                const instruction = 0b1100000011000000;  // JMP R3
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x1234);
+            });
+
+            it("as JMP R7 (RET)", () => {
+                const oldMachine = lc3.setIn(["registers", "r7"], 0xFDEC);
+                const instruction = 0b1100000111000000;  // JMP R7 (RET)
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0xFDEC);
+            });
+
+        });
+
+        describe("should handle subroutine instructions", () => {
+
+            it("such as JSR", () => {
+                const oldMachine = lc3.update("registers", rs => rs
+                    .setNumeric(7, 0x8888)
+                    .set("pc", 0x3333));
+                const instruction = 0b0100111111111100;  // JSR #-4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3330);
+                expect(newMachine.registers.r7).to.equal(0x3334);
+            });
+
+            it("such as JSRR", () => {
+                const oldMachine = lc3.update("registers", rs => rs
+                    .setNumeric(4, 0x6666)
+                    .setNumeric(7, 0x8888)
+                    .set("pc", 0x9999));
+                const instruction = 0b0100000100000000;  // JSRR R4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x6666);
+                expect(newMachine.registers.r7).to.equal(0x999A);
+            });
+
+        });
+
+        describe("should handle loading instructions", () => {
+
+            it("such as LD", () => {
+                const oldMachine = lc3
+                    .update("memory", m => m.set(0x3330, 0x2345))
+                    .update("registers", rs => rs
+                        .setNumeric(3, 0x2222)
+                        .set("pc", 0x3333));
+                const instruction = 0b0010011111111100;  // LD R3, #-4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3334);
+                expect(newMachine.registers.r3).to.equal(0x2345);
+            });
+
+            it("such as LDI", () => {
+                const oldMachine = lc3
+                    .update("memory", m => m
+                        .set(0x3330, 0x2345)
+                        .set(0x2345, 0x3456))
+                    .update("registers", rs => rs
+                        .setNumeric(3, 0x2222)
+                        .set("pc", 0x3333));
+                const instruction = 0b1010011111111100;  // LDI R3, #-4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3334);
+                expect(newMachine.registers.r3).to.equal(0x3456);
+            });
+
+            it("such as LDR", () => {
+                const oldMachine = lc3
+                    .update("memory", m => m.set(0x1234, 0x2345))
+                    .update("registers", rs => rs
+                        .setNumeric(1, 0x1235)
+                        .setNumeric(3, 0x2222)
+                        .set("pc", 0x3333));
+                const instruction = 0b0110011001111111;  // LDR R3, R1, #-1
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3334);
+                expect(newMachine.registers.r1).to.equal(0x1235);
+                expect(newMachine.registers.r3).to.equal(0x2345);
+            });
+
+        });
+
+        describe("should handle LEA", () => {
+
+            const test = (instruction, pc, expected) => () => {
+                const oldMachine = lc3.update("registers", rs => rs
+                    .set("pc", pc)
+                    .setNumeric(1, 0x0000));
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(pc + 1);
+                expect(newMachine.registers.r1).to.equal(expected);
+            };
+
+            // Sample LEA instructions with positive and negative offsets.
+            const positive = 0b1110001000010000;  // LEA R1, #16
+            const negative = 0b1110001111110000;  // LEA R1, #-16
+
+            it("with a positive offset", test(positive, 0x7FFE, 0x800F));
+            it("with a negative offset", test(negative, 0x800E, 0x7FFF));
+            it("when underflowing", test(negative, 0x0002, 0xFFF3));
+            it("when overflowing", test(positive, 0xFFF0, 0x0001));
+
+        });
+
+        describe("should handle NOT", () => {
+
+            it("when the output is positive", () => {
+                const oldMachine = lc3.update("registers", rs => rs
+                    .setNumeric(2, 0b1010101010101010)
+                    .setNumeric(3, 0x0000));
+                const instruction = 0b1001011010111111;  // NOT R2, R3
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2)
+                    .to.equal(0b1010101010101010);
+                expect(newMachine.registers.r3)
+                    .to.equal(0b0101010101010101);
+            });
+
+            it("when the output is negative", () => {
+                const oldMachine = lc3.update("registers", rs => rs
+                    .setNumeric(2, 0b0101010101010101)
+                    .setNumeric(3, 0x0000));
+                const instruction = 0b1001011010111111;  // NOT R2, R3
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r2)
+                    .to.equal(0b0101010101010101);
+                expect(newMachine.registers.r3)
+                    .to.equal(0b1010101010101010);
+            });
+
+        });
+
+        describe("should handle storing instructions", () => {
+
+            it("such as ST", () => {
+                const oldMachine = lc3
+                    .update("memory", m => m.set(0x3330, 0x2345))
+                    .update("registers", rs => rs
+                        .setNumeric(3, 0x2222)
+                        .set("pc", 0x3333));
+                const instruction = 0b0011011111111100;  // ST R3, #-4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3334);
+                expect(newMachine.registers.r3).to.equal(0x2222);
+                expect(newMachine.memory.get(0x3330)).to.equal(0x2222);
+            });
+
+            it("such as STI", () => {
+                const oldMachine = lc3
+                    .update("memory", m => m
+                        .set(0x3330, 0x2345)
+                        .set(0x2345, 0x3456))
+                    .update("registers", rs => rs
+                        .setNumeric(3, 0x2222)
+                        .set("pc", 0x3333));
+                const instruction = 0b1011011111111100;  // STI R3, #-4
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3334);
+                expect(newMachine.registers.r3).to.equal(0x2222);
+                expect(newMachine.memory.get(0x3330)).to.equal(0x2345);
+                expect(newMachine.memory.get(0x2345)).to.equal(0x2222);
+            });
+
+            it("such as STR", () => {
+                const oldMachine = lc3
+                    .update("memory", m => m.set(0x1234, 0x2345))
+                    .update("registers", rs => rs
+                        .setNumeric(1, 0x1235)
+                        .setNumeric(3, 0x2222)
+                        .set("pc", 0x3333));
+                const instruction = 0b0111011001111111;  // STR R3, R1, #-1
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.pc).to.equal(0x3334);
+                expect(newMachine.registers.r1).to.equal(0x1235);
+                expect(newMachine.registers.r3).to.equal(0x2222);
+                expect(newMachine.memory.get(0x1234)).to.equal(0x2222);
+            });
+
+        });
+
+        describe("should handle TRAP", () => {
+
+            const oldMachine = lc3
+                .update("memory", m => m.set(0x0020, 0x0234))
+                .update("registers", rs => rs
+                    .set("pc", 0x3333)
+                    .setNumeric(7, 0x8888));
+            const instruction = 0b1111000000100000;  // TRAP x20
+            const newMachine = execute(instruction, oldMachine);
+
+            it("and set the PC to " +
+                "the address stored in the trap vector table", () =>
+                expect(newMachine.registers.pc).to.equal(0x0234));
+
+            it("and set R7 to the return address", () =>
+                expect(newMachine.registers.r7).to.equal(0x3334));
+
         });
 
     });
