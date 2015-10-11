@@ -72,6 +72,14 @@ export default class LC3 extends Record({
         }
     }
 
+    getConditionCode() {
+        return Utils.getConditionCode(this.registers.psr);
+    }
+
+    formatConditionCode() {
+        return Utils.formatConditionCode(this.registers.psr);
+    }
+
     _cycle() {
         const instructionValue = this.memory.get(this.registers.pc);
         return this

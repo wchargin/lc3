@@ -160,6 +160,46 @@ describe('LC3', () => {
 
     });
 
+    describe('getConditionCode', () => {
+        const lc3 = new LC3();
+
+        const test = (psr, expectedCC) => () => {
+            expect(lc3
+                .update("registers", rs => rs.set("psr", psr))
+                .getConditionCode()).to.equal(expectedCC);
+        };
+
+        it("works when the condition code is negative", test(0x8004, -1));
+        it("works when the condition code is zero", test(0x8002, 0));
+        it("works when the condition code is positive", test(0x8001, 1));
+
+        it("works when the first few PSR bits are non-standard",
+            test(0b1010111100001001, 1));
+
+        it("works when invalid (unset)", test(0x8000, null));
+        it("works when invalid (multiple)", test(0x8007, null));
+    });
+
+    describe('formatConditionCode', () => {
+        const lc3 = new LC3();
+
+        const test = (psr, expectedCC) => () => {
+            expect(lc3
+                .update("registers", rs => rs.set("psr", psr))
+                .formatConditionCode()).to.equal(expectedCC);
+        };
+
+        it("works when the condition code is negative", test(0x8004, "N"));
+        it("works when the condition code is zero", test(0x8002, "Z"));
+        it("works when the condition code is positive", test(0x8001, "P"));
+
+        it("works when the first few PSR bits are non-standard",
+            test(0b1010111100001001, "P"));
+
+        it("works when invalid (unset)", test(0x8000, "Invalid"));
+        it("works when invalid (multiple)", test(0x8007, "Invalid"));
+    });
+
     describe('step', () => {
 
         const lc3 = new LC3();
