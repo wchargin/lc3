@@ -608,4 +608,144 @@ describe('LC3', () => {
 
     });
 
+    describe.skip('formatInstructionAtAddress', () => {
+
+        const lc3 = new LC3();
+
+        const pc = 0x4000;
+        const test = (instruction, expected, machine=lc3) => () => {
+            expect(machine
+                .setIn(["registers", "pc"], pc)
+                .setIn(["memory", pc], instruction)
+                .formatInstructionAtAddress(pc))
+            .to.equal(expected);
+        };
+
+        describe("should be capable of basic formatting", () => {
+
+            it("for immediate-mode ADD",
+                test(0b0001001010100111, "ADD R1, R2, #7"));
+            it("for negative-immediate-mode ADD",
+                test(0b0001001010111001, "ADD R1, R2, #-7"));
+            it("for register-mode ADD",
+                test(0b0001001010000101, "ADD R1, R2, R5"));
+
+            it("for immediate-mode AND",
+                test(0b0101001010100111, "AND R1, R2, #7"));
+            it("for negative-immediate-mode AND",
+                test(0b0101001010111001, "AND R1, R2, #-7"));
+            it("for register-mode AND",
+                test(0b0101001010000101, "AND R1, R2, R5"));
+
+            it("for BR (break never)",
+                test(0b0000000000000111, "BR x4008"));
+            it("for BRz",
+                test(0b0000010111111001, "BRz x3FFA"));
+            it("for BRnp",
+                test(0b0000101010101010, "BRnp x40AB"));
+
+            it("for JMP R0", test(0b1100000000000000, "JMP R0"));
+            it("for JMP R1", test(0b1100000001000000, "JMP R1"));
+            it("for RET (JMP R7)", test(0b1100000111000000, "RET"));
+
+            it("for JSR", test(0b0100100000101010, "JSR x402B"));
+            it("for JSRR", test(0b0100000101000000, "JSRR R5"));
+
+            it("for LD", test(0b0010000111111110, "LD R0, x3FFF"));
+            it("for LDI", test(0b1010000000000111, "LDI R0, x4008"));
+            it("for LDR", test(0b0110000001111111, "LDR R0, R1, #-1"));
+
+            it("for LEA", test(0b1110111000000111, "LEA R7, x4008"));
+
+            it("for NOT", test(0b1001010101111111, "NOT R2, R5"));
+
+            it("for RTI", test(0b1000000000000000, "RTI"));
+
+            it("for ST", test(0b0011000111111110, "ST R0, x3FFF"));
+            it("for STI", test(0b1011000000000111, "STI R0, x4008"));
+            it("for STR", test(0b0111000001111111, "STR R0, R1, #-1"));
+
+            it("for TRAP", test(0b1111000010101111, "TRAP xAF"));
+
+        });
+
+        describe("should use the symbol table when appropriate", () => {
+            const machine = lc3.update("symbolTable", st => st
+                .set("HERE", 0x4000)     // current PC
+                .set("THERE", 0x4010)    // not the current PC
+                .set("GETLINE", 0x0030)  // user-defined TRAP instruction
+            );
+
+            it("for JSR", test(0b0100100000001111, "JSR THERE", machine));
+
+            it("for LD", test(0b0010000111111111, "LD R0, HERE", machine));
+            it("for LDI", test(0b1010001111111111, "LDI R1, HERE", machine));
+
+            it("for LEA", test(0b1110111111111111, "LEA R7, HERE", machine));
+
+            it("for ST", test(0b0011000000001111, "ST R0, THERE", machine));
+            it("for STI", test(0b1011001000001111, "STI R1, THERE", machine));
+
+            it("for TRAP", test(0b1111000000110000, "TRAP GETLINE", machine));
+        });
+
+        describe("should give .FILL when not strictValid", () => {
+
+            it("for register-mode ADD",
+                test(0b0001000111011000, ".FILL x11D8"));
+            it("for register-mode AND",
+                test(0b0101000111011000, ".FILL x51D8"));
+
+            it("for 1-invalid JMP",
+                test(0b1100111000000000, ".FILL xCE00"));
+            it("for 2-invalid JMP",
+                test(0b1100000000111111, ".FILL xC03F"));
+            it("for 1,2-invalid JMP",
+                test(0b1100111000111111, ".FILL xCE3F"));
+
+            it("for 1-invalid RET",
+                test(0b1100111111000000, ".FILL xCFC0"));
+            it("for 2-invalid RET",
+                test(0b1100000111111111, ".FILL xC1FF"));
+            it("for 1,2-invalid RET",
+                test(0b1100111111111111, ".FILL xCFFF"));
+
+            it("for 1-invalid JSRR",
+                test(0b0100011000000000, ".FILL x4600"));
+            it("for 2-invalid JSRR",
+                test(0b0100000000110011, ".FILL x4033"));
+            it("for 1,2-invalid JSRR",
+                test(0b0100011000110011, ".FILL x4633"));
+
+            it("for NOT", test(0b1001010101000000, ".FILL x9540"));
+
+            it("for RTI", test(0b1000100010001000, ".FILL x8888"));
+
+            it("for TRAP", test(0b1111010100100101, ".FILL xF525"));
+
+            it("for the reserved instruction",
+                test(0b1101000000000001, ".FILL xD001"));
+
+        });
+
+        describe("should use special names for TRAP I/O", () => {
+
+            const entries = {
+                0xF020: "GETC",
+                0xF021: "OUT",
+                0xF022: "PUTS",
+                0xF023: "IN",
+                0xF024: "PUTSP",
+                0xF025: "HALT",
+            };
+
+            Object.keys(entries).forEach(instruction => {
+                const name = entries[instruction];
+                it(`for ${name}`, test(instruction, name));
+            });
+
+        });
+
+    });
+
 });

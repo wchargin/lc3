@@ -242,4 +242,8 @@ export default class LC3 extends Record({
         return this.updateIn(["registers", "psr"], psr => (psr & ~0b111) | cc);
     }
 
+    formatInstructionAtAddress(address) {
+        return "Not yet implemented";
+    }
+
 }
