@@ -12,8 +12,6 @@ import {
     Table,
 } from 'react-bootstrap';
 import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
-import FullBleedPanel from '../FullBleedPanel';
-
 import RawModal from './RawModal';
 
 class MemoryView extends Component {
@@ -54,8 +52,8 @@ class MemoryView extends Component {
 
         return <div className="memory-view">
             <h2>Memory</h2>
-            <FullBleedPanel header={header} footer={footer}>
-                <Table hover>
+            <Panel header={header} footer={footer}>
+                <Table hover fill>
                     <thead>
                         <MemoryHeaderRow />
                     </thead>
@@ -63,7 +61,7 @@ class MemoryView extends Component {
                         {memoryRows}
                     </tbody>
                 </Table>
-            </FullBleedPanel>
+            </Panel>
         </div>;
     }
 
