@@ -13,6 +13,14 @@ export function setMemory(address, value) {
     };
 }
 
+export function setRegister(name, value) {
+    return {
+        type: "SET_REGISTER",
+        name,
+        value,
+    };
+}
+
 export function loadProgram(program) {
     return {
         type: "LOAD_PROGRAM",

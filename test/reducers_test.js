@@ -108,4 +108,32 @@ describe('reducer', () => {
             testScrollBy(distanceToEnd + 0x10000, maxAddress));
     });
 
+    describe("SET_REGISTER", () => {
+
+        it("can set numeric registers", () => {
+            const action = actions.setRegister("r3", 10);
+            const newState = reducer(initialState, action);
+            expect(newState.get("lc3").registers.r3).to.equal(10);
+        });
+
+        it("can set the program counter", () => {
+            const action = actions.setRegister("pc", 0x4343);
+            const newState = reducer(initialState, action);
+            expect(newState.get("lc3").registers.pc).to.equal(0x4343);
+        });
+
+        it("can set the instruction register", () => {
+            const action = actions.setRegister("ir", 0x4343);
+            const newState = reducer(initialState, action);
+            expect(newState.get("lc3").registers.ir).to.equal(0x4343);
+        });
+
+        it("can set the program status register", () => {
+            const action = actions.setRegister("psr", 0x4343);
+            const newState = reducer(initialState, action);
+            expect(newState.get("lc3").registers.psr).to.equal(0x4343);
+        });
+
+    });
+
 });

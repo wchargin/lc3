@@ -20,6 +20,10 @@ function setMemory(state, address, value) {
     return state.setIn(["lc3", "memory", address], value);
 }
 
+function setRegister(state, name, value) {
+    return state.setIn(["lc3", "registers", name], value);
+}
+
 function loadProgram(state, program) {
     const data = new LC3Program.fromJS(program);
     return state.update("lc3", lc3 => lc3.loadProgram(data));
@@ -46,6 +50,8 @@ export default function reducer(state = initialState, action) {
             return setPC(state, action.newPC);
         case "SET_MEMORY":
             return setMemory(state, action.address, action.value);
+        case "SET_REGISTER":
+            return setRegister(state, action.name, action.value);
         case "LOAD_PROGRAM":
             return loadProgram(state, action.program);
         case "SCROLL_TO_PC":
