@@ -297,11 +297,18 @@ export default class LC3 extends Record({
                 }
 
             case 0b0000:  // BR
-                return (opname
-                    + (instruction.n ? "n" : "")
-                    + (instruction.z ? "z" : "")
-                    + (instruction.p ? "p" : "")
-                    + " " + label);
+                const {n, z, p} = instruction;
+                if (!(n || z || p)) {
+                    // If there's no condition code that matches, it's a no-op.
+                    return "NOP";
+                } else {
+                    // Otherwise, just format it normally.
+                    return (opname
+                        + (n ? "n" : "")
+                        + (z ? "z" : "")
+                        + (p ? "p" : "")
+                        + " " + label);
+                }
 
             case 0b1100:  // JMP, RET
                 return instruction.baseR === 7 ? "RET" : `JMP ${baseR}`;

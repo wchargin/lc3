@@ -621,6 +621,8 @@ describe('LC3', () => {
             .to.equal(expected);
         };
 
+        it("should give NOP for 0x0000", test(0x0000, "NOP"));
+
         describe("should be capable of basic formatting", () => {
 
             it("for immediate-mode ADD",
@@ -637,8 +639,8 @@ describe('LC3', () => {
             it("for register-mode AND",
                 test(0b0101001010000101, "AND R1, R2, R5"));
 
-            it("for BR (break never)",
-                test(0b0000000000000111, "BR x4008"));
+            it("for BR (break-never), which should be a NOP",
+                test(0b0000000000000111, "NOP"));
             it("for BRz",
                 test(0b0000010111111001, "BRz x3FFA"));
             it("for BRnp",
