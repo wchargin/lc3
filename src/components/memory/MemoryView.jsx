@@ -43,6 +43,7 @@ class MemoryView extends Component {
                 active={address === activeRow}
                 instruction={lc3.formatInstructionAtAddress(address)}
                 onSetPC={() => this.props.onSetPC(address)}
+                onSetValue={(value) => this.props.setMemory(address, value)}
                 key={index}
             />;
         });
@@ -121,6 +122,7 @@ function mapDispatchToProps(dispatch) {
         onLoadProgram: (program) => dispatch(actions.loadProgram(program)),
         scrollBy: (delta) => dispatch(actions.scrollBy(delta)),
         scrollToPC: () => dispatch(actions.scrollToPC()),
+        setMemory: (addr, value) => dispatch(actions.setMemory(addr, value)),
     };
 }
 
