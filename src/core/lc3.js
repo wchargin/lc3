@@ -25,10 +25,30 @@ function createSymbolTable() {
     return Map();
 }
 
+/*
+ * Create the map of OS-provided TRAP vectors.
+ * The format is the inverse of the symbol table:
+ * this maps addresses to names instead of the other way aroud.
+ * This is just used for formatting purposes.
+ */
+function createSystemTraps() {
+    // We can't just return Map({0x20: ...})
+    // because JS coerces numeric literal object keys to strings,
+    // so instead we set these one at a time.
+    return Map()
+        .set(0x20, "GETC")
+        .set(0x21, "OUT")
+        .set(0x22, "PUTS")
+        .set(0x23, "IN")
+        .set(0x24, "PUTSP")
+        .set(0x25, "HALT");
+}
+
 export default class LC3 extends Record({
     memory: createMemory(),
     registers: new RegisterSet(),
     symbolTable: createSymbolTable(),
+    systemTraps: createSystemTraps(),
     consoleBuffer: "",
 }) {
 
