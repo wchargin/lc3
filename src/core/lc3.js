@@ -179,14 +179,13 @@ export default class LC3 extends Record({
         }
     }
 
-    _evaluateAddress(instruction) {
+    _evaluateAddress(instruction, pc = this.registers.pc) {
         const mode = instruction.get("mode");
         switch (mode) {
             case "none":
                 return null;
             case "pcOffset":
-                return Utils.toUint16(
-                    this.registers.pc + instruction.get("offset"));
+                return Utils.toUint16(pc + instruction.get("offset"));
             case "baseOffset":
                 const baseR = instruction.get("baseR");
                 const offset = instruction.get("offset");
