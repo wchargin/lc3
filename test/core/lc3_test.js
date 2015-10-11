@@ -608,7 +608,7 @@ describe('LC3', () => {
 
     });
 
-    describe.skip('formatInstructionAtAddress', () => {
+    describe('formatInstructionAtAddress', () => {
 
         const lc3 = new LC3();
 

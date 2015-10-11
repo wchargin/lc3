@@ -262,7 +262,104 @@ export default class LC3 extends Record({
     }
 
     formatInstructionAtAddress(address) {
-        return "Not yet implemented";
+        const immutableInstruction =
+            decode(this.memory.get(Utils.toUint16(address)));
+        const instruction = immutableInstruction.toJS();
+
+        // Show .FILL for invalid instructions.
+        if (!instruction.strictValid) {
+            return ".FILL " + Utils.toHexString(instruction.raw);
+        }
+
+        const {opcode, opname} = instruction;
+
+        const dr = "R" + instruction.dr;
+        const sr = "R" + instruction.sr;
+        const sr1 = "R" + instruction.sr1;
+        const sr2 = "R" + instruction.sr2;
+        const baseR = "R" + instruction.baseR;
+
+        const targetAddress =
+            this._evaluateAddress(immutableInstruction, address + 1);
+        const label = targetAddress && this.formatAddress(targetAddress);
+
+        switch (opcode) {
+            case 0b0001:  // ADD
+            case 0b0101:  // AND
+                const arithmeticMode = instruction.arithmeticMode;
+                switch (arithmeticMode) {
+                    case "immediate":
+                        return `${opname} ${dr}, ${sr1}, #${instruction.immediateField}`;
+                    case "register":
+                        return `${opname} ${dr}, ${sr1}, ${sr2}`;
+                    default:
+                        throw new Error("Unknown arithmetic mode: " + arithmeticMode);
+                }
+
+            case 0b0000:  // BR
+                return (opname
+                    + (instruction.n ? "n" : "")
+                    + (instruction.z ? "z" : "")
+                    + (instruction.p ? "p" : "")
+                    + " " + label);
+
+            case 0b1100:  // JMP, RET
+                return instruction.baseR === 7 ? "RET" : `JMP ${baseR}`;
+
+            case 0b0100:  // JSR, JSRR
+                switch (opname) {
+                    case "JSR":
+                        return `${opname} ${label}`;
+                    case "JSRR":
+                        return `${opname} ${baseR}`;
+                    default:
+                        throw new Error(`Unknown JSR/JSRR variant: ${opname}`);
+                }
+
+            case 0b0010:  // LD
+            case 0b1010:  // LDI
+            case 0b1110:  // LEA
+                return `${opname} ${dr}, ${label}`;
+
+            case 0b0110:  // LDR
+                return `${opname} ${dr}, ${baseR}, #${instruction.offset}`;
+
+            case 0b1001:  // NOT
+                return `${opname} ${dr}, ${sr}`;
+
+            case 0b1000:  // RTI
+                return opname;
+
+            case 0b0011:  // ST
+            case 0b1011:  // STI
+                return `${opname} ${sr}, ${label}`;
+
+            case 0b0111:  // STR
+                return `${opname} ${sr}, ${baseR}, #${instruction.offset}`;
+
+            case 0b1111:  // TRAP
+                const {trapVector} = instruction;
+
+                const systemTrap = this.systemTraps.get(trapVector);
+                if (systemTrap !== undefined) {
+                    // These don't get a TRAP prefix.
+                    return systemTrap;
+                }
+
+                const userTrap = this.symbolTable.keyOf(trapVector);
+                if (userTrap !== undefined) {
+                    return `${opname} ${userTrap}`;
+                }
+
+                // Use just two hex digits for the trap vector.
+                return `${opname} ${Utils.toHexString(trapVector, 2)}`;
+
+            case 0b1101:  // RSRV
+                // We shouldn't get here,
+                // because the reserved instruction is not strictValid.
+                // But handle it anyway.
+                return op.opname;
+        }
     }
 
 }
