@@ -71,13 +71,13 @@ class MemoryView extends Component {
         const scrollDelta = 1;
         return <ButtonToolbar>
             <ButtonGroup>
-                <Button onClick={() => this.props.scrollBy(-scrollDelta)}>
+                <Button onClick={() => this.props.onScrollBy(-scrollDelta)}>
                     <Glyphicon glyph="chevron-up" alt="Scroll memory up" />
                 </Button>
-                <Button onClick={() => this.props.scrollBy(scrollDelta)}>
+                <Button onClick={() => this.props.onScrollBy(scrollDelta)}>
                     <Glyphicon glyph="chevron-down" alt="Scroll memory down" />
                 </Button>
-                <Button onClick={() => this.props.scrollToPC()}>
+                <Button onClick={() => this.props.onScrollToPC()}>
                     Jump to PC
                 </Button>
             </ButtonGroup>
@@ -120,9 +120,9 @@ function mapDispatchToProps(dispatch) {
     return {
         onSetPC: (newPC) => dispatch(actions.setPC(newPC)),
         onLoadProgram: (program) => dispatch(actions.loadProgram(program)),
-        scrollBy: (delta) => dispatch(actions.scrollBy(delta)),
-        scrollToPC: () => dispatch(actions.scrollToPC()),
-        setMemory: (addr, value) => dispatch(actions.setMemory(addr, value)),
+        onScrollBy: (delta) => dispatch(actions.scrollBy(delta)),
+        onScrollToPC: () => dispatch(actions.scrollToPC()),
+        onSetMemory: (addr, value) => dispatch(actions.setMemory(addr, value)),
     };
 }
 
