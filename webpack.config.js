@@ -1,17 +1,28 @@
 var webpack = require('webpack');
 
+var prod = process.env.NODE_ENV === 'production';
+
+function entry() {
+    var mainEntry = './src/index.jsx';
+    if (prod) {
+        return [mainEntry];
+    } else {
+        return [
+            'webpack-dev-server/client?http://localhost:8080',
+            'webpack/hot/only-dev-server',
+            mainEntry,
+        ];
+    }
+}
+
 module.exports = {
-    entry: [
-        'webpack-dev-server/client?http://localhost:8080',
-        'webpack/hot/only-dev-server',
-        './src/index.jsx',
-    ],
+    entry: entry(),
     module: {
         loaders: [
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
-                loader: 'react-hot!babel',
+                loader: (prod ? '' : 'react-hot!') + 'babel',
             },
             { test: /\.css$/, loader: 'style-loader!css-loader' },
             { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
@@ -30,9 +41,13 @@ module.exports = {
     },
     devServer: {
         contentBase: './dist',
-        hot: true,
+        hot: !prod,
     },
-    plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-    ],
+    plugins: prod ?
+        [new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false,
+            },
+        })] :
+        [new webpack.HotModuleReplacementPlugin()],
 };
