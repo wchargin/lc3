@@ -215,6 +215,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.r2).to.equal(10);
                 expect(newMachine.registers.r3).to.equal(11);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
             it("in immediate-mode with a negative argument", () => {
@@ -223,6 +224,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.r2).to.equal(10);
                 expect(newMachine.registers.r3).to.equal(2);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
             it("in immediate-mode with a negative result", () => {
@@ -231,6 +233,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.r2).to.equal(4);
                 expect(newMachine.registers.r3).to.equal(-4 + 0x10000);
+                expect(newMachine.getConditionCode()).to.equal(-1);
             });
 
             it("in register mode", () => {
@@ -241,11 +244,20 @@ describe('LC3', () => {
                 expect(newMachine.registers.r4).to.equal(0x89);
                 expect(newMachine.registers.r5).to.equal(0xAB);
                 expect(newMachine.registers.r7).to.equal(0x89 + 0xAB);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
         });
 
         describe("should handle AND", () => {
+
+            it("when used to clear a register", () => {
+                const oldMachine = lc3.setIn(["registers", "r3"], 0b1010);
+                const instruction = 0b0101011011100000;  // AND R3, R3, #0
+                const newMachine = execute(instruction, oldMachine);
+                expect(newMachine.registers.r3).to.equal(0);
+                expect(newMachine.getConditionCode()).to.equal(0);
+            });
 
             it("in immediate-mode with a positive argument", () => {
                 const oldMachine = lc3.setIn(["registers", "r2"], 0b1010);
@@ -253,6 +265,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.r2).to.equal(0b1010);
                 expect(newMachine.registers.r3).to.equal(0b0010);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
             it("in immediate-mode with a negative argument", () => {
@@ -261,6 +274,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.r2).to.equal(0b1010);
                 expect(newMachine.registers.r3).to.equal(0b1000);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
             it("in register mode", () => {
@@ -271,6 +285,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r4).to.equal(0xABCD);
                 expect(newMachine.registers.r5).to.equal(0xBCDE);
                 expect(newMachine.registers.r7).to.equal(0xABCD & 0xBCDE);
+                expect(newMachine.getConditionCode()).to.equal(-1);
             });
 
         });
@@ -377,20 +392,22 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x3334);
                 expect(newMachine.registers.r3).to.equal(0x2345);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
             it("such as LDI", () => {
                 const oldMachine = lc3
                     .update("memory", m => m
                         .set(0x3330, 0x2345)
-                        .set(0x2345, 0x3456))
+                        .set(0x2345, 0x890A))
                     .update("registers", rs => rs
                         .setNumeric(3, 0x2222)
                         .set("pc", 0x3333));
                 const instruction = 0b1010011111111100;  // LDI R3, #-4
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x3334);
-                expect(newMachine.registers.r3).to.equal(0x3456);
+                expect(newMachine.registers.r3).to.equal(0x890A);
+                expect(newMachine.getConditionCode()).to.equal(-1);
             });
 
             it("such as LDR", () => {
@@ -405,29 +422,32 @@ describe('LC3', () => {
                 expect(newMachine.registers.pc).to.equal(0x3334);
                 expect(newMachine.registers.r1).to.equal(0x1235);
                 expect(newMachine.registers.r3).to.equal(0x2345);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
         });
 
         describe("should handle LEA", () => {
 
-            const test = (instruction, pc, expected) => () => {
+            const test = (instruction, pc, expected, expectedCC) => () => {
                 const oldMachine = lc3.update("registers", rs => rs
                     .set("pc", pc)
-                    .setNumeric(1, 0x0000));
+                    .setNumeric(1, 0x1234));
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(pc + 1);
                 expect(newMachine.registers.r1).to.equal(expected);
+                expect(newMachine.getConditionCode()).to.equal(expectedCC);
             };
 
             // Sample LEA instructions with positive and negative offsets.
             const positive = 0b1110001000010000;  // LEA R1, #16
             const negative = 0b1110001111110000;  // LEA R1, #-16
 
-            it("with a positive offset", test(positive, 0x7FFE, 0x800F));
-            it("with a negative offset", test(negative, 0x800E, 0x7FFF));
-            it("when underflowing", test(negative, 0x0002, 0xFFF3));
-            it("when overflowing", test(positive, 0xFFF0, 0x0001));
+            it("with a positive offset", test(positive, 0x7FFE, 0x800F, -1));
+            it("with a negative offset", test(negative, 0x800E, 0x7FFF, 1));
+            it("when underflowing", test(negative, 0x0002, 0xFFF3, -1));
+            it("when overflowing", test(positive, 0xFFF0, 0x0001, 1));
+            it("when setting to zero", test(positive, 0xFFEF, 0x0000, 0));
 
         });
 
@@ -443,6 +463,7 @@ describe('LC3', () => {
                     .to.equal(0b1010101010101010);
                 expect(newMachine.registers.r3)
                     .to.equal(0b0101010101010101);
+                expect(newMachine.getConditionCode()).to.equal(1);
             });
 
             it("when the output is negative", () => {
@@ -455,6 +476,7 @@ describe('LC3', () => {
                     .to.equal(0b0101010101010101);
                 expect(newMachine.registers.r3)
                     .to.equal(0b1010101010101010);
+                expect(newMachine.getConditionCode()).to.equal(-1);
             });
 
         });
