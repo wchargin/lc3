@@ -121,7 +121,6 @@ class EditorPopover extends Component {
                 buttonAfter={saveButton}
                 bsStyle={valid ? undefined : "error"}
                 help={valid ? undefined : "Invalid number"}
-                hasFeedback
                 onChange={() => this.handleChange()}
                 ref="input"
                 type="text"
