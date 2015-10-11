@@ -13,15 +13,17 @@ export default class MemoryTable extends Component {
 
         const rowsToShow = 16;
         const topRow = Math.min(nominalTopRow, memory.size - rowsToShow);
-        const memoryInView = memory.skip(topRow).take(rowsToShow);
+
+        let addressesToShow = Array(rowsToShow);
+        for (let i = 0; i < rowsToShow; i++) {
+            addressesToShow[i] = topRow + i;
+        }
 
         const activeRow = lc3.registers.pc;
-
-        const memoryRows = memoryInView.map((value, index) => {
-            const address = topRow + index;
+        const memoryRows = addressesToShow.map((address, index) => {
             return <MemoryRow
                 address={address}
-                value={value}
+                value={memory.get(address)}
                 label={symbolTable.keyOf(address)}
                 active={address === activeRow}
                 instruction={lc3.formatInstructionAtAddress(address)}
