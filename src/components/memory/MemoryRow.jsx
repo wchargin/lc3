@@ -17,6 +17,7 @@ export class MemoryHeaderRow extends Component {
             <th>0x</th>
             <th>Label</th>
             <th>Hex</th>
+            <th>Instruction</th>
         </tr>;
     }
 
@@ -53,6 +54,7 @@ export class MemoryRow extends Component {
                     id={"value-" + this.props.address}
                 />
             </td>
+            <td>{this.props.instruction}</td>
         </tr>;
     }
 

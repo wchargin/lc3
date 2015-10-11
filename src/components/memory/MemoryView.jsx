@@ -43,6 +43,7 @@ class MemoryView extends Component {
                 value={value}
                 label={lc3.symbolTable.keyOf(address)}
                 active={address === activeRow}
+                instruction={lc3.formatInstructionAtAddress(address)}
                 onSetPC={() => this.props.onSetPC(address)}
                 key={index}
             />;
