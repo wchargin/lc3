@@ -9,10 +9,9 @@ import {
     ButtonToolbar,
     Glyphicon,
     Panel,
-    Table,
 } from 'react-bootstrap';
-import {MemoryRow, MemoryHeaderRow} from './MemoryRow';
 import RawModal from './RawModal';
+import MemoryTable from './MemoryTable';
 
 class MemoryView extends Component {
 
@@ -26,42 +25,19 @@ class MemoryView extends Component {
     render() {
         const {lc3, viewOptions} = this.props;
 
-        const memory = lc3.get("memory");
-        const rowsToShow = 16;
-        const nominalTopRow = viewOptions.get("topAddressShown");
-        const topRow = Math.min(nominalTopRow, memory.size - rowsToShow);
-        const memoryInView = memory.skip(topRow).take(rowsToShow);
-
-        const activeRow = lc3.registers.pc;
-
-        const memoryRows = memoryInView.map((value, index) => {
-            const address = topRow + index;
-            return <MemoryRow
-                address={address}
-                value={value}
-                label={lc3.symbolTable.keyOf(address)}
-                active={address === activeRow}
-                instruction={lc3.formatInstructionAtAddress(address)}
-                onSetPC={() => this.props.onSetPC(address)}
-                onSetValue={(value) => this.props.setMemory(address, value)}
-                key={index}
-            />;
-        });
-
         const header = "Search bar goes here";  // TODO(william)
         const footer = this.renderFooter();
 
         return <div className="memory-view">
             <h2>Memory</h2>
             <Panel header={header} footer={footer}>
-                <Table hover fill>
-                    <thead>
-                        <MemoryHeaderRow />
-                    </thead>
-                    <tbody>
-                        {memoryRows}
-                    </tbody>
-                </Table>
+                <MemoryTable
+                    lc3={this.props.lc3}
+                    topRow={viewOptions.get("topAddressShown")}
+                    onSetPC={this.props.onSetPC}
+                    onSetMemory={this.props.onSetMemory}
+                    fill
+                />
             </Panel>
         </div>;
     }
