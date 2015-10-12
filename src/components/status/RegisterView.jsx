@@ -31,6 +31,8 @@ export default class RegisterView extends Component {
                     value={registers[name]}
                     signed={signed}
                     id={name}
+                    editable={true}
+                    onEdit={(value) => this.props.onSetRegister(name, value)}
                 />
             </Register>;
 
@@ -49,4 +51,7 @@ export default class RegisterView extends Component {
 
 RegisterView.propTypes = {
     registers: PropTypes.instanceOf(RegisterSet).isRequired,
+
+    // (name, value) => ()
+    onSetRegister: PropTypes.func.isRequired,
 };

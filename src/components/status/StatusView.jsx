@@ -3,16 +3,19 @@ import {connect} from 'react-redux';
 
 import RegisterView from './RegisterView';
 import ControlButtons from './ControlButtons';
-import {step} from '../../actions';
+import * as actions from '../../actions';
 
 class StatusView extends Component {
 
     render() {
         return <div className="status-view">
             <h2>Status</h2>
-            <RegisterView registers={this.props.lc3.registers} />
+            <RegisterView
+                registers={this.props.lc3.registers}
+                onSetRegister={this.props.onSetRegister}
+            />
             <ControlButtons
-                onStep={this.props.step}
+                onStep={this.props.onStep}
             />
         </div>;
     }
@@ -28,7 +31,9 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        step: () => dispatch(step()),
+        onStep: () => dispatch(actions.step()),
+        onSetRegister: (name, value) =>
+            dispatch(actions.setRegister(name, value)),
     };
 }
 
