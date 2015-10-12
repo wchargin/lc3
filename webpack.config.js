@@ -16,6 +16,7 @@ function entry() {
 }
 
 module.exports = {
+    devtool: prod ? "source-map" : "eval",
     entry: entry(),
     module: {
         loaders: [
