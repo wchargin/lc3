@@ -60,6 +60,36 @@ describe('assemble', () => {
         });
     });
 
+    describe("meta-helper withContext", () => {
+        const inc1 = x => x + 1;
+        const bad = x => {
+            throw new Error("bad!");
+        };
+        const greaterThan = (x, y) => {
+            if (x > y) {
+                return x;
+            } else {
+                throw new Error(`expected ${x} to be greater than ${y}!`);
+            }
+        };
+
+        const {withContext} = assembleHelpers;
+
+        it("passes arguments through a successful unary function", () =>
+            expect(withContext(inc1, "uh oh")(10)).to.equal(11));
+
+        it("formats an error based on a failed unary function", () =>
+            expect(() => withContext(bad, "uh oh")(10)).to.throw(
+                "uh oh: bad!"));
+
+        it("passes arguments through a successful binary function", () =>
+            expect(withContext(greaterThan, "uh oh")(4, 2)).to.equal(4));
+
+        it("formats an error based on a failed binary function", () =>
+            expect(() => withContext(greaterThan, "uh oh")(2, 4)).to.throw(
+                "uh oh: expected 2 to be greater than 4!"));
+    });
+
     describe("helper parseRegister", () => {
         const {good, bad} = makeTesters(assembleHelpers.parseRegister);
 
