@@ -1,4 +1,4 @@
-import Utils from './utils';
+import Utils from './utils'; 
 
 export function handleErrors(context, callback) {
     return (...args) => {
@@ -94,4 +94,71 @@ export function tokenize(text) {
 
         return tokens || [];  // even if empty (to keep line numbers)
     });
+}
+
+/*
+ * Attempt to find the .ORIG directive.
+ * 
+ * On success, the return value is an object with the fields
+ *   - orig: the origin address specified in the .ORIG directive
+ *   - begin: (zero-based) index of the first line after the .ORIG
+ *
+ * Throws an error message on failure.
+ */
+export function findOrig(tokenizedLines) {
+    // Find the .ORIG directive.
+    for (var i = 0; i < tokenizedLines.length; i++) {
+        // Skip any blank or comment lines.
+        var line = tokenizedLines[i];
+        if (line.length === 0) {
+            continue;
+        }
+
+        // Check if there's an .ORIG directive anywhere in the line.
+        var hasOrig = false;
+        for (var j = 0; j < line.length; j++) {
+            if (line[j].toUpperCase() === ".ORIG") {
+                hasOrig = true;
+                break;
+            }
+        }
+        if (!hasOrig) {
+            throw new Error(
+                "The first non-empty, non-comment line of your program " +
+                "needs to have an .ORIG directive!");
+        }
+
+        // There's a directive somewhere.
+        // If it's not the first, then there's a label. Not allowed.
+        if (line[0].toUpperCase() !== ".ORIG") {
+            throw new Error(".ORIG directive cannot have a label!");
+        }
+
+        // If there's additional junk, that's not okay.
+        // If there's no operand, that's not okay, either.
+        const operands = line.length - 1;
+        if (operands !== 1) {
+            throw new Error(`.ORIG directive expects exactly one operand, ` +
+                `but it looks like you have ${operands}!`);
+        }
+
+        // Well, there's something. Is it a number? Is it in range?
+        const operand = line[1];
+        const orig = parseLiteral(operand);
+        if (isNaN(orig)) {
+            throw new Error(`.ORIG operand (${operand}) must be ` +
+                `a decimal or hexadecimal literal!`);
+        }
+        if (orig !== Utils.toUint16(orig)) {
+            throw new Error(`.ORIG operand (${operand}) is out of range! ` +
+                "It should be between 0 and 0xFFFF, inclusive.");
+        }
+
+        // Looks like we're good.
+        return { orig: orig, begin: i + 1 };
+    }
+
+    // If we get out of the loop, there were no non-empty lines.
+    throw new Error("Looks like your program's empty!" +
+        "You need at least an .ORIG directive and an .END directive.");
 }

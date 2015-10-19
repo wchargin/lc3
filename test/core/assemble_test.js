@@ -156,4 +156,60 @@ describe('assemble', () => {
             ]));
     });
 
+    describe("helper findOrig", () => {
+        const {good, bad} = makeTesters(raw => {
+            return assembleHelpers.findOrig(assembleHelpers.tokenize(raw));
+        });
+
+        it("finds an .ORIG directive on the first line of an empty program",
+            good(".ORIG x3000\n\n.END")({
+                orig: 0x3000,
+                begin: 1,
+            }));
+
+        it("finds a decimal .ORIG directive",
+            good(".ORIG #1234\n\n.END")({
+                orig: 1234,
+                begin: 1,
+            }));
+
+        it("finds an .ORIG directive on the first line of an invalid program",
+            good(".ORIG x3000\n\n")({
+                orig: 0x3000,
+                begin: 1,
+            }));
+
+        it("finds an .ORIG directive past the first line",
+            good("; Program!\n; It does things.\n.ORIG x4000\n\n.END")({
+                orig: 0x4000,
+                begin: 3,
+            }));
+
+        it("finds an .orig (lowercase .ORIG) directive",
+            good("; Program!\n; It does things.\n.orig x4000\n\n.END")({
+                orig: 0x4000,
+                begin: 3,
+            }));
+
+        it("fails on an .ORIG directive with no address specified",
+            bad(".ORIG\n.END")(/operand/i));
+
+        it("fails on an .ORIG directive with something other than a number",
+            bad(".ORIG START\n.END")(/literal/i));
+
+        it("fails on an .ORIG directive with multiple numbers",
+            bad(".ORIG x3000 x4000\n.END")(/operand/i));
+
+        it("fails when the .ORIG directive has a label",
+            bad("HERE .ORIG x3000\n.END")(/label/i));
+
+        it("fails when the .ORIG directive's address is too high",
+            bad(".ORIG x10000\n.END")(/range/i));
+
+        it("fails when the .ORIG directive's address is negative",
+            bad(".ORIG #-1\n.END")(/range/i));
+
+        it("fails on the empty document", bad("")(/empty/i));
+    });
+
 });
