@@ -158,9 +158,8 @@ export function findOrig(tokenizedLines) {
 
     // Well, there's something. Is it a number?
     const operand = line[1];
-    const orig = handleErrors(parseLiteral, msg => {
-        throw new Error("while parsing .ORIG directive operand: " + msg);
-    })(operand).result;
+    const orig = withContext(parseLiteral,
+        "while parsing .ORIG directive operand")(operand);
 
     // Is it in range?
     if (orig !== Utils.toUint16(orig)) {
