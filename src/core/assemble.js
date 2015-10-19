@@ -137,13 +137,13 @@ export function findOrig(tokenizedLines) {
             `but it looks like you have ${operands}!`);
     }
 
-    // Well, there's something. Is it a number? Is it in range?
+    // Well, there's something. Is it a number?
     const operand = line[1];
-    const orig = parseLiteral(operand);
-    if (isNaN(orig)) {
-        throw new Error(`.ORIG operand (${operand}) must be ` +
-            `a decimal or hexadecimal literal!`);
-    }
+    const orig = handleErrors(parseLiteral, msg => {
+        throw new Error("while parsing .ORIG directive operand: " + msg);
+    })(operand).result;
+
+    // Is it in range?
     if (orig !== Utils.toUint16(orig)) {
         throw new Error(`.ORIG operand (${operand}) is out of range! ` +
             `It should be between 0 and 0xFFFF, inclusive.`);

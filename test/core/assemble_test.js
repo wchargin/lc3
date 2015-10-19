@@ -206,7 +206,7 @@ describe('assemble', () => {
             bad(".ORIG\n.END")(/operand/i));
 
         it("fails on an .ORIG directive with something other than a number",
-            bad(".ORIG START\n.END")(/literal/i));
+            bad(".ORIG START\n.END")(/ORIG.*operand.*invalid.*literal/i));
 
         it("fails on an .ORIG directive with multiple numbers",
             bad(".ORIG x3000 x4000\n.END")(/operand/i));
