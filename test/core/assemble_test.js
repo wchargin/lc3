@@ -12,6 +12,43 @@ describe('assemble', () => {
             expect(() => fn.apply(null, args)).to.throw(message),
     });
 
+    describe("meta-helper handleErrors", () => {
+        const inc1 = x => x + 1;
+        const bad = x => {
+            throw new Error("Bad!");
+        };
+        const greaterThan = (x, y) => {
+            if (x > y) {
+                return x;
+            } else {
+                throw new Error(`Expected ${x} to be greater than ${y}!`);
+            }
+        };
+
+        const context = {
+            line: 42,
+        };
+        const {handleErrors} = assembleHelpers;
+
+        it("passes arguments through a successful unary function", () =>
+            expect(handleErrors(context, inc1)(10)).to.deep.equal(
+                { success: true, result: 11 }));
+
+        it("formats an error based on a failed unary function", () =>
+            expect(handleErrors(context, bad)(10)).to.deep.equal(
+                { success: false, errorMessage: "at line 42: Bad!" }));
+
+        it("passes arguments through a successful binary function", () =>
+            expect(handleErrors(context, greaterThan)(4, 2)).to.deep.equal(
+                { success: true, result: 4 }));
+
+        it("formats an error based on a failed binary function", () =>
+            expect(handleErrors(context, greaterThan)(2, 4)).to.deep.equal({
+                success: false,
+                errorMessage: "at line 42: Expected 2 to be greater than 4!",
+            }));
+    });
+
     describe("helper parseRegister", () => {
         const {good, bad} = makeTesters(assembleHelpers.parseRegister);
 

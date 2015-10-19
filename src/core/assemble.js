@@ -1,5 +1,21 @@
 import Utils from './utils';
 
+export function handleErrors(context, callback) {
+    return (...args) => {
+        try {
+            return {
+                success: true,
+                result: callback(...args),
+            };
+        } catch (e) {
+            return {
+                success: false,
+                errorMessage: `at line ${context.line}: ${e.message}`,
+            };
+        }
+    };
+}
+
 export function parseRegister(text) {
     const match = text.match(/^[Rr]([0-7])$/);
     if (match) {
