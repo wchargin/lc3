@@ -106,59 +106,52 @@ export function tokenize(text) {
  * Throws an error message on failure.
  */
 export function findOrig(tokenizedLines) {
-    // Find the .ORIG directive.
-    for (var i = 0; i < tokenizedLines.length; i++) {
-        // Skip any blank or comment lines.
-        var line = tokenizedLines[i];
-        if (line.length === 0) {
-            continue;
-        }
+    // The .ORIG directive needs to be on the first non-blank line
+    // (after tokenizing, which strips whitespace and comments).
+    const lineNumber = tokenizedLines.findIndex(line => line.length > 0);
+    if (lineNumber === -1) {
+        throw new Error("Looks like your program's empty!" +
+            "You need at least an .ORIG directive and an .END directive.");
+    }
+    const line = tokenizedLines[lineNumber];
 
-        // Check if there's an .ORIG directive anywhere in the line.
-        var hasOrig = false;
-        for (var j = 0; j < line.length; j++) {
-            if (line[j].toUpperCase() === ".ORIG") {
-                hasOrig = true;
-                break;
-            }
-        }
-        if (!hasOrig) {
-            throw new Error(
-                "The first non-empty, non-comment line of your program " +
-                "needs to have an .ORIG directive!");
-        }
-
-        // There's a directive somewhere.
-        // If it's not the first, then there's a label. Not allowed.
-        if (line[0].toUpperCase() !== ".ORIG") {
-            throw new Error(".ORIG directive cannot have a label!");
-        }
-
-        // If there's additional junk, that's not okay.
-        // If there's no operand, that's not okay, either.
-        const operands = line.length - 1;
-        if (operands !== 1) {
-            throw new Error(`.ORIG directive expects exactly one operand, ` +
-                `but it looks like you have ${operands}!`);
-        }
-
-        // Well, there's something. Is it a number? Is it in range?
-        const operand = line[1];
-        const orig = parseLiteral(operand);
-        if (isNaN(orig)) {
-            throw new Error(`.ORIG operand (${operand}) must be ` +
-                `a decimal or hexadecimal literal!`);
-        }
-        if (orig !== Utils.toUint16(orig)) {
-            throw new Error(`.ORIG operand (${operand}) is out of range! ` +
-                "It should be between 0 and 0xFFFF, inclusive.");
-        }
-
-        // Looks like we're good.
-        return { orig: orig, begin: i + 1 };
+    // Check if there's an .ORIG directive anywhere in the line.
+    const hasOrig = line.some(token => token.toUpperCase() === ".ORIG");
+    if (!hasOrig) {
+        throw new Error(
+            "The first non-empty, non-comment line of your program " +
+            "needs to have an .ORIG directive!");
     }
 
-    // If we get out of the loop, there were no non-empty lines.
-    throw new Error("Looks like your program's empty!" +
-        "You need at least an .ORIG directive and an .END directive.");
+    // There's a directive somewhere.
+    // If it's not the first, then there's a label. Not allowed.
+    if (line[0].toUpperCase() !== ".ORIG") {
+        throw new Error(".ORIG directive cannot have a label!");
+    }
+
+    // If there's additional junk, that's not okay.
+    // If there's no operand, that's not okay, either.
+    const operands = line.length - 1;
+    if (operands !== 1) {
+        throw new Error(`The .ORIG directive expects exactly one operand, ` +
+            `but it looks like you have ${operands}!`);
+    }
+
+    // Well, there's something. Is it a number? Is it in range?
+    const operand = line[1];
+    const orig = parseLiteral(operand);
+    if (isNaN(orig)) {
+        throw new Error(`.ORIG operand (${operand}) must be ` +
+            `a decimal or hexadecimal literal!`);
+    }
+    if (orig !== Utils.toUint16(orig)) {
+        throw new Error(`.ORIG operand (${operand}) is out of range! ` +
+            `It should be between 0 and 0xFFFF, inclusive.`);
+    }
+
+    // Looks like we're good.
+    return {
+        orig: orig,
+        begin: lineNumber + 1,
+    };
 }
