@@ -1,6 +1,6 @@
 import Utils from './utils'; 
 
-export function handleErrors(context, callback) {
+export function handleErrors(callback, errfmt) {
     return (...args) => {
         try {
             return {
@@ -10,7 +10,7 @@ export function handleErrors(context, callback) {
         } catch (e) {
             return {
                 success: false,
-                errorMessage: `at line ${context.line}: ${e.message}`,
+                errorMessage: errfmt(e.message),
             };
         }
     };

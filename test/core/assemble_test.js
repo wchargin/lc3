@@ -25,28 +25,39 @@ describe('assemble', () => {
             }
         };
 
-        const context = {
-            line: 42,
-        };
+        const errfmt = msg => "at line 42: " + msg;
         const {handleErrors} = assembleHelpers;
 
         it("passes arguments through a successful unary function", () =>
-            expect(handleErrors(context, inc1)(10)).to.deep.equal(
+            expect(handleErrors(inc1, errfmt)(10)).to.deep.equal(
                 { success: true, result: 11 }));
 
         it("formats an error based on a failed unary function", () =>
-            expect(handleErrors(context, bad)(10)).to.deep.equal(
+            expect(handleErrors(bad, errfmt)(10)).to.deep.equal(
                 { success: false, errorMessage: "at line 42: Bad!" }));
 
         it("passes arguments through a successful binary function", () =>
-            expect(handleErrors(context, greaterThan)(4, 2)).to.deep.equal(
+            expect(handleErrors(greaterThan, errfmt)(4, 2)).to.deep.equal(
                 { success: true, result: 4 }));
 
         it("formats an error based on a failed binary function", () =>
-            expect(handleErrors(context, greaterThan)(2, 4)).to.deep.equal({
+            expect(handleErrors(greaterThan, errfmt)(2, 4)).to.deep.equal({
                 success: false,
                 errorMessage: "at line 42: Expected 2 to be greater than 4!",
             }));
+
+        it("works with nesting", () => {
+            const inner = x => { throw new Error("failure"); };
+            const outer = y => {
+                handleErrors(inner, msg => {
+                    throw new Error("in inner: " + msg);
+                })(y);
+            };
+            expect(handleErrors(outer, errfmt)(1)).to.deep.equal({
+                success: false,
+                errorMessage: "at line 42: in inner: failure",
+            });
+        });
     });
 
     describe("helper parseRegister", () => {
