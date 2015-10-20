@@ -158,3 +158,17 @@ export function isValidLabelName(label) {
 
     return true;
 }
+
+/*
+ * Determine how many words of LC-3 memory
+ * the given instruction or directive will require to be allocated.
+ *
+ * The command should be a string like ".FILL" or "BRnp";
+ *
+ * the operand should be a number for .FILL or .BLKW,
+ * a string value for .STRINGZ,
+ * or null (or any other value) if it's an instruction
+ * (because the operand of an instruction doesn't influence its size).
+ */
+export function determineRequiredMemory(command, operand) {
+}

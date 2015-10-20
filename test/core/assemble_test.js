@@ -193,4 +193,26 @@ describe('assemble', () => {
         it("should reject punctuation", no("$$BILLS"));
     });
 
+    describe.skip("helper determineRequiredMemory", () => {
+        const {good, _} = makeTesters(assembleHelpers.determineRequiredMemory);
+
+        it("should allocate one word for a .FILL of any value",
+            good(".FILL", 1234)(1));
+
+        it("should allocate an arbitrary size for a .BLKW",
+            good(".BLKW", 10)(10));
+        it("should correctly handle .BLKWs of zero size",
+            good(".BLKW", 0)(0))
+
+        it("should allocate one word for the empty string's null terminator",
+            good(".STRINGZ", "")(1));
+        it("should allocate the right amount of space for a normal string",
+            good(".STRINGZ", "hello")(6));
+        it("shouldn't treat backslashes or quotes as anything special",
+            good(".STRINGZ", String.raw`I said, \ "hi!"`)(16));
+
+        it("should allocate one word for an instruction (or anything else)",
+            good("ADD", "R1, R2, #5")(1));
+    });
+
 });
