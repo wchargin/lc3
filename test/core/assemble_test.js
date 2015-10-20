@@ -110,6 +110,26 @@ describe('assemble', () => {
                 [".END"],
             ]));
 
+        it("allows comments immediately after a token (no space)",
+            good(String.raw`AND R0, R0, #0;clear it`)([
+                ["AND", "R0", "R0", "#0"],
+            ]));
+
+        it("allows comments separated from tokens by a space",
+            good(String.raw`AND R0, R0, #0 ; clear it`)([
+                ["AND", "R0", "R0", "#0"],
+            ]));
+
+        it("allows comments immediately after a string (no space)",
+            good(String.raw`.STRINGZ "hello";hey`)([
+                [".STRINGZ", "hello"],
+            ]));
+
+        it("allows comments separated from strings by a space",
+            good(String.raw`.STRINGZ "hello" ;hey`)([
+                [".STRINGZ", "hello"],
+            ]));
+
         it("deals with semicolons within comments",
             good(";; comment\nBRnzp STUFF ; comment; really\n.END")([
                 [],
@@ -138,6 +158,11 @@ describe('assemble', () => {
 
         it("allows semicolons in strings",
             good(String.raw`.STRINGZ "hark; for here \\/ be dragons!"`)([
+                ['.STRINGZ', "hark; for here \\/ be dragons!"],
+            ]));
+
+        it("allows semicolons in strings and actual comments later",
+            good(String.raw`.STRINGZ "hark; for here \\/ be dragons!" ; yep`)([
                 ['.STRINGZ', "hark; for here \\/ be dragons!"],
             ]));
     });
