@@ -135,6 +135,11 @@ describe('assemble', () => {
             good(String.raw`.STRINGZ "He says \"hi\"\\"`)([
                 ['.STRINGZ', "He says \"hi\"\\"],
             ]));
+
+        it("allows semicolons in strings",
+            good(String.raw`.STRINGZ "hark; for here \\/ be dragons!"`)([
+                ['.STRINGZ', "hark; for here \\/ be dragons!"],
+            ]));
     });
 
     describe("helper findOrig", () => {

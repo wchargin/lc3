@@ -135,14 +135,10 @@ export function tokenize(text) {
 
 // See documentation for tokenize.
 function tokenizeLine(line, lineIndex) {
-    // Remove the comment, if any.
-    const semi = line.indexOf(';');
-    const noComment = (semi === -1) ? line : line.substring(0, semi);
-
     // Trim leading whitespace.
-    // We can't trim trailing or interior whitespace at this point
+    // We can't trim trailing or interior whitespace or comments at this point
     // because those might belong to string literals.
-    const trimmed = noComment.trimLeft();
+    const trimmed = line.trimLeft();
 
     // Include the line number when we parse string literals
     // so that error messages are more helpful.
@@ -175,6 +171,11 @@ function tokenizeLine(line, lineIndex) {
             } else {
                 state = isQuote ? STRING : TOKEN;
             }
+        }
+
+        // Break at comments, unless we're inside a string.
+        if (here === ';' && state !== STRING) {
+            break;
         }
 
         if (state === TOKEN) {
