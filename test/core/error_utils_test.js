@@ -69,6 +69,12 @@ describe("ErrorUtils", () => {
         it("formats an error based on a failed binary function", () =>
             expect(() => withContext(greaterThan, "uh oh")(2, 4)).to.throw(
                 "uh oh: expected 2 to be greater than 4!"));
+
+        it("works with nesting", () => {
+            const inner = withContext(bad, "oh no");
+            const outer = withContext(inner, "uh oh");
+            expect(() => outer(10)).to.throw("uh oh: oh no: bad!");
+        });
     });
 
 });
