@@ -175,4 +175,22 @@ describe('assemble', () => {
         it("fails on the empty document", bad("")(/empty/i));
     });
 
+    describe("helper isValidLabelName", () => {
+        // This function should never throw an error,
+        // so we can discard the "bad" tester.
+        // Instead, we care about whether it returns true or false.
+        const {good, _} = makeTesters(assembleHelpers.isValidLabelName);
+        const yes = (input) => good(input)(true);
+        const no = (input) => good(input)(false);
+
+        it("should accept a normal alphabetic label", yes("START"));
+        it("should accept an alphanumeric label", yes("TEN4"));
+        it("should accept 'ADD' as a label name", yes("ADD"));
+        it("should accept a label that's purely numeric", yes("1234"));
+        it("should reject a label with spaces", no("START HERE"));
+        it("should reject a label that's a valid hex literal", no("x3000"));
+        it("should reject a label that's a valid decimal literal", no("#10"));
+        it("should reject punctuation", no("$$BILLS"));
+    });
+
 });

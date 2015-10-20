@@ -1,5 +1,5 @@
 import Utils from './utils'; 
-import {withContext} from './error_utils';
+import {handleErrors, withContext} from './error_utils';
 
 export function parseRegister(text) {
     const match = text.match(/^[Rr]([0-7])$/);
@@ -138,4 +138,23 @@ export function findOrig(tokenizedLines) {
         orig: orig,
         begin: lineNumber + 1,
     };
+}
+
+/*
+ * Test whether the given string might be a valid label name.
+ * Note that this does not check for name clashes with existing labels.
+ */
+export function isValidLabelName(label) {
+    if (label.match(/[^A-Za-z0-9_]/)) {
+        // Invalid characters.
+        return false;
+    }
+
+    const asLiteral = handleErrors(parseLiteral)(label);
+    if (asLiteral.success) {
+        // Valid literal; could be ambiguous.
+        return false;
+    }
+
+    return true;
 }
