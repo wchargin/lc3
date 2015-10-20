@@ -226,7 +226,7 @@ export function findOrig(tokenizedLines) {
     // (after tokenizing, which strips whitespace and comments).
     const lineNumber = tokenizedLines.findIndex(line => line.length > 0);
     if (lineNumber === -1) {
-        throw new Error("Looks like your program's empty!" +
+        throw new Error("Looks like your program's empty! " +
             "You need at least an .ORIG directive and an .END directive.");
     }
     const line = tokenizedLines[lineNumber];
