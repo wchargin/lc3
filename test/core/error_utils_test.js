@@ -5,19 +5,19 @@ import ErrorUtils from '../../src/core/error_utils';
 
 describe("ErrorUtils", () => {
 
-    describe("handleErrors", () => {
-        const inc1 = x => x + 1;
-        const bad = x => {
-            throw new Error("Bad!");
-        };
-        const greaterThan = (x, y) => {
-            if (x > y) {
-                return x;
-            } else {
-                throw new Error(`Expected ${x} to be greater than ${y}!`);
-            }
-        };
+    const inc1 = x => x + 1;
+    const bad = x => {
+        throw new Error("bad!");
+    };
+    const greaterThan = (x, y) => {
+        if (x > y) {
+            return x;
+        } else {
+            throw new Error(`expected ${x} to be greater than ${y}!`);
+        }
+    };
 
+    describe("handleErrors", () => {
         const errfmt = msg => "at line 42: " + msg;
         const {handleErrors} = ErrorUtils;
 
@@ -27,7 +27,7 @@ describe("ErrorUtils", () => {
 
         it("formats an error based on a failed unary function", () =>
             expect(handleErrors(bad, errfmt)(10)).to.deep.equal(
-                { success: false, errorMessage: "at line 42: Bad!" }));
+                { success: false, errorMessage: "at line 42: bad!" }));
 
         it("passes arguments through a successful binary function", () =>
             expect(handleErrors(greaterThan, errfmt)(4, 2)).to.deep.equal(
@@ -36,7 +36,7 @@ describe("ErrorUtils", () => {
         it("formats an error based on a failed binary function", () =>
             expect(handleErrors(greaterThan, errfmt)(2, 4)).to.deep.equal({
                 success: false,
-                errorMessage: "at line 42: Expected 2 to be greater than 4!",
+                errorMessage: "at line 42: expected 2 to be greater than 4!",
             }));
 
         it("works with nesting", () => {
@@ -54,18 +54,6 @@ describe("ErrorUtils", () => {
     });
 
     describe("withContext", () => {
-        const inc1 = x => x + 1;
-        const bad = x => {
-            throw new Error("bad!");
-        };
-        const greaterThan = (x, y) => {
-            if (x > y) {
-                return x;
-            } else {
-                throw new Error(`expected ${x} to be greater than ${y}!`);
-            }
-        };
-
         const {withContext} = ErrorUtils;
 
         it("passes arguments through a successful unary function", () =>
