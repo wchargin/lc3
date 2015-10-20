@@ -36,6 +36,85 @@ export function parseLiteral(text) {
 }
 
 /*
+ * Parse a raw string as it appears in the assembly source code---
+ * in the form including the outer quotation marks---
+ * into what it should represent in machine code.
+ * In particular, this includes stripping the outer quotes
+ * and performing backslash-escapes.
+ * If the string is invalid, an error will be thrown.
+ */
+export function parseString(text) {
+    const error = (message) => {
+        throw new Error(`while parsing the string ${text}: ${message}`);
+    };
+
+    if (text.length < 2) {
+        error(`this string is way too short! ` +
+            "You need at least two characters just for the quote marks.");
+    }
+
+    const quote = '"';
+    if (text.charAt(0) !== quote || text.charAt(text.length - 1) !== quote) {
+        error(`the string needs to start and end with ` +
+            `double quotation marks (e.g.: ${quote}I'm a string${quote}).`);
+    }
+
+    // We'll build up this list of single-character strings,
+    // then join them at the end.
+    // (This might end up being a tad sparse if we skip some backslashes;
+    // that's okay, because Array.join will deal with these holes fine.)
+    let chars = new Array(text.length - 2);
+
+    // This has to be a mutable-style for loop instead of a call to map
+    // because we need to be able to conditionally move the iterator
+    // (e.g., read the next character to process and escape sequence).
+    let i;
+    for (i = 1; i < text.length - 1; i++) {
+        const here = text.charAt(i);
+        const errorHere = (message) => error(`at index ${i}: ${message}`);
+
+        if (here === '"') {
+            errorHere(`unescaped double quote found before end of string`);
+        }
+
+        if (here === '\\') {
+            // Supported escape sequences: \0, \n, \r, \", \\.
+            const escapeSequence = text.charAt(++i);
+
+            // Note: if the backslash is the last character of the string,
+            // meaning that the closing quote is escaped
+            // and the string is invalid,
+            // this particular character will just resolve to a quote,
+            // and no error will be raised.
+            // We check for this case separately down below.
+            const escaped = ({
+                '0': '\0',
+                'n': '\n',
+                'r': '\r',
+                '"': '\"',
+                '\\': '\\',
+            })[escapeSequence];
+
+            if (escapeSequence === undefined) {
+                errorHere(`unsupported escape character '${escapeSequence}'`);
+            }
+            chars[i] = (escaped);
+        } else {
+            chars[i] = here;
+        }
+    }
+
+    // Now make sure that the last body character wasn't a backslash,
+    // which would mean that we escaped the final closing quote.
+    if (i >= text.length || text.charAt(i) !== '"') {
+        error("unterminated string literal! " +
+            "Did you accidentally backslash-escape the closing quote?");
+    }
+
+    return chars.join('');
+}
+
+/*
  * Tokenize the given document.
  * Returns an array of lines; each line is an array of tokens.
  * Comma-separated operands are smashed into one token.

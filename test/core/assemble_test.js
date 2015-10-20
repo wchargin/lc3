@@ -40,6 +40,25 @@ describe('assemble', () => {
         it("fails on x", bad("x")());
     });
 
+    describe("helper parseString", () => {
+        const {good, bad} = makeTesters(assembleHelpers.parseString);
+        const r = String.raw;
+
+        it("parses the empty string", good(r`""`)(''));
+        it("parses a simple string", good(r`"hello"`)('hello'));
+        it("parses a newline", good(r`"lm\nop"`)('lm\nop'));
+        it("parses an escaped backslash", good(r`"/\\/\\"`)('/\\/\\'));
+        it("parses an escaped quote", good(r`"q\"b"`)(r`q"b`));
+        it("parses a backslash then a quote", good(r`"a\\\""`)(r`a\"`));
+
+        it("rejects a string without any quotes at all", bad(r`hi`)());
+        it("rejects a string without trailing quote", bad(r`"hi`)());
+        it("rejects a string without leading quote", bad(r`hi"`)());
+
+        it("rejects a string where the trailing quote is escaped",
+            bad(r`"abc\"`)());
+    });
+
     describe("helper tokenize", () => {
         const {good, bad} = makeTesters(assembleHelpers.tokenize);
 
