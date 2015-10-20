@@ -466,3 +466,43 @@ export function buildSymbolTable(tokenizedLines, orig, begin) {
         programLength: result.address - orig,
     };
 }
+
+/*
+ * Parse a PC-relative offset, provided in either literal or label form.
+ * The result is an integer offset from the provided PC location.
+ * For example, if PC is 0x3000 and the operand points to a label at 0x2FFF,
+ * the return value will be -1.
+ *
+ * If the signed offset does not fit into the given number of bits,
+ * or if the operand refers to a label that does not exist,
+ * an error will be thrown.
+ */
+export function parseOffset(pc, operand, symbols, bits) {
+    const ensureInRange = (x) => {
+        const min = -(1 << (bits - 1));
+        const max = (1 << (bits - 1)) - 1;
+        if (!(min <= x && x <= max)) {
+            throw new Error(`offset ${x} is out of range; ` +
+                `it must fit into ${bits} bits, ` +
+                `so it should be between ${min} and ${max}, inclusive`);
+        }
+        return x;
+    };
+
+    // First, see if it's a valid literal.
+    const asLiteral = handleErrors(parseLiteral)(operand);
+    if (asLiteral.success) {
+        return ensureInRange(asLiteral.result);
+    }
+
+    // If it's not a literal, it must be a symbol to be valid.
+    if (!(operand in symbols)) {
+        throw new Error(
+            `the offset '${operand}' is not a valid numeric literal, ` +
+            `but I can't find it in the symbol table either; ` +
+            `did you misspell a label name?`);
+    }
+
+    const symbolAddress = symbols[operand];
+    return ensureInRange(symbolAddress - pc);
+};

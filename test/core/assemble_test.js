@@ -417,4 +417,48 @@ describe('assemble', () => {
 
     });
 
+    describe("helper parseOffset", () => {
+        const {good, bad} = makeTesters(assembleHelpers.parseOffset);
+
+        describe("should accept", () => {
+            it("a positive decimal literal offset",
+                good(0x3000, "#1", {}, 5)(1));
+            it("a negative decimal literal offset",
+                good(0x3000, "#-1", {}, 5)(-1));
+            it("a positive hex offset",
+                good(0x3000, "x08", {}, 5)(8));
+            it("a negative hex offset",
+                good(0x3000, "x-08", {}, 5)(-8));
+            it("a forward reference to a label",
+                good(0x3000, "THING", { "THING": 0x3010 }, 6)(0x10));
+            it("a backward reference to a label",
+                good(0x3000, "THING", { "THING": 0x2FFF }, 6)(-1));
+            it("a reference to a label at the current location",
+                good(0x3000, "THING", { "THING": 0x3000 }, 6)(0));
+        });
+
+        describe("should reject", () => {
+            describe("an out-of-range", () => {
+                it("positive decimal literal offset",
+                    bad(0x3000, "#30", {}, 5)(/range.*-16.*15/));
+                it("negative decimal literal offset",
+                    bad(0x3000, "#-17", {}, 5)(/range.*-16.*15/));
+                it("positive hex offset",
+                    bad(0x3000, "x10", {}, 5)(/range.*-16.*15/));
+                it("negative hex offset",
+                    bad(0x3000, "x-11", {}, 5)(/range.*-16.*15/));
+                it("forward reference to a label",
+                    bad(0x3000, "THING", { "THING": 0x3050 }, 6)(
+                        /range.*-32.*31/));
+                it("backward reference to a label",
+                    bad(0x3000, "THING", { "THING": 0x2F00 }, 6)(
+                        /range.*-32.*31/));
+            });
+
+            it("a label that doesn't exist",
+                bad(0x3000, "NOPE", { "THING": 0x3005 }, 5)(/label/));
+        });
+
+    });
+
 });
