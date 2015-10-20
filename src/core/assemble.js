@@ -293,12 +293,26 @@ export function isValidLabelName(label) {
  * Determine how many words of LC-3 memory
  * the given instruction or directive will require to be allocated.
  *
- * The command should be a string like ".FILL" or "BRnp";
+ * The command should be a string like ".FILL" or "BRnp".
  *
- * the operand should be a number for .FILL or .BLKW,
+ * The operand should be a number for .FILL or .BLKW,
  * a string value for .STRINGZ,
  * or null (or any other value) if it's an instruction
  * (because the operand of an instruction doesn't influence its size).
+ *
+ * Special cases like ".ORIG" and ".END" are not supported by this function.
+ * You should process those separately.
  */
 export function determineRequiredMemory(command, operand) {
+    switch (command) {
+        case ".FILL":
+            return 1;
+        case ".BLKW":
+            return operand;
+        case ".STRINGZ":
+            return operand.length + 1;  // for the null-terminator
+        default:
+            // Assume it's a normal instruction.
+            return 1;
+    }
 }

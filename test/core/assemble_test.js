@@ -211,7 +211,7 @@ describe('assemble', () => {
         it("should reject punctuation", no("$$BILLS"));
     });
 
-    describe.skip("helper determineRequiredMemory", () => {
+    describe("helper determineRequiredMemory", () => {
         const {good, _} = makeTesters(assembleHelpers.determineRequiredMemory);
 
         it("should allocate one word for a .FILL of any value",
@@ -230,7 +230,7 @@ describe('assemble', () => {
             good(".STRINGZ", String.raw`I said, \ "hi!"`)(16));
 
         it("should allocate one word for an instruction (or anything else)",
-            good("ADD", "R1, R2, #5")(1));
+            good("ADD", null)(1));
     });
 
 });
