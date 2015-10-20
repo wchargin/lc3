@@ -1,3 +1,4 @@
+import Constants from './constants';
 import Utils from './utils'; 
 import {handleErrors, withContext} from './error_utils';
 
@@ -315,4 +316,152 @@ export function determineRequiredMemory(command, operand) {
             // Assume it's a normal instruction.
             return 1;
     }
+}
+
+export function buildSymbolTable(tokenizedLines, orig, begin) {
+    // These two fields will be used to compute the return value.
+    let symbols = {};
+    let address = orig;
+
+    // Here are all the things that can come at the start of a line.
+    // We use these to determine whether the first token in a line
+    // is a label or an actual operation of some kind.
+    const trapVectors = "GETC OUT PUTS IN PUTSP HALT".split(' ');
+    const instructions = [
+        "ADD", "AND", "NOT",
+        "BR", "BRP", "BRZ", "BRZP", "BRN", "BRNP", "BRNZ", "BRNZP",
+        "JMP", "RET",
+        "JSR", "JSRR",
+        "LD", "LDI", "LDR",
+        "LEA",
+        "RTI",
+        "ST", "STI", "STR",
+        "TRAP",
+    ];
+    const directives = [".FILL", ".BLKW", ".STRINGZ"];
+    const commands = [...trapVectors, ...instructions, ...directives];
+
+    const initialState = {
+        symbols: {},
+        address: orig,
+        seenEndDirective: false,
+    };
+    const programLines = tokenizedLines.slice(begin);
+    const result = programLines.reduce((state, line, lineIndex) => {
+        const ctx = `at line ${lineIndex + begin + 1}`;
+        const error = message => {
+            throw new Error(`${ctx}: ${message}`);
+        };
+        const oob = (address) => error(
+            `currently at address ${Utils.toHexString(address)}, ` +
+            `which is past the memory limit ` +
+            `of ${Utils.toHexString(Constants.MEMORY_SIZE)}`);
+
+        // Empty lines are totally fine:
+        // maybe they originally had comments,
+        // or maybe they were just empty.
+        // In either case, let it pass through.
+        if (line.length === 0) {
+            return state;
+        }
+
+        // We'll also silently ignore anything after the .END directive.
+        if (state.seenEndDirective) {
+            return state;
+        }
+
+        // Check for the .END directive.
+        if (line.some(x => x.toUpperCase() === '.END')) {
+            return {
+                ...state,
+                seenEndDirective: true,
+            };
+        }
+
+        // Make sure we haven't gone out of the memory bounds.
+        if (state.address >= Constants.MEMORY_SIZE) {
+            oob(state.address);
+        }
+
+        // Looks good so far. Let's take a look at the data.
+        let newState = { ...state };
+
+        const fst = line[0];
+
+        // This could either be a label and then maybe some things
+        // or just some things.
+        // We take the policy that it's only a label if it has to be.
+        const hasLabel = !commands.includes(fst.toUpperCase());
+        if (hasLabel) {
+            const labelName = fst;
+
+            // That's a label! Perform some validity checks.
+            if (!isValidLabelName(labelName)) {
+                error(`this line looks like a label, ` +
+                    `but '${labelName}' is not a valid label name; ` +
+                    `you either misspelled an instruction ` +
+                    `or entered an invalid name for a label`);
+            } else if (labelName in newState.symbols) {
+                const existingLocation = newState.symbols[labelName];
+                error(`label name ${labelName} already exists; ` +
+                    `it points to ${Utils.toHexString(existingLocation)}`);
+            } else {
+                // Go ahead and add it to the symbol table!
+                newState.symbols = {
+                    ...newState.symbols,
+                    [labelName]: newState.address,
+                };
+            }
+        }
+
+        const rest = line.slice(hasLabel ? 1 : 0);
+        if (rest.length === 0) {
+            // It's a label-only line. No problem.
+        } else {
+            const command = rest[0].toUpperCase();
+            const operands = rest.slice(1);
+
+            // For assembly directives,
+            // we might need the argument to see how much space to allocate.
+            const operand = (() => {
+                switch (command) {
+                    case ".BLKW":
+                    case ".FILL":
+                        if (operands.length !== 1) {
+                            error(`expected ${command} directive ` +
+                                `to have exactly one operand, ` +
+                                `but found ${operands.length}`);
+                        }
+                        return withContext(parseLiteral, ctx)(operands[0]);
+                    case ".STRINGZ":
+                        if (operands.length !== 1) {
+                            error(`expected ${command} directive ` +
+                                `to have exactly one operand, ` +
+                                `but found ${operands.length}`);
+                        }
+                        return operands[0];  // already a string, from tokenize
+                    default:
+                        return null;  // doesn't matter for instructions
+                }
+            })();
+
+            newState.address += determineRequiredMemory(command, operand);
+
+            // Make sure this wasn't, e.g., a .BLKW on the edge of memory.
+            if (newState.address > Constants.MEMORY_SIZE) {
+                oob(newState.address);
+            }
+        }
+
+        return newState;
+    }, initialState);
+
+    if (!result.seenEndDirective) {
+        error("no .END directive found!");
+    }
+
+    return {
+        symbolTable: result.symbols,
+        programLength: result.address - orig,
+    };
 }

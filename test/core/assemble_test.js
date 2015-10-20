@@ -233,4 +233,158 @@ describe('assemble', () => {
             good("ADD", null)(1));
     });
 
+    describe("helper buildSymbolTable", () => {
+        const {good, bad} = makeTesters(lines => {
+            const tokenized = assembleHelpers.tokenize(lines.join('\n'));
+            const {orig, begin} = assembleHelpers.findOrig(tokenized);
+            return assembleHelpers.buildSymbolTable(tokenized, orig, begin);
+        });
+
+        it("generates an empty symbol table for the empty program",
+            good([".ORIG x3000", ".END"])({
+                symbolTable: {},
+                programLength: 0,
+            }));
+
+        it("generates an empty symbol table for a simple program",
+            good([".ORIG x3000", "ADD R0, R1, #0", ".END"])({
+                symbolTable: {},
+                programLength: 1,
+            }));
+
+        it("works for a program with just instructions", good([
+            ".ORIG x3000",
+            "START ADD R1, R1, #-1",
+            "BRnz START",
+            ".END",
+        ])({
+            symbolTable: {
+                "START": 0x3000,
+            },
+            programLength: 2,
+        }));
+
+        it("works for a program with data at the end", good([
+            ".ORIG x3000",
+            "AND R0, R0, #0",
+            "ADD R1, R0, #9",
+            "; Next, we'll call a subroutine.",
+            "; (This comment shouldn't affect the page index.)",
+            "LD R2, Subroutine",
+            "LOOP ADD R1, R1, #-1",
+            "JSRR R2",
+            "BRzp LOOP",
+            "HALT",
+            "Subroutine .FILL x4000",
+            ".END"
+        ])({
+            symbolTable: {
+                "LOOP": 0x3003,
+                "Subroutine": 0x3007,
+            },
+            programLength: 8,
+        }));
+
+        it("works for a program with multi-word data", good([
+            ".ORIG x5000",
+            "UserInput .BLKW x10",
+            'Hello .STRINGZ "Hello, world!"',
+            "Newline .FILL x0A",
+            ".END",
+        ])({
+            symbolTable: {
+                "UserInput": 0x5000,
+                "Hello": 0x5010,
+                "Newline": 0x501E,
+            },
+            programLength: 0x1F,
+        }));
+
+        it("works for label-only lines", good([
+            ".ORIG x3000",
+            "Loop",
+            "AND R0, R0, #0",
+            "BRnzp Loop",
+            ".END",
+        ])({
+            symbolTable: {
+                "Loop": 0x3000,
+            },
+            programLength: 2,
+        }));
+
+        it("lets your instructions go up to the last memory cell", good([
+            ".ORIG xFFFE",
+            "JSRR R0",
+            "RTI",
+            ".END",
+        ])({
+            symbolTable: {},
+            programLength: 2,
+        }));
+
+        it("fails if your instructions overflow the memory", bad([
+            ".ORIG xFFFE",
+            "JSRR R0",
+            "ADD R0, R0, R0",
+            "RTI",
+            ".END",
+        ])(/line 4.*x10000.*memory limit/));
+
+        it("lets your .BLKWs go up to the last memory cell", good([
+            ".ORIG xFFF0",
+            ".BLKW #16",
+            ".END",
+        ])({
+            symbolTable: {},
+            programLength: 16,
+        }));
+
+        it("fails if your .BLKWs overflow the memory", bad([
+            ".ORIG xFFF8",
+            ".BLKW #16",
+            ".END",
+        ])(/line 2.*x10008.*memory limit/));
+
+        it("fails if you have an invalid label name", bad([
+            ".ORIG x3000",
+            "LD R3, Subroutine",
+            "xa JSR R3",
+            "Subroutine .FILL x3000",
+            ".END",
+        ])(/line 3.*label/));
+
+        it("fails for a .STRINGZ with no operand", bad([
+            ".ORIG x3000",
+            ".STRINGZ",
+            ".END",
+        ])(/line 2.*operand/));
+
+        // This is a bit different from the .STRINGZ case
+        // because the operand to .FILL isn't actually needed
+        // to compute anything in the symbol table.
+        // (And, indeed, it is handled separately in the code.)
+        // It should still fail, though.
+        it("fails for a .FILL with no operand", bad([
+            ".ORIG x3000",
+            ".FILL",
+            ".END",
+        ])(/line 2.*operand/));
+
+        it("fails when you have duplicate labels", bad([
+            ".ORIG x3000",
+            "AND R0, R0, x0000",
+            "ADD R1, R0, #5",
+            "Loop ADD R0, R0, #1",
+            "ADD R1, R1, #-1",
+            "BRp Loop",
+            "ADD R2, R1, #5",
+            "Loop ADD R0, R0, #1",
+            "ADD R2, R2, #-1",
+            "BRp Loop",
+            ".END",
+        ])(/line 8.*exists.*x3002/));
+
+    });
+
 });
