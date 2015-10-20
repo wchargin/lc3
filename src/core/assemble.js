@@ -143,6 +143,8 @@ function tokenizeLine(line, lineIndex) {
     // because those might belong to string literals.
     const trimmed = noComment.trimLeft();
 
+    // Include the line number when we parse string literals
+    // so that error messages are more helpful.
     const parseStringCtx = withContext(parseString,
         `on line ${lineIndex + 1}`);
 
@@ -154,64 +156,59 @@ function tokenizeLine(line, lineIndex) {
     const [IDLE, TOKEN, STRING] = [0, 1, 2];
     let state = IDLE;
 
+    // These are the list of tokens/strings we've collected so far
+    // (which will be the return value of this function)
+    // and the value of the token/string currently being built.
     let tokens = [];
     let current = "";
 
-    let i = 0;
-    while (i < line.length) {
-        const here = trimmed.charAt(i++);
+    for (let i = 0; i < line.length; i++) {
+        const here = trimmed.charAt(i);
         const isWhitespace = !!here.match(/\s/);
         const isComma = here === ',';
         const isQuote = here === '"';
 
-        let skip = false;
         if (state === IDLE) {
             if (isWhitespace || isComma) {
-                skip = true;
+                continue;
             } else {
                 state = isQuote ? STRING : TOKEN;
             }
         }
 
-        if (!skip) {
-            if (state === TOKEN) {
-                // Break tokens at commas and whitespace.
-                if (isWhitespace || isComma) {
-                    tokens.push(current);
-                    state = IDLE;
-                    current = "";
-                } else {
-                    current += here;
-                }
-            } else if (state === STRING) {
-                current += here;  // includes the quotation marks
-                if (here === '\\') {
-                    // All our escape sequences are just one character,
-                    // so we can just read that in. Easy.
-                    current += trimmed.charAt(i++);
-                } else if (isQuote && current.length > 1) {
-                    tokens.push(parseStringCtx(current));
-                    state = IDLE;
-                    current = "";
-                }
+        if (state === TOKEN) {
+            // Break tokens at commas and whitespace.
+            if (isWhitespace || isComma) {
+                tokens.push(current);
+                state = IDLE;
+                current = "";
+            } else {
+                current += here;
+            }
+        } else if (state === STRING) {
+            current += here;  // includes the quotation marks
+            if (here === '\\') {
+                // All our escape sequences are just one character,
+                // so we can just read that in. Easy.
+                current += trimmed.charAt(++i);
+            } else if (isQuote && current.length > 1) {
+                tokens.push(parseStringCtx(current));
+                state = IDLE;
+                current = "";
             }
         }
     }
 
+    // Finally, add any tokens that extended to the end of the line.
     if (current.length > 0) {
-        switch (state) {
-            case IDLE:
-                break;
-            case TOKEN:
-                tokens.push(current);
-                break;
-            case STRING:
-                tokens.push(parseStringCtx(current));
-                break;
+        if (state === TOKEN) {
+            tokens.push(current);
+        } else if (state === STRING) {
+            tokens.push(parseStringCtx(current));
         }
     }
 
-    return tokens || [];  // even if empty (to keep line numbers)
+    return tokens;
 }
 
 /*
