@@ -77,29 +77,28 @@ describe('assemble', () => {
             good("  .ORIG  x3000   ; start here")([[".ORIG", "x3000"]]));
 
         it("parses a comma-separated ADD instruction",
-            good("ADD  R1,  R2 , R3 ")([["ADD", "R1,R2,R3"]]));
+            good("ADD  R1,  R2 , R3 ")([["ADD", "R1", "R2", "R3"]]));
         it("parses a terse comma-separated ADD instruction",
-            good("ADD R1,R2,R3")([["ADD", "R1,R2,R3"]]));
+            good("ADD R1,R2,R3")([["ADD", "R1", "R2", "R3"]]));
 
-        it("parses a space-separated ADD instruction " +
-                "(will fail to assemble)",
+        it("parses a space-separated ADD instruction",
             good("ADD R1 R2 R3")([["ADD", "R1", "R2", "R3"]]));
-        it("parses a mixed-space-and-comma-separated ADD instruction " +
-                "(will fail to assemble)",
-            good("ADD R1,R2 R3")([["ADD", "R1,R2", "R3"]]));
+
+        it("parses a mixed-space-and-comma-separated ADD instruction ",
+            good("ADD R1,R2 R3")([["ADD", "R1", "R2", "R3"]]));
 
         it("parses two consecutive instruction lines",
             good("ADD R1, R2, R3\nAND R4, R5, #11")([
-                ["ADD", "R1,R2,R3"],
-                ["AND", "R4,R5,#11"],
+                ["ADD", "R1", "R2", "R3"],
+                ["AND", "R4", "R5", "#11"],
             ]));
 
         it("parses five lines with comments/blanks at lines 1, 3, and 5",
             good("; xxx\nADD R1, R2, R3\n\nAND R4, R5, #-11\n ; the end")([
                 [],
-                ["ADD", "R1,R2,R3"],
+                ["ADD", "R1", "R2", "R3"],
                 [],
-                ["AND", "R4,R5,#-11"],
+                ["AND", "R4", "R5", "#-11"],
                 [],
             ]));
 
@@ -129,12 +128,12 @@ describe('assemble', () => {
 
         it("treats quoted expressions atomically",
             good('.STRINGZ "A thing" ; comment text')([
-                ['.STRINGZ', '"A thing"'],
+                ['.STRINGZ', 'A thing'],
             ]));
 
         it("allows escaped quotes in quoted expressions",
-            good(String.raw`.STRINGZ "He says \"hi\""`)([
-                ['.STRINGZ', String.raw`"He says \"hi\""`],
+            good(String.raw`.STRINGZ "He says \"hi\"\\"`)([
+                ['.STRINGZ', "He says \"hi\"\\"],
             ]));
     });
 

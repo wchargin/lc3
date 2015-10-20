@@ -119,42 +119,94 @@ export function parseString(text) {
  * Returns an array of lines; each line is an array of tokens.
  * Comma-separated operands are smashed into one token.
  * Comments are stripped.
+ * Strings are resolved, and an error is thrown if they are invalid.
  *
  * Sample tokenizations:
  *   - '.ORIG x3000' goes to [[".ORIG", "x3000"]]
  *   - 'ADD R1, R2, R3' goes to [["ADD", "R1,R2,R3"]]
- *   - '.STRINGZ "with spaces"' goes to [[".STRINGZ", "\"with spaces\""]]
+ *   - '.STRINGZ "with spaces"' goes to [[".STRINGZ", "with spaces"]]
  *   - 'RET  ; go back' goes to [["RET"]]
  *   - '; thing \n RET ; thing \n ; thing' goes to [[], ["RET"], []]
  */
 export function tokenize(text) {
     const lines = text.split(/\r?\n/);
-    return lines.map(line => {
+    return lines.map((line, lineIndex) => {
         // Remove the comment, if any.
         const semi = line.indexOf(';');
-        const trimmed = (semi === -1) ? line : line.substring(0, semi);
+        const noComment = (semi === -1) ? line : line.substring(0, semi);
 
-        // First, chomp all white space,
-        // and consolidate comma groups: 'R1, R2, #1' -> 'R1,R2,#1'
-        const squash = trimmed.replace(/\s+/g, ' ');
-        const commaSquash = squash.replace(/\s?,\s?/g, ',');
+        // Trim leading whitespace.
+        // We can't trim trailing or interior whitespace at this point
+        // because those might belong to string literals.
+        const trimmed = noComment.trimLeft();
 
-        // Then, split on whitespace, except for quoted strings.
-        // Quote escaping with a backslash is considered.
-        // From: http://stackoverflow.com/a/4032642/732016
-        // Explanation:
-        //   globally match
-        //     groups of at least one okay character; or
-        //     quotes around
-        //       groups of at least one
-        //         quote, preceded by (?:) a (literal) backslash, or
-        //         non-quote character.
-        // If the quotes are unbalanced,
-        // the leading quote will be stripped
-        // and the "contents" will not be treated atomically:
-        // for example, '"A B C' goes to three tokens A, B, and C.
-        const regex = /[A-Za-z0-9_#x,.-]+|"(?:\\"|[^"])+"/g;
-        const tokens = commaSquash.match(regex);
+        const parseStringCtx = withContext(parseString,
+            `on line ${lineIndex + 1}`);
+
+        // Now we execute a small state machine.
+        // At any point, we can be
+        //   * ready to start a new token;
+        //   * in the middle of a token; or
+        //   * in the middle of a string.
+        const [IDLE, TOKEN, STRING] = [0, 1, 2];
+        let state = IDLE;
+
+        let tokens = [];
+        let current = "";
+
+        let i = 0;
+        while (i < line.length) {
+            const here = trimmed.charAt(i++);
+            const isWhitespace = !!here.match(/\s/);
+            const isComma = here === ',';
+            const isQuote = here === '"';
+
+            let skip = false;
+            if (state === IDLE) {
+                if (isWhitespace || isComma) {
+                    skip = true;
+                } else {
+                    state = isQuote ? STRING : TOKEN;
+                }
+            }
+
+            if (!skip) {
+                if (state === TOKEN) {
+                    // Break tokens at commas and whitespace.
+                    if (isWhitespace || isComma) {
+                        tokens.push(current);
+                        state = IDLE;
+                        current = "";
+                    } else {
+                        current += here;
+                    }
+                } else if (state === STRING) {
+                    current += here;  // includes the quotation marks
+                    if (here === '\\') {
+                        // All our escape sequences are just one character,
+                        // so we can just read that in. Easy.
+                        current += trimmed.charAt(i++);
+                    } else if (isQuote && current.length > 1) {
+                        tokens.push(parseStringCtx(current));
+                        state = IDLE;
+                        current = "";
+                    }
+                }
+            }
+        }
+
+        if (current.length > 0) {
+            switch (state) {
+                case IDLE:
+                    break;
+                case TOKEN:
+                    tokens.push(current);
+                    break;
+                case STRING:
+                    tokens.push(parseStringCtx(current));
+                    break;
+            }
+        }
 
         return tokens || [];  // even if empty (to keep line numbers)
     });
