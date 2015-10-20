@@ -129,87 +129,89 @@ export function parseString(text) {
  *   - '; thing \n RET ; thing \n ; thing' goes to [[], ["RET"], []]
  */
 export function tokenize(text) {
-    const lines = text.split(/\r?\n/);
-    return lines.map((line, lineIndex) => {
-        // Remove the comment, if any.
-        const semi = line.indexOf(';');
-        const noComment = (semi === -1) ? line : line.substring(0, semi);
+    return text.split(/\r?\n/).map(tokenizeLine);
+}
 
-        // Trim leading whitespace.
-        // We can't trim trailing or interior whitespace at this point
-        // because those might belong to string literals.
-        const trimmed = noComment.trimLeft();
+// See documentation for tokenize.
+function tokenizeLine(line, lineIndex) {
+    // Remove the comment, if any.
+    const semi = line.indexOf(';');
+    const noComment = (semi === -1) ? line : line.substring(0, semi);
 
-        const parseStringCtx = withContext(parseString,
-            `on line ${lineIndex + 1}`);
+    // Trim leading whitespace.
+    // We can't trim trailing or interior whitespace at this point
+    // because those might belong to string literals.
+    const trimmed = noComment.trimLeft();
 
-        // Now we execute a small state machine.
-        // At any point, we can be
-        //   * ready to start a new token;
-        //   * in the middle of a token; or
-        //   * in the middle of a string.
-        const [IDLE, TOKEN, STRING] = [0, 1, 2];
-        let state = IDLE;
+    const parseStringCtx = withContext(parseString,
+        `on line ${lineIndex + 1}`);
 
-        let tokens = [];
-        let current = "";
+    // Now we execute a small state machine.
+    // At any point, we can be
+    //   * ready to start a new token;
+    //   * in the middle of a token; or
+    //   * in the middle of a string.
+    const [IDLE, TOKEN, STRING] = [0, 1, 2];
+    let state = IDLE;
 
-        let i = 0;
-        while (i < line.length) {
-            const here = trimmed.charAt(i++);
-            const isWhitespace = !!here.match(/\s/);
-            const isComma = here === ',';
-            const isQuote = here === '"';
+    let tokens = [];
+    let current = "";
 
-            let skip = false;
-            if (state === IDLE) {
+    let i = 0;
+    while (i < line.length) {
+        const here = trimmed.charAt(i++);
+        const isWhitespace = !!here.match(/\s/);
+        const isComma = here === ',';
+        const isQuote = here === '"';
+
+        let skip = false;
+        if (state === IDLE) {
+            if (isWhitespace || isComma) {
+                skip = true;
+            } else {
+                state = isQuote ? STRING : TOKEN;
+            }
+        }
+
+        if (!skip) {
+            if (state === TOKEN) {
+                // Break tokens at commas and whitespace.
                 if (isWhitespace || isComma) {
-                    skip = true;
-                } else {
-                    state = isQuote ? STRING : TOKEN;
-                }
-            }
-
-            if (!skip) {
-                if (state === TOKEN) {
-                    // Break tokens at commas and whitespace.
-                    if (isWhitespace || isComma) {
-                        tokens.push(current);
-                        state = IDLE;
-                        current = "";
-                    } else {
-                        current += here;
-                    }
-                } else if (state === STRING) {
-                    current += here;  // includes the quotation marks
-                    if (here === '\\') {
-                        // All our escape sequences are just one character,
-                        // so we can just read that in. Easy.
-                        current += trimmed.charAt(i++);
-                    } else if (isQuote && current.length > 1) {
-                        tokens.push(parseStringCtx(current));
-                        state = IDLE;
-                        current = "";
-                    }
-                }
-            }
-        }
-
-        if (current.length > 0) {
-            switch (state) {
-                case IDLE:
-                    break;
-                case TOKEN:
                     tokens.push(current);
-                    break;
-                case STRING:
+                    state = IDLE;
+                    current = "";
+                } else {
+                    current += here;
+                }
+            } else if (state === STRING) {
+                current += here;  // includes the quotation marks
+                if (here === '\\') {
+                    // All our escape sequences are just one character,
+                    // so we can just read that in. Easy.
+                    current += trimmed.charAt(i++);
+                } else if (isQuote && current.length > 1) {
                     tokens.push(parseStringCtx(current));
-                    break;
+                    state = IDLE;
+                    current = "";
+                }
             }
         }
+    }
 
-        return tokens || [];  // even if empty (to keep line numbers)
-    });
+    if (current.length > 0) {
+        switch (state) {
+            case IDLE:
+                break;
+            case TOKEN:
+                tokens.push(current);
+                break;
+            case STRING:
+                tokens.push(parseStringCtx(current));
+                break;
+        }
+    }
+
+    return tokens || [];  // even if empty (to keep line numbers)
 }
 
 /*
