@@ -614,15 +614,15 @@ describe('assemble', () => {
 
         // All these instructions take the exact same form (like ADD/AND).
         // We can just test them in batch.
-        const pcRelativeMemoryInstructions = {
-            "LD": 0b0010,
-            "LDI": 0b1010,
-            "LEA": 0b1110,
-            "ST": 0b0011,
-            "STI": 0b1011,
-        };
-        Object.keys(pcRelativeMemoryInstructions).forEach((name) => {
-            const opcode = pcRelativeMemoryInstructions[name];
+        const pcRelativeMemoryInstructions = [
+            { name: "LD", opcode: 0b0010, },
+            { name: "LDI", opcode: 0b1010, },
+            { name: "LEA", opcode: 0b1110, },
+            { name: "ST", opcode: 0b0011, },
+            { name: "STI", opcode: 0b1011, },
+        ];
+        pcRelativeMemoryInstructions.forEach(data => {
+            const {name, opcode} = data;
             const baseop = opcode << 12;
 
             describe(`for ${name} instructions`, () => {
@@ -635,20 +635,20 @@ describe('assemble', () => {
                 it("should accept a valid backward symbol offset",
                     good(`${name} R5, PRE`)(baseop | 0b101111111011));
 
-                it("should reject a invalid positive literal offset",
+                it("should reject an invalid positive literal offset",
                     bad(`${name} R5, #1024`)());
-                it("should reject a invalid negative literal offset",
+                it("should reject an invalid negative literal offset",
                     bad(`${name} R5, x-401`)());
-                it("should reject a invalid forward symbol offset",
+                it("should reject an invalid forward symbol offset",
                     bad(`${name} R5, POSTTT`)());
-                it("should reject a invalid backward symbol offset",
+                it("should reject an invalid backward symbol offset",
                     bad(`${name} R5, PREEE`)());
 
-                it(`should reject a ${name} with no operands`,
+                it(`should reject an instruction with no operands`,
                     bad(`${name}`)());
-                it(`should reject a ${name} with just one operand`,
+                it(`should reject an instruction with just one operand`,
                     bad(`${name} R0`)());
-                it(`should reject a ${name} with three operands`,
+                it(`should reject an instruction with three operands`,
                     bad(`${name} R1, #1, #2`)());
             });
         });
