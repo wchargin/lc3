@@ -647,5 +647,10 @@ export function encodeInstruction(tokens, pc, symbols) {
     } else if (upname === "JSRR") {
         ensureOpcount(1);
         return [(baseop) | (0 << 11) | (parseRegister(operands[0]) << 6)];
+    } else if (["LD", "LDI", "LEA", "ST", "STI"].includes(upname)) {
+        ensureOpcount(2);
+        const register = parseRegister(operands[0]);  // loads: DR; stores: SR
+        const offset = extractOffset(operands[1], 9);
+        return [(baseop) | (register << 9) | (offset)];
     }
 }

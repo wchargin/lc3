@@ -612,6 +612,47 @@ describe('assemble', () => {
             it("should reject a JSRR with two operands", bad("JSRR R1, R2")());
         });
 
+        // All these instructions take the exact same form (like ADD/AND).
+        // We can just test them in batch.
+        const pcRelativeMemoryInstructions = {
+            "LD": 0b0010,
+            "LDI": 0b1010,
+            "LEA": 0b1110,
+            "ST": 0b0011,
+            "STI": 0b1011,
+        };
+        Object.keys(pcRelativeMemoryInstructions).forEach((name) => {
+            const opcode = pcRelativeMemoryInstructions[name];
+            const baseop = opcode << 12;
+
+            describe(`for ${name} instructions`, () => {
+                it("should accept a valid positive literal offset",
+                    good(`${name} R5, #255`)(baseop | 0b101011111111));
+                it("should accept a valid negative literal offset",
+                    good(`${name} R5, x-100`)(baseop | 0b101100000000));
+                it("should accept a valid forward symbol offset",
+                    good(`${name} R5, POSTT`)(baseop | 0b101000010100));
+                it("should accept a valid backward symbol offset",
+                    good(`${name} R5, PRE`)(baseop | 0b101111111011));
+
+                it("should reject a invalid positive literal offset",
+                    bad(`${name} R5, #1024`)());
+                it("should reject a invalid negative literal offset",
+                    bad(`${name} R5, x-401`)());
+                it("should reject a invalid forward symbol offset",
+                    bad(`${name} R5, POSTTT`)());
+                it("should reject a invalid backward symbol offset",
+                    bad(`${name} R5, PREEE`)());
+
+                it(`should reject a ${name} with no operands`,
+                    bad(`${name}`)());
+                it(`should reject a ${name} with just one operand`,
+                    bad(`${name} R0`)());
+                it(`should reject a ${name} with three operands`,
+                    bad(`${name} R1, #1, #2`)());
+            });
+        });
+
     });
 
 });
