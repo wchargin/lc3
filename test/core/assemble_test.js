@@ -519,15 +519,17 @@ describe('assemble', () => {
             it("should accept a valid negative immediate-mode ADD",
                 good("ADD R0, R1, #-16")(0b0001000001110000));
             it("should reject an invalid positive immediate-mode ADD",
-                bad("ADD R0, R1, #16")());
+                bad("ADD R0, R1, #16")(/range/));
             it("should reject an invalid negative immediate-mode ADD",
-                bad("ADD R0, R1, #-17")());
+                bad("ADD R0, R1, #-17")(/range/));
+            it("should reject an ADD with no operands",
+                bad("ADD")(/operand/));
             it("should reject an ADD with a single operand",
-                bad("ADD R0")());
+                bad("ADD R0")(/operand/));
             it("should reject an ADD with just two operands",
-                bad("ADD R0, R1")());
+                bad("ADD R0, R1")(/operand/));
             it("should reject an ADD with a whole four operands",
-                bad("ADD R0, R1, R2, R3")());
+                bad("ADD R0, R1, R2, R3")(/operand/));
         });
 
         describe("for AND instructions", () => {
@@ -538,15 +540,17 @@ describe('assemble', () => {
             it("should accept a valid negative immediate-mode AND",
                 good("AND R0, R1, #-16")(0b0101000001110000));
             it("should reject an invalid positive immediate-mode AND",
-                bad("AND R0, R1, #16")());
+                bad("AND R0, R1, #16")(/range/));
             it("should reject an invalid negative immediate-mode AND",
-                bad("AND R0, R1, #-17")());
+                bad("AND R0, R1, #-17")(/range/));
+            it("should reject an AND with no operands",
+                bad("AND")(/operand/));
             it("should reject an AND with a single operand",
-                bad("AND R0")());
+                bad("AND R0")(/operand/));
             it("should reject an AND with just two operands",
-                bad("AND R0, R1")());
+                bad("AND R0, R1")(/operand/));
             it("should reject an AND with a whole four operands",
-                bad("AND R0, R1, R2, R3")());
+                bad("AND R0, R1, R2, R3")(/operand/));
         });
 
         describe("for BR instructions", () => {
@@ -559,27 +563,29 @@ describe('assemble', () => {
             it("should accept a valid BRnp with a backward label reference",
                 good("BRnp PRE")(0b0000101111111011));
             it("should reject an invalid BRnp with a forward label reference",
-                bad("BRnp POSTTT")());
+                bad("BRnp POSTTT")(/range/));
             it("should reject an invalid BRnp with a backward label reference",
-                bad("BRnp PREEE")());
+                bad("BRnp PREEE")(/range/));
             it("should work for a BRnzp",
                 good("BRnzp HERE")(0b0000111000000000));
             it("should treat a blank BR like a BRnzp",
                 good("BR HERE")(0b0000111000000000));
-            it("should reject a branch without an operand", bad("BR")());
-            it("should reject a branch with two operands", bad("BR #0 #0")());
+            it("should reject a branch without an operand",
+                bad("BR")(/operand/));
+            it("should reject a branch with two operands",
+                bad("BR #0 #0")(/operand/));
         });
 
         describe("for JMP instructions", () => {
             it("should work for JMP R0", good("JMP R0")(0b1100000000000000));
             it("should work for JMP R7", good("JMP R7")(0b1100000111000000));
-            it("should fail without an operand", bad("JMP")());
-            it("should fail with two operands", bad("JMP R1, R2")());
+            it("should fail without an operand", bad("JMP")(/operand/));
+            it("should fail with two operands", bad("JMP R1, R2")(/operand/));
         });
 
         describe("for RET instructions", () => {
             it("should just work", good("RET")(0b1100000111000000));
-            it("should fail with an operand", bad("RET R7")());
+            it("should fail with an operand", bad("RET R7")(/operand/));
         });
 
         describe("for JSR instructions", () => {
@@ -593,23 +599,27 @@ describe('assemble', () => {
                 good("JSR PRE")(0b0100111111111011));
 
             it("should reject a invalid positive literal offset",
-                bad("JSR #1024")());
+                bad("JSR #1024")(/offset/));
             it("should reject a invalid negative literal offset",
-                bad("JSR x-401")());
+                bad("JSR x-401")(/offset/));
             it("should reject a invalid forward symbol offset",
-                bad("JSR POSTTT")());
+                bad("JSR POSTTT")(/offset/));
             it("should reject a invalid backward symbol offset",
-                bad("JSR PREEE")());
+                bad("JSR PREEE")(/offset/));
 
-            it("should reject a JSR with no operands", bad("JSR")());
-            it("should reject a JSR with two operands", bad("JSR #1, #2")());
+            it("should reject a JSR with no operands",
+                bad("JSR")(/operand/));
+            it("should reject a JSR with two operands",
+                    bad("JSR #1, #2")(/operand/));
         });
 
         describe("for JSRR instructions", () => {
             it("should work for JSRR R5",
                 good("JSRR R5")(0b0100000101000000));
-            it("should reject a JSRR with no operands", bad("JSRR")());
-            it("should reject a JSRR with two operands", bad("JSRR R1, R2")());
+            it("should reject a JSRR with no operands",
+                bad("JSRR")(/operand/));
+            it("should reject a JSRR with two operands",
+                bad("JSRR R1, R2")(/operand/));
         });
 
         // All these instructions take the exact same form (like ADD/AND).
@@ -636,20 +646,20 @@ describe('assemble', () => {
                     good(`${name} R5, PRE`)(baseop | 0b101111111011));
 
                 it("should reject an invalid positive literal offset",
-                    bad(`${name} R5, #1024`)());
+                    bad(`${name} R5, #1024`)(/offset/));
                 it("should reject an invalid negative literal offset",
-                    bad(`${name} R5, x-401`)());
+                    bad(`${name} R5, x-401`)(/offset/));
                 it("should reject an invalid forward symbol offset",
-                    bad(`${name} R5, POSTTT`)());
+                    bad(`${name} R5, POSTTT`)(/offset/));
                 it("should reject an invalid backward symbol offset",
-                    bad(`${name} R5, PREEE`)());
+                    bad(`${name} R5, PREEE`)(/offset/));
 
                 it(`should reject an instruction with no operands`,
-                    bad(`${name}`)());
+                    bad(`${name}`)(/operand/));
                 it(`should reject an instruction with just one operand`,
-                    bad(`${name} R0`)());
+                    bad(`${name} R0`)(/operand/));
                 it(`should reject an instruction with three operands`,
-                    bad(`${name} R1, #1, #2`)());
+                    bad(`${name} R1, #1, #2`)(/operand/));
             });
         });
 
@@ -659,18 +669,18 @@ describe('assemble', () => {
             it("should accept a valid negative offset",
                 good("LDR R0, R1, #-32")(0b0110000001100000));
             it("should reject an invalid positive offset",
-                bad("LDR R0, R1, #32")());
+                bad("LDR R0, R1, #32")(/offset/));
             it("should reject an invalid negative offset",
-                bad("LDR R0, R1, #-33")());
+                bad("LDR R0, R1, #-33")(/offset/));
 
             it("should reject an instruction with no operands",
-                bad("LDR")());
+                bad("LDR")(/operand/));
             it("should reject an instruction with just one operand",
-                bad("LDR R0")());
+                bad("LDR R0")(/operand/));
             it("should reject an instruction with just two operands",
-                bad("LDR R0, R1")());
+                bad("LDR R0, R1")(/operand/));
             it("should reject an instruction with just four operands",
-                bad("LDR R0, R1, #10, #20")());
+                bad("LDR R0, R1, #10, #20")(/operand/));
         });
 
         describe("for STR instructions", () => {
@@ -679,37 +689,37 @@ describe('assemble', () => {
             it("should accept a valid negative offset",
                 good("STR R0, R1, #-32")(0b0111000001100000));
             it("should reject an invalid positive offset",
-                bad("STR R0, R1, #32")());
+                bad("STR R0, R1, #32")(/offset/));
             it("should reject an invalid negative offset",
-                bad("STR R0, R1, #-33")());
+                bad("STR R0, R1, #-33")(/offset/));
 
             it("should reject an instruction with no operands",
-                bad("STR")());
+                bad("STR")(/operand/));
             it("should reject an instruction with just one operand",
-                bad("STR R0")());
+                bad("STR R0")(/operand/));
             it("should reject an instruction with just two operands",
-                bad("STR R0, R1")());
+                bad("STR R0, R1")(/operand/));
             it("should reject an instruction with just four operands",
-                bad("STR R0, R1, #10, #20")());
+                bad("STR R0, R1, #10, #20")(/operand/));
         });
 
         describe("for RTI instructions", () => {
             it("should just work", good("RTI")(0b1000000000000000));
             it("should reject an instruction with an operand",
-                bad("RTI R1")());
+                bad("RTI R1")(/operand/));
         });
 
         describe("for TRAP instructions", () => {
             it("should accept a valid trap vector",
                 good("TRAP xAA")(0b1111000010101010));
             it("should reject a trap vector that's too large",
-                bad("TRAP #256")());
+                bad("TRAP #256")(/range/));
             it("should reject a negative trap vector",
-                bad("TRAP #-1")());
+                bad("TRAP #-1")(/range/));
             it("should reject an instruction with no operands",
-                bad("TRAP")());
+                bad("TRAP")(/operand/));
             it("should reject an instruction with two operands",
-                bad("TRAP x33, x44")());
+                bad("TRAP x33, x44")(/operand/));
         });
 
         describe("for trap service routine keyword instructions", () => {
@@ -720,18 +730,18 @@ describe('assemble', () => {
             it("should handle PUTSP", good("PUTSP")(0xF024));
             it("should handle HALT", good("HALT")(0xF025));
 
-            it("should reject a GETC with an argument",
-                bad("GETC x11")());
-            it("should reject a OUT with an argument",
-                bad("OUT x11")());
-            it("should reject a PUTS with an argument",
-                bad("PUTS x11")());
-            it("should reject a IN with an argument",
-                bad("IN x11")());
-            it("should reject a PUTSP with an argument",
-                bad("PUTSP x11")());
-            it("should reject a HALT with an argument",
-                bad("HALT x11")());
+            it("should reject a GETC with an operand",
+                bad("GETC x11")(/operand/));
+            it("should reject a OUT with an operand",
+                bad("OUT x11")(/operand/));
+            it("should reject a PUTS with an operand",
+                bad("PUTS x11")(/operand/));
+            it("should reject a IN with an operand",
+                bad("IN x11")(/operand/));
+            it("should reject a PUTSP with an operand",
+                bad("PUTSP x11")(/operand/));
+            it("should reject a HALT with an operand",
+                bad("HALT x11")(/operand/));
         });
 
     });

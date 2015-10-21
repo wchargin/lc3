@@ -565,7 +565,8 @@ export function encodeInstruction(tokens, pc, symbols) {
         if (min <= x && x <= max) {
             return Utils.toUint16(x) & ((1 << bits) - 1);
         } else {
-            throw new Error(`expected ${description} to fit in ${bits} bits ` +
+            throw new Error(`${description} is out of range: ` +
+                `expected value to fit in ${bits} bits ` +
                 `(i.e., to be between ${min} and ${max}, inclusive), ` +
                 `but found ${x}`);
         }
@@ -678,12 +679,14 @@ export function encodeInstruction(tokens, pc, symbols) {
         return [baseop];
     } else if (upname === "TRAP") {
         ensureOpcount(1);
-        const ctx = `while parsing the trap vector`;
-        const vector = withContext(parseLiteral, ctx)(operands[0]);
-        if (!(0 <= vector && vector <= 0xFF)) {
-            throw new Error(`expected trap vector to be an unsigned byte ` +
-                `(i.e., between 0 and 255, inclusive), but found ${vector}`);
+        const ctx = "while parsing the trap vector";
+        const trapVector = withContext(parseLiteral, ctx)(operands[0]);
+        if (!(0 <= trapVector && trapVector <= 0xFF)) {
+            throw new Error(`trap vector out of range: ` +
+                `expected value to be an unsigned byte ` +
+                `(i.e., between 0 and 255, inclusive), ` +
+                `but found ${trapVector}`);
         }
-        return [baseop | vector];
+        return [baseop | trapVector];
     }
 }
