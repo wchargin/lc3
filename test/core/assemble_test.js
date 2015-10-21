@@ -1,7 +1,7 @@
 import {describe, it} from 'mocha';
 import {expect} from 'chai';
 
-import assemble, * as assembleHelpers from '../../src/core/assemble';
+import assemble, * as helpers from '../../src/core/assemble';
 
 describe('assemble', () => {
 
@@ -13,7 +13,7 @@ describe('assemble', () => {
     });
 
     describe("helper parseRegister", () => {
-        const {good, bad} = makeTesters(assembleHelpers.parseRegister);
+        const {good, bad} = makeTesters(helpers.parseRegister);
 
         it("works for R0", good("R0")(0));
         it("works for r1", good("r1")(1));
@@ -26,7 +26,7 @@ describe('assemble', () => {
     });
 
     describe("helper parseLiteral", () => {
-        const {good, bad} = makeTesters(assembleHelpers.parseLiteral);
+        const {good, bad} = makeTesters(helpers.parseLiteral);
 
         it("parses #0", good("#0")(0));
         it("parses #-1", good("#-1")(-1));
@@ -41,7 +41,7 @@ describe('assemble', () => {
     });
 
     describe("helper parseString", () => {
-        const {good, bad} = makeTesters(assembleHelpers.parseString);
+        const {good, bad} = makeTesters(helpers.parseString);
         const r = String.raw;
 
         it("parses the empty string", good(r`""`)(''));
@@ -60,7 +60,7 @@ describe('assemble', () => {
     });
 
     describe("helper tokenize", () => {
-        const {good, bad} = makeTesters(assembleHelpers.tokenize);
+        const {good, bad} = makeTesters(helpers.tokenize);
 
         it("parses an empty document", good("")([[]]));
 
@@ -169,7 +169,7 @@ describe('assemble', () => {
 
     describe("helper findOrig", () => {
         const {good, bad} = makeTesters(raw => {
-            return assembleHelpers.findOrig(assembleHelpers.tokenize(raw));
+            return helpers.findOrig(helpers.tokenize(raw));
         });
 
         it("finds an .ORIG directive on the first line of an empty program",
@@ -227,7 +227,7 @@ describe('assemble', () => {
         // This function should never throw an error,
         // so we can discard the "bad" tester.
         // Instead, we care about whether it returns true or false.
-        const {good, _} = makeTesters(assembleHelpers.isValidLabelName);
+        const {good, _} = makeTesters(helpers.isValidLabelName);
         const yes = (input) => good(input)(true);
         const no = (input) => good(input)(false);
 
@@ -242,7 +242,7 @@ describe('assemble', () => {
     });
 
     describe("helper determineRequiredMemory", () => {
-        const {good, _} = makeTesters(assembleHelpers.determineRequiredMemory);
+        const {good, _} = makeTesters(helpers.determineRequiredMemory);
 
         it("should allocate one word for a .FILL of any value",
             good(".FILL", 1234)(1));
@@ -265,9 +265,9 @@ describe('assemble', () => {
 
     describe("helper buildSymbolTable", () => {
         const {good, bad} = makeTesters(lines => {
-            const tokenized = assembleHelpers.tokenize(lines.join('\n'));
-            const {orig, begin} = assembleHelpers.findOrig(tokenized);
-            return assembleHelpers.buildSymbolTable(tokenized, orig, begin);
+            const tokenized = helpers.tokenize(lines.join('\n'));
+            const {orig, begin} = helpers.findOrig(tokenized);
+            return helpers.buildSymbolTable(tokenized, orig, begin);
         });
 
         it("generates an empty symbol table for the empty program",
@@ -418,7 +418,7 @@ describe('assemble', () => {
     });
 
     describe("helper parseOffset", () => {
-        const {good, bad} = makeTesters(assembleHelpers.parseOffset);
+        const {good, bad} = makeTesters(helpers.parseOffset);
 
         describe("should accept", () => {
             it("a positive decimal literal offset",
