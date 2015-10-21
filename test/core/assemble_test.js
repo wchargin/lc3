@@ -242,7 +242,7 @@ describe('assemble', () => {
     });
 
     describe("helper determineRequiredMemory", () => {
-        const {good, _} = makeTesters(helpers.determineRequiredMemory);
+        const {good, bad} = makeTesters(helpers.determineRequiredMemory);
 
         it("should allocate one word for a .FILL of any value",
             good(".FILL", 1234)(1));
@@ -251,6 +251,8 @@ describe('assemble', () => {
             good(".BLKW", 10)(10));
         it("should correctly handle .BLKWs of zero size",
             good(".BLKW", 0)(0))
+        it("should fail on .BLKWs of negative size",
+            bad(".BLKW", -1)(/negative/));
 
         it("should allocate one word for the empty string's null terminator",
             good(".STRINGZ", "")(1));

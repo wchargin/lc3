@@ -310,6 +310,11 @@ export function determineRequiredMemory(command, operand) {
         case ".FILL":
             return 1;
         case ".BLKW":
+            if (operand < 0) {
+                throw new Error(
+                    `a .BLKW needs to have a non-negative length, ` +
+                    `but I found ${operand}`);
+            }
             return operand;
         case ".STRINGZ":
             return operand.length + 1;  // for the null-terminator
