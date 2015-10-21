@@ -614,5 +614,16 @@ export function encodeInstruction(tokens, pc, symbols) {
             0b100000 | inBits(asLiteral.result, 5, "immediate field") :
             0b000000 | parseRegister(last);
         return [(baseop) | (dr << 9) | (sr1 << 6) | (sr2OrImm)];
+    } else if (opcode === 0) {
+        // This is one of the eight BR variants.
+        ensureOpcount(1);
+        const [n, z, p] = (upname === "BR") ?
+            [true, true, true] :  // plain "BR" is an unconditional branch
+            ["N", "Z", "P"].map(x => upname.substring(2).includes(x));
+        const nzp = (n << 2) | (z << 1) | (p << 0);
+        const offset = withContext(parseOffset,
+            `while parsing the offset for a ${opname}`)(
+                pc, operands[0], symbols, 9);
+        return [(baseop) | (nzp << 9) | (Utils.toUint16(offset) & 0x1FF)];
     }
 }

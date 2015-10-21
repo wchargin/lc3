@@ -550,6 +550,36 @@ describe('assemble', () => {
 
         });
 
+        describe("for BR instructions", () => {
+
+            it("should accept a valid BRnp with a literal positive offset",
+                good(["BRnp", "#15"], pc, symbols)([0b0000101000001111]));
+
+            it("should accept a valid BRnp with a literal negative offset",
+                good(["BRnp", "#-16"], pc, symbols)([0b0000101111110000]));
+
+            it("should accept a valid BRnp with a forward label reference",
+                good(["BRnp", "POST"], pc, symbols)([0b0000101000000101]));
+
+            it("should accept a valid BRnp with a backward label reference",
+                good(["BRnp", "PRE"], pc, symbols)([0b0000101111111011]));
+
+            it("should reject an invalid BRnp with a forward label reference",
+                bad(["BRnp", "POSTTT"], pc, symbols)());
+
+            it("should reject an invalid BRnp with a backward label reference",
+                bad(["BRnp", "PREEE"], pc, symbols)());
+
+            it("should work for a BRnzp",
+                good(["BRnzp", "HERE"], pc, symbols)([0b0000111000000000]));
+
+            it("should treat a blank BR like a BRnzp",
+                good(["BR", "HERE"], pc, symbols)([0b0000111000000000]));
+
+            it("should reject a branch without an operand", bad(["BR"])());
+
+        });
+
     });
 
 });
