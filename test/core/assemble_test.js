@@ -361,7 +361,7 @@ describe('assemble', () => {
             "ADD R0, R0, R0",
             "RTI",
             ".END",
-        ])(/line 4.*x10000.*memory limit/));
+        ])(/line 4.*x10001.*memory limit/));
 
         it("lets your .BLKWs go up to the last memory cell", good([
             ".ORIG xFFF0",
