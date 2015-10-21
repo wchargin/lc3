@@ -653,6 +653,46 @@ describe('assemble', () => {
             });
         });
 
+        describe("for LDR instructions", () => {
+            it("should accept a valid positive offset",
+                good("LDR R0, R1, #31")(0b0110000001011111));
+            it("should accept a valid negative offset",
+                good("LDR R0, R1, #-32")(0b0110000001100000));
+            it("should reject an invalid positive offset",
+                bad("LDR R0, R1, #32")());
+            it("should reject an invalid negative offset",
+                bad("LDR R0, R1, #-33")());
+
+            it("should reject an instruction with no operands",
+                bad("LDR")());
+            it("should reject an instruction with just one operand",
+                bad("LDR R0")());
+            it("should reject an instruction with just two operands",
+                bad("LDR R0, R1")());
+            it("should reject an instruction with just four operands",
+                bad("LDR R0, R1, #10, #20")());
+        });
+
+        describe("for STR instructions", () => {
+            it("should accept a valid positive offset",
+                good("STR R0, R1, #31")(0b0111000001011111));
+            it("should accept a valid negative offset",
+                good("STR R0, R1, #-32")(0b0111000001100000));
+            it("should reject an invalid positive offset",
+                bad("STR R0, R1, #32")());
+            it("should reject an invalid negative offset",
+                bad("STR R0, R1, #-33")());
+
+            it("should reject an instruction with no operands",
+                bad("STR")());
+            it("should reject an instruction with just one operand",
+                bad("STR R0")());
+            it("should reject an instruction with just two operands",
+                bad("STR R0, R1")());
+            it("should reject an instruction with just four operands",
+                bad("STR R0, R1, #10, #20")());
+        });
+
     });
 
 });

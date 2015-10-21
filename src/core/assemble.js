@@ -652,5 +652,11 @@ export function encodeInstruction(tokens, pc, symbols) {
         const register = parseRegister(operands[0]);  // loads: DR; stores: SR
         const offset = extractOffset(operands[1], 9);
         return [(baseop) | (register << 9) | (offset)];
+    } else if (upname === "LDR" || upname === "STR") {
+        ensureOpcount(3);
+        const drsr = parseRegister(operands[0]);  // DR for LDR; SR for STR
+        const baseR = parseRegister(operands[1]);
+        const offset = extractOffset(operands[2], 6);
+        return [(baseop) | (drsr << 9) | (baseR << 6) | (offset)];
     }
 }
