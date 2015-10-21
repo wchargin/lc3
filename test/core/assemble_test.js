@@ -2,8 +2,87 @@ import {describe, it} from 'mocha';
 import {expect} from 'chai';
 
 import assemble, * as helpers from '../../src/core/assemble';
+import ParseResult from '../../src/core/parse_result';
 
 describe('assemble', () => {
+
+    it("assembles the empty program", () =>
+        expect(assemble(`
+            .ORIG x3000
+            .END
+        `)).to.equal(ParseResult.fromJS({
+            success: true,
+            program: {
+                orig: 0x3000,
+                machineCode: [],
+                symbolTable: {},
+            },
+        })));
+
+    it("assembles a simple arithmetic program", () =>
+        expect(assemble(`
+            ; negative multiplier:
+            ; multiplies R1 by -R2 and stores the result in R0
+            .ORIG x3000
+            AND R0, R0, #0
+            ST R1, StashR1
+
+            ; we'd like to assume that R1 > 0;
+            ; to do this, we'll negate R1 if it's negative,
+            ; or otherwise negate R2 like we would do anyway
+            ADD R1, R1, #0
+            BRzp NegateR2
+            NOT R1, R1
+            ADD R1, R1, #1
+            BR Loop
+            NegateR2
+            NOT R2, R2
+            ADD R2, R2, #1
+
+            Loop
+            ; now keep iterating
+            ; (this is probably not the most efficient, but whatever)
+            ADD R1, R1, #-1
+            BRn Done
+            ADD R0, R0, R2
+            BR Loop
+
+            Done
+            LD R1, StashR1
+            HALT
+
+            StashR1 .BLKW #1
+            .END
+        `)).to.equal(ParseResult.fromJS({
+            success: true,
+            program: {
+                orig: 0x3000,
+                machineCode: [
+                    0b0101000000100000,  // AND R0, R0, #0
+                    0b0011001000001101,  // ST R1, StashR1 (+13)
+                    0b0001001001100000,  // ADD R1, R1, #0
+                    0b0000011000000011,  // BRzp NegateR2 (+3)
+                    0b1001001001111111,  // NOT R1, R1
+                    0b0001001001100001,  // ADD R1, R1, #1
+                    0b0000111000000010,  // BR(nzp) Loop (+2)
+                    0b1001010010111111,  // NOT R2, R2
+                    0b0001010010100001,  // ADD R2, R2, #1
+                    0b0001001001111111,  // ADD R1, R1, #-1,
+                    0b0000100000000010,  // BRn Done (+2)
+                    0b0001000000000010,  // ADD R0, R0, R2
+                    0b0000111111111100,  // BR(nzp) Loop (-4),
+                    0b0010001000000001,  // LD R1, StashR1 (+1)
+                    0b1111000000100101,  // HALT
+                    0b0000000000000000,  // StashR1[0]
+                ],
+                symbolTable: {
+                    "NegateR2": 0x3007,
+                    "Loop": 0x3009,
+                    "Done": 0x300D,
+                    "StashR1": 0x300F,
+                },
+            },
+        })));
 
     const makeTesters = (fn) => ({
         good: (...args) => (expected) => () =>

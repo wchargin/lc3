@@ -1,6 +1,28 @@
 import Constants from './constants';
+import LC3Program from './program';
+import ParseResult from './parse_result';
 import Utils from './utils'; 
 import {handleErrors, withContext} from './error_utils';
+
+export default function assemble(text) {
+    const result = handleErrors(() => {
+        const tokenizedLines = tokenize(text);
+        const {orig, begin} = findOrig(tokenizedLines);
+        const {symbolTable, programLength} =
+            buildSymbolTable(tokenizedLines, orig, begin);
+        const machineCode = generateMachineCode(
+            tokenizedLines, symbolTable, orig, begin);
+        return {orig, symbolTable, machineCode};
+    })(text);
+
+    if (result.success) {
+        const program = LC3Program.fromJS(result.result);
+        return new ParseResult({ success: true, program });
+    } else {
+        const {success, errorMessage} = result;
+        return new ParseResult({ success, errorMessage });
+    }
+}
 
 export function parseRegister(text) {
     const match = text.match(/^[Rr]([0-7])$/);
