@@ -712,6 +712,28 @@ describe('assemble', () => {
                 bad("TRAP x33, x44")());
         });
 
+        describe("for trap service routine keyword instructions", () => {
+            it("should handle GETC", good("GETC")(0xF020));
+            it("should handle OUT", good("OUT")(0xF021));
+            it("should handle PUTS", good("PUTS")(0xF022));
+            it("should handle IN", good("IN")(0xF023));
+            it("should handle PUTSP", good("PUTSP")(0xF024));
+            it("should handle HALT", good("HALT")(0xF025));
+
+            it("should reject a GETC with an argument",
+                bad("GETC x11")());
+            it("should reject a OUT with an argument",
+                bad("OUT x11")());
+            it("should reject a PUTS with an argument",
+                bad("PUTS x11")());
+            it("should reject a IN with an argument",
+                bad("IN x11")());
+            it("should reject a PUTSP with an argument",
+                bad("PUTSP x11")());
+            it("should reject a HALT with an argument",
+                bad("HALT x11")());
+        });
+
     });
 
 });

@@ -548,6 +548,7 @@ export function encodeDirective(tokens) {
  */
 export function encodeInstruction(tokens, pc, symbols) {
     const opname = tokens[0];
+    const upname = opname.toUpperCase();
     const operands = tokens.slice(1);
 
     const ensureOpcount = expected => {
@@ -582,6 +583,21 @@ export function encodeInstruction(tokens, pc, symbols) {
         return Utils.toUint16(parsed) & ((1 << bits) - 1);
     };
 
+    // Handle the trap service routines specially.
+    const systemTraps = {
+        "GETC": 0x20,
+        "OUT": 0x21,
+        "PUTS": 0x22,
+        "IN": 0x23,
+        "PUTSP": 0x24,
+        "HALT": 0x25,
+    };
+    const systemTrapVector = systemTraps[upname];
+    if (systemTrapVector !== undefined) {
+        ensureOpcount(0);
+        return [0xF000 | systemTrapVector];
+    }
+
     const instructions = {
         "ADD": 0b0001,
         "AND": 0b0101,
@@ -608,7 +624,6 @@ export function encodeInstruction(tokens, pc, symbols) {
         "STR": 0b0111,
         "TRAP": 0b1111,
     };
-    const upname = opname.toUpperCase();
     const opcode = instructions[upname];
 
     if (opcode === undefined) {
