@@ -697,3 +697,77 @@ export function encodeInstruction(tokens, pc, symbols) {
         throw new Error(`internal error: unhandled instruction ${opname}`);
     }
 }
+
+export function generateMachineCode(lines, symbols, orig, begin) {
+    const program = lines.slice(begin);
+
+    // TODO(william): This is duplicated in buildSymbolTable.
+    // Find a way to unify it.
+    //
+    // Here are all the things that can come at the start of a line.
+    // We use these to determine whether the first token in a line
+    // is a label or an actual operation of some kind.
+    const trapVectors = "GETC OUT PUTS IN PUTSP HALT".split(' ');
+    const instructions = [
+        "ADD", "AND", "NOT",
+        "BR", "BRP", "BRZ", "BRZP", "BRN", "BRNP", "BRNZ", "BRNZP",
+        "JMP", "RET",
+        "JSR", "JSRR",
+        "LD", "LDI", "LDR",
+        "LEA",
+        "RTI",
+        "ST", "STI", "STR",
+        "TRAP",
+    ];
+    const directives = [".FILL", ".BLKW", ".STRINGZ"];
+    const commands = [...trapVectors, ...instructions, ...directives];
+
+    const initialState = {
+        machineCode: [],
+        address: orig,
+        seenEndDirective: false,
+    };
+    const finalState = program.reduce((state, line, lineIndex) => {
+        if (state.seenEndDirective) {
+            return state;
+        }
+
+        const ctx = `at line ${lineIndex + begin + 1}`;
+        if (line.length === 0) {
+            return state;
+        }
+
+        const fst = line[0];
+        if (fst.toUpperCase() === ".END") {
+            return {
+                ...state,
+                seenEndDirective: true,
+            };
+        }
+        const hasLabel = !commands.includes(fst.toUpperCase()) &&
+            isValidLabelName(fst);
+        const rest = line.slice(hasLabel ? 1 : 0);
+
+        if (rest.length === 0) {
+            // It's a label-only line. No problem.
+            return state;
+        }
+
+        const command = rest[0].toUpperCase();
+        const isDirective = (command.charAt(0) === '.');
+        const pc = state.address + 1;
+        const newCode = isDirective ?
+            withContext(encodeDirective, ctx)(rest) :
+            withContext(encodeInstruction, ctx)(rest, pc, symbols);
+        return {
+            ...state,
+            machineCode: state.machineCode.concat(newCode),
+            address: state.address + newCode.length,
+        };
+    }, initialState);
+
+    if (!finalState.seenEndDirective) {
+        throw new Error("missing .END directive");
+    }
+    return finalState.machineCode;
+}

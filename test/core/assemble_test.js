@@ -760,4 +760,86 @@ describe('assemble', () => {
 
     });
 
+    describe("helper generateMachineCode", () => {
+        const {good, bad} = makeTesters(helpers.generateMachineCode);
+
+        it("should parse the empty program (with .ORIG and .END only)",
+            good([[".ORIG", "x3000"], [".END"]], {}, 0x3000, 1)([]));
+
+        it("should parse a program to just clear R0", good([
+            [/* ; clear R0 */],
+            [".ORIG", "x3000"],
+            ["AND", "R0", "R0", "x0000"],
+            [".END"],
+        ], {}, 0x3000, 2)([0b0101000000100000]));
+
+        it("should parse a simple program with labels", good([
+            [], [], [],  // a few lines of comments
+            [".ORIG x4000"], [],
+            ["AND", "R0", "R0", "#0"],
+            ["ADD", "R1", "R0", "#10"],
+            ["LD", "R2", "FortyTwo"],
+            ["Loop", "ADD", "R0", "R0", "R2"],
+            ["ADD", "R1", "R1", "#-1"],
+            ["BRp", "Loop"],
+            ["HALT"],
+            ["FortyTwo", ".FILL", "#42"],
+            [".END"],
+        ], {"Loop": 0x4003, "FortyTwo": 0x4007}, 0x4000, 4)([
+            0b0101000000100000,
+            0b0001001000101010,
+            0b0010010000000100,
+            0b0001000000000010,
+            0b0001001001111111,
+            0b0000001111111101,
+            0b1111000000100101,
+            42,
+        ]));
+
+        it("should ignore anything after the .END directive", good([
+            [".ORIG", "x3000"],
+            [".FILL", "xAFAF"],
+            [".END"],
+            [".FILL", "xAFAF"],
+        ], {}, 0x3000, 1)([0xAFAF]));
+
+        it("should handle some basic strings and I/O", good([
+            [".ORIG", "x3000"],
+            ["LEA", "R0", "Prompt"],
+            ["PUTS"],
+            ["GETC"],
+            ["ADD", "R0", "R0", "#1"],
+            ["OUT"],
+            ["LD", "R0", "Exclamation"],
+            ["OUT"],
+            ["HALT"],
+            ["Prompt", ".STRINGZ", "press a key\n> "],
+            ["Exclamation", ".FILL", "x21"],
+            [".END"],
+        ], { "Prompt": 0x3008, "Exclamation": 0x3017 }, 0x3000, 1)([
+            0b1110000000000111,
+            0b1111000000100010,
+            0b1111000000100000,
+            0b0001000000100001,
+            0b1111000000100001,
+            0b0010000000010001,
+            0b1111000000100001,
+            0b1111000000100101,
+            // p  r     e     s     s     <Sp>
+            0x70, 0x72, 0x65, 0x73, 0x73, 0x20,
+            // a  <Sp>  k     e     y
+            0x61, 0x20, 0x6B, 0x65, 0x79,
+            // newline, >, <Sp>, null-terminator
+            0x0A, 0x3E, 0x20, 0,
+            // "!"
+            0x21,
+        ]));
+
+        it("should fail when there is no .END directive", bad([
+            [".ORIG", "x3000"],
+            [".FILL", "x1234"],
+        ], {}, 0x3000, 1)(/\.END/));
+
+    });
+
 });
