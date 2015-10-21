@@ -1,3 +1,4 @@
+require("babel-core/polyfill");
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {createStore} from 'redux';
