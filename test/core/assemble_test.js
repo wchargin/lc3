@@ -522,6 +522,12 @@ describe('assemble', () => {
                 bad("ADD R0, R1, #16")());
             it("should reject an invalid negative immediate-mode ADD",
                 bad("ADD R0, R1, #-17")());
+            it("should reject an ADD with a single operand",
+                bad("ADD R0")());
+            it("should reject an ADD with just two operands",
+                bad("ADD R0, R1")());
+            it("should reject an ADD with a whole four operands",
+                bad("ADD R0, R1, R2, R3")());
         });
 
         describe("for AND instructions", () => {
@@ -535,6 +541,12 @@ describe('assemble', () => {
                 bad("AND R0, R1, #16")());
             it("should reject an invalid negative immediate-mode AND",
                 bad("AND R0, R1, #-17")());
+            it("should reject an AND with a single operand",
+                bad("AND R0")());
+            it("should reject an AND with just two operands",
+                bad("AND R0, R1")());
+            it("should reject an AND with a whole four operands",
+                bad("AND R0, R1, R2, R3")());
         });
 
         describe("for BR instructions", () => {
@@ -555,6 +567,7 @@ describe('assemble', () => {
             it("should treat a blank BR like a BRnzp",
                 good("BR HERE")(0b0000111000000000));
             it("should reject a branch without an operand", bad("BR")());
+            it("should reject a branch with two operands", bad("BR #0 #0")());
         });
 
     });
