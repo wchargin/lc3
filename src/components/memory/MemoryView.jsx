@@ -11,6 +11,7 @@ import {
     Panel,
 } from 'react-bootstrap';
 import RawModal from './RawModal';
+import AssembleModal from './AssembleModal';
 import MemoryTable from './MemoryTable';
 
 class MemoryView extends Component {
@@ -19,6 +20,7 @@ class MemoryView extends Component {
         super();
         this.state = {
             showRawModal: false,
+            showAssembleModal: false,
         };
     }
 
@@ -66,6 +68,15 @@ class MemoryView extends Component {
                 onLoadIntoLC3={this.handleLoadIntoLC3.bind(this)}
                 onDownloadObject={this.handleDownloadObject.bind(this)}
             />
+            <Button onClick={() => this.setState({ showAssembleModal: true })}>
+                Assemble
+            </Button>
+            <AssembleModal
+                show={this.state.showAssembleModal}
+                onHide={() => this.setState({ showAssembleModal: false })}
+                onLoadIntoLC3={this.handleLoadIntoLC3.bind(this)}
+                onDownloadObject={this.handleDownloadObject.bind(this)}
+            />
         </ButtonToolbar>;
     }
 
@@ -73,6 +84,7 @@ class MemoryView extends Component {
         this.props.onLoadProgram(data);
         this.setState({
             showRawModal: false,
+            showAssembleModal: false,
         });
     }
 
