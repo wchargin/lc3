@@ -536,3 +536,83 @@ export function encodeDirective(tokens) {
             throw new Error(`unrecognized directive: ${directive}`);
     }
 }
+
+/*
+ * Generate the machine code output for an LC-3 instruction.
+ * The tokens parameter should be a single tokenized line, excluding any label.
+ * The PC should be the value of the PC when the instruction is executed
+ * (i.e., one past the address at which the instruction is stored).
+ * The symbols parameter should be an object mapping label names to addresses.
+ * The result is an array of LC-3 machine words (integers)
+ * to be appended to the machine code.
+ */
+export function encodeInstruction(tokens, pc, symbols) {
+    const opname = tokens[0];
+    const operands = tokens.slice(1);
+
+    const ensureOpcount = expected => {
+        if (operands.length !== expected) {
+            const noun = (expected === 1) ? "operand" : "operands";
+            throw new Error(`expected ${opname} instruction to have ` +
+                `exactly ${expected} ${noun}, but found ${operands.length}`);
+        }
+    };
+
+    const inBits = (x, bits, description) => {
+        const min = -(1 << (bits - 1));
+        const max = (1 << (bits - 1)) - 1;
+        if (min <= x && x <= max) {
+            return Utils.toUint16(x) & ((1 << bits) - 1);
+        } else {
+            throw new Error(`expected ${description} to fit in ${bits} bits ` +
+                `(i.e., to be between ${min} and ${max}, inclusive), ` +
+                `but found ${x}`);
+        }
+    };
+
+    const instructions = {
+        "ADD": 0b0001,
+        "AND": 0b0101,
+        "NOT": 0b1001,
+        "BR": 0b0000,
+        "BRP": 0b0000,
+        "BRZ": 0b0000,
+        "BRZP": 0b0000,
+        "BRN": 0b0000,
+        "BRNP": 0b0000,
+        "BRNZ": 0b0000,
+        "BRNZP": 0b0000,
+        "JMP": 0b1100,
+        "RET": 0b1100,
+        "JSR": 0b0100,
+        "JSRR": 0b0100,
+        "LD": 0b0010,
+        "LDI": 0b1010,
+        "LDR": 0b0110,
+        "LEA": 0b1110,
+        "RTI": 0b1000,
+        "ST": 0b0011,
+        "STI": 0b1011,
+        "STR": 0b0111,
+        "TRAP": 0b1111,
+    };
+    const upname = opname.toUpperCase();
+    const opcode = instructions[upname];
+
+    if (opcode === undefined) {
+        throw new Error(`unrecognized instruction "${opname}"`);
+    }
+
+    const baseop = opcode << 12;
+
+    if (upname === "ADD" || upname === "AND") {
+        ensureOpcount(3);
+        const [dr, sr1] = operands.slice(0, 2).map(x => parseRegister(x));
+        const last = operands[2];
+        const asLiteral = handleErrors(parseLiteral)(last);
+        const sr2OrImm = (asLiteral.success) ?
+            0b100000 | inBits(asLiteral.result, 5, "immediate field") :
+            0b000000 | parseRegister(last);
+        return [(baseop) | (dr << 9) | (sr1 << 6) | (sr2OrImm)];
+    }
+}

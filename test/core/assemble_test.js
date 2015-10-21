@@ -492,4 +492,64 @@ describe('assemble', () => {
 
     });
 
+    describe("helper encodeInstruction", () => {
+        const {good, bad} = makeTesters(helpers.encodeInstruction);
+
+        const pc = 0x3000;
+        const symbols = {
+            PREEE: pc - 0x1000,
+            PREE: pc - 20,
+            PRE: pc - 5,
+            HERE: pc,
+            POST: pc + 5,
+            POSTT: pc + 20,
+            POSTTT: pc + 0x1000,
+        };
+
+        describe("for ADD instructions", () => {
+
+            it("should accept a valid register-mode ADD",
+                good(["ADD", "R0", "R1", "R2"], pc, symbols)(
+                    [0b0001000001000010]));
+
+            it("should accept a valid positive immediate-mode ADD",
+                good(["ADD", "R0", "R1", "#15"], pc, symbols)(
+                    [0b0001000001101111]));
+
+            it("should accept a valid negative immediate-mode ADD",
+                good(["ADD", "R0", "R1", "#-16"], pc, symbols)(
+                    [0b0001000001110000]));
+
+            it("should reject an invalid positive immediate-mode ADD",
+                bad(["ADD", "R0", "R1", "#16"], pc, symbols)());
+
+            it("should reject an invalid negative immediate-mode ADD",
+                bad(["ADD", "R0", "R1", "#-17"], pc, symbols)());
+
+        });
+
+        describe("for AND instructions", () => {
+
+            it("should accept a valid register-mode AND",
+                good(["AND", "R0", "R1", "R2"], pc, symbols)(
+                    [0b0101000001000010]));
+
+            it("should accept a valid positive immediate-mode AND",
+                good(["AND", "R0", "R1", "#15"], pc, symbols)(
+                    [0b0101000001101111]));
+
+            it("should accept a valid negative immediate-mode AND",
+                good(["AND", "R0", "R1", "#-16"], pc, symbols)(
+                    [0b0101000001110000]));
+
+            it("should reject an invalid positive immediate-mode AND",
+                bad(["AND", "R0", "R1", "#16"], pc, symbols)());
+
+            it("should reject an invalid negative immediate-mode AND",
+                bad(["AND", "R0", "R1", "#-17"], pc, symbols)());
+
+        });
+
+    });
+
 });
