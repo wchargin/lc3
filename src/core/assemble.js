@@ -325,10 +325,6 @@ export function determineRequiredMemory(command, operand) {
 }
 
 export function buildSymbolTable(tokenizedLines, orig, begin) {
-    // These two fields will be used to compute the return value.
-    let symbols = {};
-    let address = orig;
-
     // Here are all the things that can come at the start of a line.
     // We use these to determine whether the first token in a line
     // is a label or an actual operation of some kind.
