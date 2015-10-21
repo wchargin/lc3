@@ -570,6 +570,18 @@ export function encodeInstruction(tokens, pc, symbols) {
         }
     };
 
+    /*
+     * Parse an offset, then force it into the given bit width.
+     * This is like parseOffset except that "#-1" maps to, e.g., 0b11111
+     * instead of a literal -1.
+     */
+    const extractOffset = (offset, bits) => {
+        const ctx = `while parsing the offset for a ${opname}`;
+        const parsed = withContext(parseOffset, ctx)(
+            pc, operands[0], symbols, bits);
+        return Utils.toUint16(parsed) & ((1 << bits) - 1);
+    };
+
     const instructions = {
         "ADD": 0b0001,
         "AND": 0b0101,
@@ -621,10 +633,8 @@ export function encodeInstruction(tokens, pc, symbols) {
             [true, true, true] :  // plain "BR" is an unconditional branch
             ["N", "Z", "P"].map(x => upname.substring(2).includes(x));
         const nzp = (n << 2) | (z << 1) | (p << 0);
-        const offset = withContext(parseOffset,
-            `while parsing the offset for a ${opname}`)(
-                pc, operands[0], symbols, 9);
-        return [(baseop) | (nzp << 9) | (Utils.toUint16(offset) & 0x1FF)];
+        const offset = extractOffset(operands[0], 9);
+        return [(baseop) | (nzp << 9) | (offset)];
     } else if (upname === "JMP") {
         ensureOpcount(1);
         return [(baseop) | (parseRegister(operands[0]) << 6)];
