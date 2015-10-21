@@ -463,4 +463,33 @@ describe('assemble', () => {
 
     });
 
+    describe("helper encodeDirective", () => {
+        const {good, _} = makeTesters(helpers.encodeDirective);
+
+        it("should process a .FILL with a positive value",
+            good([".FILL", "x1234"])([0x1234]));
+
+        it("should process a .FILL with a negative value",
+            good([".FILL", "x-1234"])([0xEDCC]));
+
+        it("should process a .FILL with a value past 0x10000",
+            good([".FILL", "x123456"])([0x3456]));
+
+        it("should process a .BLKW of size zero",
+            good([".BLKW", "#0"])([]));
+
+        it("should process a .BLKW of size one",
+            good([".BLKW", "#1"])([0]));
+
+        it("should process a .BLKW of size four",
+            good([".BLKW", "#4"])([0, 0, 0, 0]));
+
+        it("should process an empty .STRINGZ as just a null-terminator",
+            good([".STRINGZ", ""])([0]));
+
+        it("should process a .STRINGZ with some text",
+            good([".STRINGZ", "hello"])([0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00]));
+
+    });
+
 });

@@ -510,4 +510,29 @@ export function parseOffset(pc, operand, symbols, bits) {
 
     const symbolAddress = symbols[operand];
     return ensureInRange(symbolAddress - pc);
-};
+}
+
+/*
+ * Generate the machine code output for an assembly directive.
+ * The tokens parameter should be a single tokenized line, excluding any label.
+ * The result is an array of LC-3 machine words (integers)
+ * to be appended to the machine code.
+ *
+ * Assembly directives don't depend on the current PC or the symbol table,
+ * so these don't need to be passed in as arguments.
+ */
+export function encodeDirective(tokens) {
+    const directive = tokens[0];
+    const operand = tokens[1];
+
+    switch (directive.toUpperCase()) {
+        case ".FILL":
+            return [Utils.toUint16(parseLiteral(operand))];
+        case ".BLKW":
+            return new Array(Utils.toUint16(parseLiteral(operand))).fill(0);
+        case ".STRINGZ":
+            return operand.split('').map(c => c.charCodeAt(0)).concat([0]);
+        default:
+            throw new Error(`unrecognized directive: ${directive}`);
+    }
+}
