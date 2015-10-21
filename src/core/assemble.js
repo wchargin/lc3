@@ -641,5 +641,11 @@ export function encodeInstruction(tokens, pc, symbols) {
     } else if (upname === "RET") {
         ensureOpcount(0);
         return [(baseop) | (7 << 6)];
+    } else if (upname === "JSR") {
+        ensureOpcount(1);
+        return [(baseop) | (1 << 11) | (extractOffset(operands[0], 11))];
+    } else if (upname === "JSRR") {
+        ensureOpcount(1);
+        return [(baseop) | (0 << 11) | (parseRegister(operands[0]) << 6)];
     }
 }

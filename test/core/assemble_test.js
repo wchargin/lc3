@@ -582,6 +582,36 @@ describe('assemble', () => {
             it("should fail with an operand", bad("RET R7")());
         });
 
+        describe("for JSR instructions", () => {
+            it("should accept a valid positive literal offset",
+                good("JSR #1023")(0b0100101111111111));
+            it("should accept a valid negative literal offset",
+                good("JSR x-400")(0b0100110000000000));
+            it("should accept a valid forward symbol offset",
+                good("JSR POSTT")(0b0100100000010100));
+            it("should accept a valid backward symbol offset",
+                good("JSR PRE")(0b0100111111111011));
+
+            it("should reject a invalid positive literal offset",
+                bad("JSR #1024")());
+            it("should reject a invalid negative literal offset",
+                bad("JSR x-401")());
+            it("should reject a invalid forward symbol offset",
+                bad("JSR POSTTT")());
+            it("should reject a invalid backward symbol offset",
+                bad("JSR PREEE")());
+
+            it("should reject a JSR with no operands", bad("JSR")());
+            it("should reject a JSR with two operands", bad("JSR #1, #2")());
+        });
+
+        describe("for JSRR instructions", () => {
+            it("should work for JSRR R5",
+                good("JSRR R5")(0b0100000101000000));
+            it("should reject a JSRR with no operands", bad("JSRR")());
+            it("should reject a JSRR with two operands", bad("JSRR R1, R2")());
+        });
+
     });
 
 });
