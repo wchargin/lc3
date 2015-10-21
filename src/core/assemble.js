@@ -578,7 +578,7 @@ export function encodeInstruction(tokens, pc, symbols) {
     const extractOffset = (offset, bits) => {
         const ctx = `while parsing the offset for a ${opname}`;
         const parsed = withContext(parseOffset, ctx)(
-            pc, operands[0], symbols, bits);
+            pc, offset, symbols, bits);
         return Utils.toUint16(parsed) & ((1 << bits) - 1);
     };
 
