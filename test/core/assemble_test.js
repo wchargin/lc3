@@ -693,6 +693,12 @@ describe('assemble', () => {
                 bad("STR R0, R1, #10, #20")());
         });
 
+        describe("for RTI instructions", () => {
+            it("should just work", good("RTI")(0b1000000000000000));
+            it("should reject an instruction with an operand",
+                bad("RTI R1")());
+        });
+
     });
 
 });

@@ -658,5 +658,8 @@ export function encodeInstruction(tokens, pc, symbols) {
         const baseR = parseRegister(operands[1]);
         const offset = extractOffset(operands[2], 6);
         return [(baseop) | (drsr << 9) | (baseR << 6) | (offset)];
+    } else if (upname === "RTI") {
+        ensureOpcount(0);
+        return [baseop];
     }
 }
