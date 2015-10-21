@@ -625,5 +625,11 @@ export function encodeInstruction(tokens, pc, symbols) {
             `while parsing the offset for a ${opname}`)(
                 pc, operands[0], symbols, 9);
         return [(baseop) | (nzp << 9) | (Utils.toUint16(offset) & 0x1FF)];
+    } else if (upname === "JMP") {
+        ensureOpcount(1);
+        return [(baseop) | (parseRegister(operands[0]) << 6)];
+    } else if (upname === "RET") {
+        ensureOpcount(0);
+        return [(baseop) | (7 << 6)];
     }
 }

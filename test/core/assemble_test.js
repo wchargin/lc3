@@ -570,6 +570,18 @@ describe('assemble', () => {
             it("should reject a branch with two operands", bad("BR #0 #0")());
         });
 
+        describe("for JMP instructions", () => {
+            it("should work for JMP R0", good("JMP R0")(0b1100000000000000));
+            it("should work for JMP R7", good("JMP R7")(0b1100000111000000));
+            it("should fail without an operand", bad("JMP")());
+            it("should fail with two operands", bad("JMP R1, R2")());
+        });
+
+        describe("for RET instructions", () => {
+            it("should just work", good("RET")(0b1100000111000000));
+            it("should fail with an operand", bad("RET R7")());
+        });
+
     });
 
 });
