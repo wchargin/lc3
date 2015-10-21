@@ -674,6 +674,11 @@ export function encodeInstruction(tokens, pc, symbols) {
         const baseR = parseRegister(operands[1]);
         const offset = extractOffset(operands[2], 6);
         return [(baseop) | (drsr << 9) | (baseR << 6) | (offset)];
+    } else if (upname === "NOT") {
+        ensureOpcount(2);
+        const dr = parseRegister(operands[0]);
+        const sr = parseRegister(operands[1]);
+        return [(baseop) | (dr << 9) | (sr << 6) | 0b111111];
     } else if (upname === "RTI") {
         ensureOpcount(0);
         return [baseop];

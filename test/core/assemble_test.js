@@ -703,6 +703,20 @@ describe('assemble', () => {
                 bad("STR R0, R1, #10, #20")(/operand/));
         });
 
+        describe("for NOT instructions", () => {
+            it("should work with two register operands",
+                good("NOT R1, R2")(0b1001001010111111));
+            it("should reject a literal operand",
+                bad("NOT R1, #11")());
+
+            it("should reject an instruction with no operands",
+                bad("NOT")());
+            it("should reject an instruction with just one operand",
+                bad("NOT R1")());
+            it("should reject an instruction with three operands",
+                bad("NOT R3, R4, R5")());
+        });
+
         describe("for RTI instructions", () => {
             it("should just work", good("RTI")(0b1000000000000000));
             it("should reject an instruction with an operand",
