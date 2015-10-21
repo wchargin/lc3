@@ -693,5 +693,7 @@ export function encodeInstruction(tokens, pc, symbols) {
                 `but found ${trapVector}`);
         }
         return [baseop | trapVector];
+    } else {
+        throw new Error(`internal error: unhandled instruction ${opname}`);
     }
 }
