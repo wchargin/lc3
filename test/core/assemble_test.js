@@ -512,71 +512,49 @@ describe('assemble', () => {
         };
 
         describe("for ADD instructions", () => {
-
             it("should accept a valid register-mode ADD",
                 good("ADD R0, R1, R2")(0b0001000001000010));
-
             it("should accept a valid positive immediate-mode ADD",
                 good("ADD R0, R1, #15")(0b0001000001101111));
-
             it("should accept a valid negative immediate-mode ADD",
                 good("ADD R0, R1, #-16")(0b0001000001110000));
-
             it("should reject an invalid positive immediate-mode ADD",
                 bad("ADD R0, R1, #16")());
-
             it("should reject an invalid negative immediate-mode ADD",
                 bad("ADD R0, R1, #-17")());
-
         });
 
         describe("for AND instructions", () => {
-
             it("should accept a valid register-mode AND",
                 good("AND R0, R1, R2")(0b0101000001000010));
-
             it("should accept a valid positive immediate-mode AND",
                 good("AND R0, R1, #15")(0b0101000001101111));
-
             it("should accept a valid negative immediate-mode AND",
                 good("AND R0, R1, #-16")(0b0101000001110000));
-
             it("should reject an invalid positive immediate-mode AND",
                 bad("AND R0, R1, #16")());
-
             it("should reject an invalid negative immediate-mode AND",
                 bad("AND R0, R1, #-17")());
-
         });
 
         describe("for BR instructions", () => {
-
             it("should accept a valid BRnp with a literal positive offset",
                 good("BRnp #15")(0b0000101000001111));
-
             it("should accept a valid BRnp with a literal negative offset",
                 good("BRnp #-16")(0b0000101111110000));
-
             it("should accept a valid BRnp with a forward label reference",
                 good("BRnp POST")(0b0000101000000101));
-
             it("should accept a valid BRnp with a backward label reference",
                 good("BRnp PRE")(0b0000101111111011));
-
             it("should reject an invalid BRnp with a forward label reference",
                 bad("BRnp POSTTT")());
-
             it("should reject an invalid BRnp with a backward label reference",
                 bad("BRnp PREEE")());
-
             it("should work for a BRnzp",
                 good("BRnzp HERE")(0b0000111000000000));
-
             it("should treat a blank BR like a BRnzp",
                 good("BR HERE")(0b0000111000000000));
-
             it("should reject a branch without an operand", bad("BR")());
-
         });
 
     });
