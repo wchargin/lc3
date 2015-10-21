@@ -699,11 +699,51 @@ export function encodeInstruction(tokens, pc, symbols) {
 }
 
 export function generateMachineCode(lines, symbols, orig, begin) {
-    const program = lines.slice(begin);
+    const initialState = {
+        machineCode: [],
+        address: orig,
+        seenEndDirective: false,
+    };
+    const appendCode = (state, code) => ({
+        ...state,
+        machineCode: state.machineCode.concat(code),
+        address: state.address + code.length,
+    });
+    const handlers = {
+        handleDirective(state, line) {
+            if (state.seenEndDirective) {
+                return state;
+            }
+            return appendCode(state, encodeDirective(line));
+        },
+        handleInstruction(state, line) {
+            if (state.seenEndDirective) {
+                return state;
+            }
+            const pc = state.address + 1;
+            return appendCode(state, encodeInstruction(line, pc, symbols));
+        },
+        handleEnd(state) {
+            return { ...state, seenEndDirective: true };
+        },
+    };
+    const finalState = reduceProgram(lines, begin, handlers, initialState);
 
-    // TODO(william): This is duplicated in buildSymbolTable.
-    // Find a way to unify it.
-    //
+    if (!finalState.seenEndDirective) {
+        throw new Error("missing .END directive");
+    }
+    return finalState.machineCode;
+}
+
+function reduceProgram(lines, begin, handlers, initialState) {
+    const id = x => x;
+    const {
+        handleLabel = id,
+        handleDirective = id,
+        handleInstruction = id,
+        handleEnd = id,
+    } = handlers;
+
     // Here are all the things that can come at the start of a line.
     // We use these to determine whether the first token in a line
     // is a label or an actual operation of some kind.
@@ -722,52 +762,39 @@ export function generateMachineCode(lines, symbols, orig, begin) {
     const directives = [".FILL", ".BLKW", ".STRINGZ"];
     const commands = [...trapVectors, ...instructions, ...directives];
 
-    const initialState = {
-        machineCode: [],
-        address: orig,
-        seenEndDirective: false,
-    };
-    const finalState = program.reduce((state, line, lineIndex) => {
-        if (state.seenEndDirective) {
-            return state;
-        }
-
-        const ctx = `at line ${lineIndex + begin + 1}`;
+    const program = lines.slice(begin);
+    return program.reduce((state, line, lineIndex) => {
         if (line.length === 0) {
             return state;
         }
 
+        const ctx = `at line ${lineIndex + begin + 1}`;
+        const delegate = (cb, _state = state, _line = line) =>
+            withContext(cb, ctx)(_state, _line, lineIndex);
+
         const fst = line[0];
         if (fst.toUpperCase() === ".END") {
-            return {
-                ...state,
-                seenEndDirective: true,
-            };
+            return delegate(handleEnd);
         }
+
         const hasLabel = !commands.includes(fst.toUpperCase()) &&
             isValidLabelName(fst);
+        const labeledState = hasLabel ? delegate(handleLabel) : state;
         const rest = line.slice(hasLabel ? 1 : 0);
 
         if (rest.length === 0) {
             // It's a label-only line. No problem.
-            return state;
+            return labeledState;
         }
 
         const command = rest[0].toUpperCase();
         const isDirective = (command.charAt(0) === '.');
         const pc = state.address + 1;
-        const newCode = isDirective ?
-            withContext(encodeDirective, ctx)(rest) :
-            withContext(encodeInstruction, ctx)(rest, pc, symbols);
-        return {
-            ...state,
-            machineCode: state.machineCode.concat(newCode),
-            address: state.address + newCode.length,
-        };
+        if (isDirective) {
+            return delegate(handleDirective, labeledState, rest);
+        } else {
+            return delegate(handleInstruction, labeledState, rest);
+        }
     }, initialState);
 
-    if (!finalState.seenEndDirective) {
-        throw new Error("missing .END directive");
-    }
-    return finalState.machineCode;
 }
