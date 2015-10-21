@@ -699,6 +699,19 @@ describe('assemble', () => {
                 bad("RTI R1")());
         });
 
+        describe("for TRAP instructions", () => {
+            it("should accept a valid trap vector",
+                good("TRAP xAA")(0b1111000010101010));
+            it("should reject a trap vector that's too large",
+                bad("TRAP #256")());
+            it("should reject a negative trap vector",
+                bad("TRAP #-1")());
+            it("should reject an instruction with no operands",
+                bad("TRAP")());
+            it("should reject an instruction with two operands",
+                bad("TRAP x33, x44")());
+        });
+
     });
 
 });

@@ -661,5 +661,14 @@ export function encodeInstruction(tokens, pc, symbols) {
     } else if (upname === "RTI") {
         ensureOpcount(0);
         return [baseop];
+    } else if (upname === "TRAP") {
+        ensureOpcount(1);
+        const ctx = `while parsing the trap vector`;
+        const vector = withContext(parseLiteral, ctx)(operands[0]);
+        if (!(0 <= vector && vector <= 0xFF)) {
+            throw new Error(`expected trap vector to be an unsigned byte ` +
+                `(i.e., between 0 and 255, inclusive), but found ${vector}`);
+        }
+        return [baseop | vector];
     }
 }
