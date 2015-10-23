@@ -702,6 +702,58 @@ export function generateMachineCode(lines, symbols, orig, begin) {
     return finalState.machineCode;
 }
 
+/*
+ * Given a program in the form of a sequence of tokenized lines
+ * and the index of the first line of the program after its .ORIG,
+ * process each line of the program sequentially, similarly to `reduce`.
+ *
+ * `handlers` should be an object with zero or more callbacks.
+ * Each callback corresponds to a certain type of line,
+ * and will be invoked when that line is run;
+ * the provided parameters will be the previous state,
+ * the tokenized line contents,
+ * and the index of the line in the program (where begin = 0).
+ * The callback should return the new state.
+ * The keys of handlers should be zero or more of
+ * handleLabel, handleDirective (all assembly directives except .END),
+ * handleInstruction, and handleEnd (for .END).
+ *
+ * Note that multiple callbacks may be invoked per line:
+ * if a line has, say, a label and an instruction,
+ * handleLabel will be called first, and then
+ * its state will be passed to handleInstruction.
+ *
+ * Note also that handleInstruction and handleDirective
+ * will not see the labels for a line, if any;
+ * that is, the first token will be the command or directive name.
+ *
+ * As a simple example, suppose we want to count
+ * the numbers of labels, instructions, and directives in a program,
+ * except for "ADD" instructions.
+ * Our initial state might be
+ *    const initialState = { labels: 0, instructions: 0, directives: 0 },
+ * and our callbacks would be
+ *    const handlers = {
+ *        handleLabel(state) {
+ *            return { ...state, labels: state.labels + 1 };
+ *        }
+ *        handleDirective(state) {
+ *            return { ...state, directives: state.directives + 1 };
+ *        }
+ *        handleInstruction(state, line) {
+ *            const instruction = line[0];
+ *            if (instruction.toUpperCase() === "ADD") {
+ *                // Skip it and return the state unchanged.
+ *                return state;
+ *            } else {
+ *                return { ...state, instructions: state.instructions + 1 }
+ *            }
+ *        }
+ *    }.
+ * Then we can simply invoke
+ *     const finalState = reduceProgram(lines, begin, handlers, initialState)
+ * and finalState will contain the relevant counts.
+ */
 function reduceProgram(lines, begin, handlers, initialState) {
     const id = x => x;
     const {
