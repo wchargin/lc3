@@ -15,3 +15,7 @@ The goal of this project is to rewrite a *clean* LC-3 simulator. Specifically:
 All of this means that **it's easier for other people to contribute**! If there's a feature you'd like to see, open an issue and we can discuss it; then, if we determine that it's a good idea, you can implement it, submit a pull request, and get it merged.
 
 **Note** that this project doesn't currently have a live site, because it's not production-ready. Please continue to use the old simulator for now, or, if you really want to, clone this repository, then `npm install` and `npm start`.
+
+## License
+
+MIT
