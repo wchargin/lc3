@@ -496,6 +496,9 @@ describe('assemble', () => {
             ".END",
         ])(/line 8.*exists.*x3002/));
 
+        it("fails when there is no .END directive",
+            bad([".ORIG x3000"])(/\.END/));
+
     });
 
     describe("helper parseOffset", () => {

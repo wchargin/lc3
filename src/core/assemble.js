@@ -430,7 +430,7 @@ export function buildSymbolTable(lines, orig, begin) {
     const finalState = reduceProgram(lines, begin, handlers, initialState);
 
     if (!finalState.seenEndDirective) {
-        error("no .END directive found!");
+        throw new Error("no .END directive found!");
     }
 
     return {
