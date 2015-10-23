@@ -815,7 +815,6 @@ function reduceProgram(lines, begin, handlers, initialState) {
 
         const command = rest[0].toUpperCase();
         const isDirective = (command.charAt(0) === '.');
-        const pc = state.address + 1;
         if (isDirective) {
             return delegate(handleDirective, labeledState, rest);
         } else {
