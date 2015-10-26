@@ -35,13 +35,12 @@ function scrollTo(state, address) {
 }
 
 function scrollToPC(state) {
-    const pc = state.get("lc3").getIn(["registers", "pc"]);
-    return state.setIn(["viewOptions", "topAddressShown"], pc);
+    return scrollTo(state, state.get("lc3").registers.pc);
 }
 
 function scrollBy(state, delta) {
-    return state.updateIn(["viewOptions", "topAddressShown"],
-        x => Math.max(0, Math.min(x + delta, Constants.MEMORY_SIZE - 1)));
+    const currentAddress = state.getIn(["viewOptions", "topAddressShown"]);
+    return scrollTo(state, currentAddress + delta);
 }
 
 function step(state) {
