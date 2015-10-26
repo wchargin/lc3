@@ -3,15 +3,10 @@ import {connect} from 'react-redux';
 
 import * as actions from '../../actions';
 
-import {
-    Button,
-    ButtonGroup,
-    ButtonToolbar,
-    Glyphicon,
-    Panel,
-} from 'react-bootstrap';
+import {Panel} from 'react-bootstrap';
 import RawModal from './RawModal';
 import AssembleModal from './AssembleModal';
+import MemoryFooter from './MemoryFooter';
 import MemoryTable from './MemoryTable';
 
 class MemoryView extends Component {
@@ -28,7 +23,12 @@ class MemoryView extends Component {
         const {lc3, viewOptions} = this.props;
 
         const header = "Search bar goes here";  // TODO(william)
-        const footer = this.renderFooter();
+        const footer = <MemoryFooter
+            onShowRaw={() => this.setState({ showRawModal: true })}
+            onShowAssemble={() => this.setState({ showAssembleModal: true })}
+            onScrollToPC={this.props.onScrollToPC}
+            onScrollBy={this.props.onScrollBy}
+        />;
 
         return <div className="memory-view">
             <h2>Memory</h2>
@@ -41,43 +41,19 @@ class MemoryView extends Component {
                     fill
                 />
             </Panel>
-        </div>;
-    }
-
-    renderFooter() {
-        // TODO(william): Add the rest of the input/export logic
-        const scrollDelta = 1;
-        return <ButtonToolbar>
-            <ButtonGroup>
-                <Button onClick={() => this.props.onScrollBy(-scrollDelta)}>
-                    <Glyphicon glyph="chevron-up" alt="Scroll memory up" />
-                </Button>
-                <Button onClick={() => this.props.onScrollBy(scrollDelta)}>
-                    <Glyphicon glyph="chevron-down" alt="Scroll memory down" />
-                </Button>
-                <Button onClick={() => this.props.onScrollToPC()}>
-                    Jump to PC
-                </Button>
-            </ButtonGroup>
-            <Button onClick={() => this.setState({ showRawModal: true })}>
-                Raw
-            </Button>
             <RawModal
                 show={this.state.showRawModal}
                 onHide={() => this.setState({ showRawModal: false })}
                 onLoadIntoLC3={this.handleLoadIntoLC3.bind(this)}
                 onDownloadObject={this.handleDownloadObject.bind(this)}
             />
-            <Button onClick={() => this.setState({ showAssembleModal: true })}>
-                Assemble
-            </Button>
             <AssembleModal
                 show={this.state.showAssembleModal}
                 onHide={() => this.setState({ showAssembleModal: false })}
                 onLoadIntoLC3={this.handleLoadIntoLC3.bind(this)}
                 onDownloadObject={this.handleDownloadObject.bind(this)}
             />
-        </ButtonToolbar>;
+        </div>;
     }
 
     handleLoadIntoLC3(data) {
