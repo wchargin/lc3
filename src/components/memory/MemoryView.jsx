@@ -25,7 +25,7 @@ class MemoryView extends Component {
 
         const header = <MemorySearch
             symbolTable={this.props.lc3.symbolTable}
-            onScrollTo={(x) => console.log(x) /* TODO STOPSHIP */}
+            onScrollTo={this.props.onScrollTo}
         />;
         const footer = <MemoryFooter
             onShowRaw={() => this.setState({ showRawModal: true })}
@@ -90,6 +90,7 @@ function mapDispatchToProps(dispatch) {
         onLoadProgram: (program) => dispatch(actions.loadProgram(program)),
         onScrollBy: (delta) => dispatch(actions.scrollBy(delta)),
         onScrollToPC: () => dispatch(actions.scrollToPC()),
+        onScrollTo: (addr) => dispatch(actions.scrollTo(addr)),
         onSetMemory: (addr, value) => dispatch(actions.setMemory(addr, value)),
     };
 }
