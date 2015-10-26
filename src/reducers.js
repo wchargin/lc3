@@ -29,6 +29,11 @@ function loadProgram(state, program) {
     return state.update("lc3", lc3 => lc3.loadProgram(data));
 }
 
+function scrollTo(state, address) {
+    return state.setIn(["viewOptions", "topAddressShown"],
+        Math.max(0, Math.min(address, Constants.MEMORY_SIZE - 1)));
+}
+
 function scrollToPC(state) {
     const pc = state.get("lc3").getIn(["registers", "pc"]);
     return state.setIn(["viewOptions", "topAddressShown"], pc);
@@ -54,6 +59,8 @@ export default function reducer(state = initialState, action) {
             return setRegister(state, action.name, action.value);
         case "LOAD_PROGRAM":
             return loadProgram(state, action.program);
+        case "SCROLL_TO":
+            return scrollTo(state, action.address);
         case "SCROLL_TO_PC":
             return scrollToPC(state);
         case "SCROLL_BY":

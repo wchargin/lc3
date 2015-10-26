@@ -64,6 +64,25 @@ describe('reducer', () => {
         expect(newLC3.getIn(["symbolTable", "DATA"])).to.equal(0x3100);
     });
 
+    describe("SCROLL_TO", () => {
+        const state0 = reducer(initialState, actions.setPC(0x9001));
+        const test = (input, expected) => () => {
+            const state = reducer(state0, actions.scrollTo(input));
+            expect(state).to.be.ok;
+            const actual = state.getIn(["viewOptions", "topAddressShown"]);
+            expect(actual).to.equal(expected);
+        };
+
+        it("scrolls to an arbitrary address", test(0x4321, 0x4321));
+        it("scrolls to the beginning of memory", test(0x0, 0x0));
+        it("doesn't scroll into negative memory", test(-100, 0));
+
+        const maxAddress = Constants.MEMORY_SIZE - 1;
+        it("scrolls to the end of memory", test(maxAddress, maxAddress));
+        it("doesn't scroll past the end of memory",
+            test(maxAddress + 1, maxAddress));
+    });
+
     it("handles SCROLL_TO_PC", () => {
         const state = [
             actions.setPC(0x1234),

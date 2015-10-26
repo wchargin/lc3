@@ -28,6 +28,13 @@ export function loadProgram(program) {
     };
 }
 
+export function scrollTo(address) {
+    return {
+        type: "SCROLL_TO",
+        address,
+    };
+}
+
 export function scrollToPC() {
     return {
         type: "SCROLL_TO_PC",
