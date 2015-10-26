@@ -7,6 +7,7 @@ import {Panel} from 'react-bootstrap';
 import RawModal from './RawModal';
 import AssembleModal from './AssembleModal';
 import MemoryFooter from './MemoryFooter';
+import MemorySearch from './MemorySearch';
 import MemoryTable from './MemoryTable';
 
 class MemoryView extends Component {
@@ -22,7 +23,10 @@ class MemoryView extends Component {
     render() {
         const {lc3, viewOptions} = this.props;
 
-        const header = "Search bar goes here";  // TODO(william)
+        const header = <MemorySearch
+            symbolTable={this.props.lc3.symbolTable}
+            onScrollTo={(x) => console.log(x) /* TODO STOPSHIP */}
+        />;
         const footer = <MemoryFooter
             onShowRaw={() => this.setState({ showRawModal: true })}
             onShowAssemble={() => this.setState({ showAssembleModal: true })}
