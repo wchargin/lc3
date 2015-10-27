@@ -6,9 +6,10 @@ import * as actions from '../../actions';
 import {Panel} from 'react-bootstrap';
 import RawModal from './RawModal';
 import AssembleModal from './AssembleModal';
-import MemoryFooter from './MemoryFooter';
+import MemoryNav from './MemoryNav';
 import MemorySearch from './MemorySearch';
 import MemoryTable from './MemoryTable';
+import IOToolbar from './IOToolbar';
 
 class MemoryView extends Component {
 
@@ -23,15 +24,15 @@ class MemoryView extends Component {
     render() {
         const {lc3, viewOptions} = this.props;
 
-        const header = <MemorySearch
+        const header = <MemoryNav
+            onScrollToPC={this.props.onScrollToPC}
+            onScrollBy={this.props.onScrollBy}
             symbolTable={this.props.lc3.symbolTable}
             onScrollTo={this.props.onScrollTo}
         />;
-        const footer = <MemoryFooter
+        const footer = <IOToolbar
             onShowRaw={() => this.setState({ showRawModal: true })}
             onShowAssemble={() => this.setState({ showAssembleModal: true })}
-            onScrollToPC={this.props.onScrollToPC}
-            onScrollBy={this.props.onScrollBy}
         />;
 
         return <div className="memory-view">

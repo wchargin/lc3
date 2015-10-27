@@ -42,8 +42,7 @@ export default class MemorySearch extends Component {
                     state: "invalid",
                     errorNode: <span>
                         Address out of range!
-                        It should be at least {min}
-                        and smaller than {max}.
+                        It should be at least {min} and less than {max}.
                     </span>,
                 };
             }
@@ -107,7 +106,12 @@ export default class MemorySearch extends Component {
             help={feedback}
             ref="input"
             style={inputStyle}
+            {...this.props}
         />;
+    }
+
+    focus() {
+        this.refs.input.getInputDOMNode().focus();
     }
 
     _handleChange() {
@@ -117,7 +121,7 @@ export default class MemorySearch extends Component {
     }
 
     _handleClick() {
-        this.refs.input.getInputDOMNode().focus();
+        this.focus();
         this._maybeJump(this.state.inputValue);
     }
 
