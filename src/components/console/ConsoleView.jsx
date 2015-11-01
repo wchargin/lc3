@@ -15,6 +15,11 @@ class MemoryView extends Component {
                 console={this.props.console}
                 onEnqueueStdin={this.props.onEnqueueStdin}
             />
+            <StdinStatus
+                stdin={this.props.console.get("stdin")}
+                kbsr={this.props.memory.get(0xFE00)}
+                kbdr={this.props.memory.get(0xFE02)}
+            />
         </div>;
     }
 
@@ -22,6 +27,7 @@ class MemoryView extends Component {
 
 function mapStateToProps(state) {
     return {
+        memory: state.get("lc3").memory,
         console: state.get("console"),
     };
 }
