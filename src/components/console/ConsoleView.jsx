@@ -3,11 +3,17 @@ import {connect} from 'react-redux';
 
 import * as actions from '../../actions';
 
+import Console from './Console';
+
 class MemoryView extends Component {
 
     render() {
         return <div className="console-view">
             <h2>Console</h2>
+            <Console
+                console={this.props.console}
+                onEnqueueStdin={this.props.onEnqueueStdin}
+            />
         </div>;
     }
 
@@ -21,6 +27,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
+        onEnqueueStdin: (text) => dispatch(actions.enqueueStdin(text)),
     };
 }
 
