@@ -19,7 +19,7 @@ export default class MemoryNav extends Component {
                     Jump to PC
                 </Button>
                 <OverlayTrigger
-                    placement="bottom"
+                    placement="right"
                     trigger="click"
                     rootClose
                     overlay={
