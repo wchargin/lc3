@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import {Col} from 'react-bootstrap';
 
+import ConsoleView from './console/ConsoleView';
 import MemoryView from './memory/MemoryView';
 import StatusView from './status/StatusView';
 
@@ -14,6 +15,7 @@ export default class App extends Component {
             </Col>
             <Col md={6}>
                 <StatusView />
+                <ConsoleView />
             </Col>
         </div>;
     }
