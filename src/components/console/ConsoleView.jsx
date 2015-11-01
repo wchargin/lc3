@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import * as actions from '../../actions';
 
 import Console from './Console';
+import ConsoleControls from './ConsoleControls';
 import StdinStatus from './StdinStatus';
 
 class MemoryView extends Component {
@@ -20,6 +21,10 @@ class MemoryView extends Component {
                 kbsr={this.props.memory.get(0xFE00)}
                 kbdr={this.props.memory.get(0xFE02)}
             />
+            <ConsoleControls
+                onClearStdin={this.props.onClearStdin}
+                onClearStdout={this.props.onClearStdout}
+            />
         </div>;
     }
 
@@ -35,6 +40,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         onEnqueueStdin: (text) => dispatch(actions.enqueueStdin(text)),
+        onClearStdin: () => dispatch(actions.clearStdin()),
+        onClearStdout: () => dispatch(actions.clearStdout()),
     };
 }
 
