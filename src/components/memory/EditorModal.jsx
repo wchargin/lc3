@@ -77,37 +77,41 @@ export default class EditorModal extends Component {
                     }}
                 />
                 <Collapse in={result && !result.success}>
-                    <Alert bsStyle="danger">
-                        <strong>Oh no!</strong>
-                        {" "}
-                        {result && result.errorMessage}
-                    </Alert>
+                    <div>
+                        <Alert bsStyle="danger">
+                            <strong>Oh no!</strong>
+                            {" "}
+                            {result && result.errorMessage}
+                        </Alert>
+                    </div>
                 </Collapse>
                 <Collapse in={result && result.success}>
-                    <Alert bsStyle="success">
-                        {this.props.successMessage}
-                        <AlertButtonToolbar>
-                            {this.hasSymbolTable() &&
+                    <div>
+                        <Alert bsStyle="success">
+                            {this.props.successMessage}
+                            <AlertButtonToolbar>
+                                {this.hasSymbolTable() &&
+                                    <AlertButton
+                                        onClick={() =>
+                                            this.handleDownloadSymbolTable()
+                                        }
+                                    >
+                                        Download Symbol Table
+                                    </AlertButton>}
                                 <AlertButton
-                                    onClick={
-                                        () => this.handleDownloadSymbolTable()
-                                    }
+                                    onClick={() => this.handleDownloadObject()}
                                 >
-                                    Download Symbol Table
-                                </AlertButton>}
-                            <AlertButton
-                                onClick={() => this.handleDownloadObject()}
-                            >
-                                Download Object File
-                            </AlertButton>
-                            <AlertButton
-                                bsStyle="primary"
-                                onClick={() => this.handleLoadIntoLC3()}
-                            >
-                                Load into Simulator
-                            </AlertButton>
-                        </AlertButtonToolbar>
-                    </Alert>
+                                    Download Object File
+                                </AlertButton>
+                                <AlertButton
+                                    bsStyle="primary"
+                                    onClick={() => this.handleLoadIntoLC3()}
+                                >
+                                    Load into Simulator
+                                </AlertButton>
+                            </AlertButtonToolbar>
+                        </Alert>
+                    </div>
                 </Collapse>
             </Modal.Body>
             <Modal.Footer>

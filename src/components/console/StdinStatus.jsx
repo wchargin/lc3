@@ -48,7 +48,7 @@ export default class StdinStatus extends Component {
                 The KBSR is {kbsrState}.
             </p>
             <Collapse in={showStdin}>
-                <pre>{this.props.stdin.replace(/\r/g, "\n")}</pre>
+                <div><pre>{this.props.stdin.replace(/\r/g, "\n")}</pre></div>
             </Collapse>
         </div>;
     }
