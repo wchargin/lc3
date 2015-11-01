@@ -15,7 +15,9 @@ export default class StdinStatus extends Component {
 
     render() {
         const {stdin, kbsr, kbdr} = this.props;
+        const length = stdin.length;
 
+        const showStdin = this.state.showStdin && length !== 0;
         const showHide = <a
             role="button"
             href="javascript:void 0"
@@ -24,7 +26,6 @@ export default class StdinStatus extends Component {
             {this.state.showStdin ? "hide" : "show"}
         </a>;
 
-        const length = stdin.length;
         const noun = length === 1 ? "byte" : "bytes";
         const stdinState = (length === 0) ?
             <strong>empty</strong> :
@@ -46,7 +47,7 @@ export default class StdinStatus extends Component {
                 Standard input is {stdinState}.
                 The KBSR is {kbsrState}.
             </p>
-            <Collapse in={this.state.showStdin}>
+            <Collapse in={showStdin}>
                 <pre>{this.props.stdin.replace(/\r/g, "\n")}</pre>
             </Collapse>
         </div>;
