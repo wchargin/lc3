@@ -59,18 +59,28 @@ export default class MemorySearch extends Component {
                     state: "empty",
                 };
             }
-            const nnl = "Not a numeric literal, and no such label found.";
+            const nnl = <span>
+                Not a numeric literal, and no such label found.
+            </span>;
+            const suggestNumber = query.toLowerCase().startsWith("0x") &&
+                <span>
+                    Did you mean to write <tt>{query.substring(1)}</tt>
+                    {" "}(without the leading <tt>0</tt>)?
+                </span>;
+
+            const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const closeKey = this.props.symbolTable.findKey((value, key) =>
+                normalize(key) == normalize(query));
+            const suggestKey = closeKey !== undefined &&
+                <span>
+                    Did you mean to write <tt>{closeKey}</tt>?
+                </span>;
+
             return {
                 query,
                 isLiteral,
                 state: "invalid",
-                errorNode: query.toLowerCase().startsWith("0x") ?
-                    <span>
-                        {nnl}{" "}
-                        Did you mean to write <tt>{query.substring(1)}</tt>
-                        {" "}(without the leading <tt>0</tt>)?
-                    </span> :
-                    <span>{nnl}</span>,
+                errorNode: <span>{nnl} {suggestNumber} {suggestKey}</span>,
             };
         }
 
