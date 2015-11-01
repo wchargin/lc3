@@ -1,74 +1,120 @@
-export function setPC(newPC) {
-    return {
+/*
+ * This utility function lets us specify descriptions of action creators
+ * instead of defining imperative functions for each action creator.
+ * Then, we can create the action creators all at once!
+ * Are we meta yet?
+ *
+ * An action creator description is an object with
+ *
+ *   - a "type" field, containing a string value,
+ *     which will be assigned to each action created;
+ *   - an optional "parameters" array of strings (default: []),
+ *     indicating the names of the fields in the created action
+ *     to which the arguments of the action creator should map; and
+ *   - an optional "parameterTransforms" object
+ *     whose keys are parameter names
+ *     and whose functions will be applied to the action creator's arguments
+ *     before the results are stored on the action itself.
+ *
+ * For example, the action creator description
+ *
+ *     { type: "FOO",
+ *       parameters: ["one", "two"],
+ *       parameterTransforms: { two: (x) => x + 1 } }
+ *
+ * would result in an action creator "foo" that could be invoked as
+ *
+ *     foo(100, 200)
+ *
+ * to create the action object
+ *
+ *     { type: "FOO",
+ *       one: 100,
+ *       two: 201 }.
+ *
+ * This system does not currently allow default arguments,
+ * and if the argument count is not the expected count
+ * then an error will be thrown at action creation time.
+ */
+function createActionCreator(description) {
+    const {type, parameters = [], parameterTransforms = {}} = description;
+    return function actionCreator(...args) {
+        if (args.length !== parameters.length) {
+            throw new Error(
+                `Expected ${parameters.length} arguments ` +
+                `in action creator ${type}, `
+                `but found ${args.length}`);
+        }
+        return parameters.reduce((acc, key, idx) => {
+            const transformer = parameterTransforms[key] || (x => x);
+            return {
+                ...acc,
+               [key]: transformer(args[idx]),
+            };
+        }, {type});
+    };
+}
+
+/*
+ * Map an object whose keys are action creator names
+ * and whose values are action creator descriptions
+ * to an object whose keys are the same names
+ * but whose values are the actual action creator functions.
+ */
+function createActionCreators(descriptions) {
+    return Object.keys(descriptions).reduce((acc, key) => {
+        return {
+            ...acc,
+           [key]: createActionCreator(descriptions[key]),
+        };
+    }, {});
+}
+
+const actionCreatorDescriptions = {
+    setPC: {
         type: "SET_PC",
-        newPC,
-    };
-}
-
-export function setMemory(address, value) {
-    return {
+        parameters: ["newPC"],
+    },
+    setMemory: {
         type: "SET_MEMORY",
-        address,
-        value,
-    };
-}
-
-export function setRegister(name, value) {
-    return {
+        parameters: ["address", "value"],
+    },
+    setRegister: {
         type: "SET_REGISTER",
-        name,
-        value,
-    };
-}
-
-export function loadProgram(program) {
-    return {
+        parameters: ["name", "value"],
+    },
+    loadProgram: {
         type: "LOAD_PROGRAM",
-        program: program.toJS(),
-    };
-}
-
-export function scrollTo(address) {
-    return {
+        parameters: ["program"],
+        parameterTransforms: {
+            "program": p => p.toJS(),
+        },
+    },
+    scrollTo: {
         type: "SCROLL_TO",
-        address,
-    };
-}
-
-export function scrollToPC() {
-    return {
+        parameters: ["address"],
+    },
+    scrollToPC: {
         type: "SCROLL_TO_PC",
-    };
-}
-
-export function scrollBy(delta) {
-    return {
+    },
+    scrollBy: {
         type: "SCROLL_BY",
-        delta,
-    };
-}
-
-export function step() {
-    return {
+        parameters: ["delta"],
+    },
+    step: {
         type: "STEP",
-    };
-}
-
-export function enqueueStdin(text) {
-    return {
+    },
+    enqueueStdin: {
         type: "ENQUEUE_STDIN",
-        text,
-    };
-}
-
-export function clearStdin() {
-    return {
+        parameters: ["text"],
+    },
+    clearStdin: {
         type: "CLEAR_STDIN",
-    };
-}
-
-export function clearStdout() {
-    return {
+    },
+    clearStdout: {
         type: "CLEAR_STDOUT",
-    };
-}
+    },
+};
+
+const actionCreators = createActionCreators(actionCreatorDescriptions);
+export default actionCreators;
