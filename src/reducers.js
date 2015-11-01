@@ -10,6 +10,10 @@ const initialState = Map({
         topAddressShown: 0x3000,
         followPC: true,
     }),
+    console: Map({
+        stdout: "",
+        stdin: "",
+    }),
 });
 
 function setPC(state, newPC) {
