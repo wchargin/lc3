@@ -2,6 +2,7 @@ import {List, Map, Record, fromJS} from 'immutable';
 
 import Constants from './constants';
 import RegisterSet from './register_set';
+import OS from './os';
 import Utils from './utils';
 import decode from './instructions';
 
@@ -10,19 +11,27 @@ import decode from './instructions';
  * Returns: an Immutable.List with one entry per address, in order.
  */
 function createMemory() {
-    let memory = List(Array(Constants.MEMORY_SIZE)).map(() => 0);
-    // TODO(william): load the OS memory here.
-    return memory;
+    const zeroMemory = List(Array(Constants.MEMORY_SIZE)).map(() => 0);
+
+    // The OS memory is sparse, and is not stored as a normal LC3Program;
+    // instead, it's an Object representing a partial function
+    // from memory addresses to values.
+    // We'll merge those in manually.
+    const initialMemory = zeroMemory.withMutations(mem => {
+        Object.keys(OS.memory).forEach(key => {
+            mem.set(key, OS.memory[key]);
+        });
+    });
+
+    return initialMemory;
 }
 
 /*
  * Create the initial symbol table for the LC3.
- * This currently is just a blank symbol table,
- * but eventually should contain some predefined labels, etc.
+ * This contains just the operating system labels.
  */
 function createSymbolTable() {
-    // TODO(william): Load the OS symbol table here.
-    return Map();
+    return Map(OS.symbolTable);
 }
 
 /*
