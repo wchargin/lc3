@@ -55,6 +55,14 @@ function enqueueStdin(state, text) {
     return state.updateIn(["console", "stdin"], oldText => oldText + text);
 }
 
+function clearStdin(state) {
+    return state.setIn(["console", "stdin"], "");
+}
+
+function clearStdout(state) {
+    return state.setIn(["console", "stdout"], "");
+}
+
 export default function reducer(state = initialState, action) {
 
     switch (action.type) {
@@ -76,6 +84,10 @@ export default function reducer(state = initialState, action) {
             return step(state);
         case "ENQUEUE_STDIN":
             return enqueueStdin(state, action.text);
+        case "CLEAR_STDIN":
+            return clearStdin(state);
+        case "CLEAR_STDOUT":
+            return clearStdout(state);
     }
 
     return state;

@@ -169,4 +169,25 @@ describe('reducer', () => {
         expect(state3.getIn(["console", "stdin"])).to.equal("echoecho");
     });
 
+    const withStdinStdout = initialState
+        .setIn(["console", "stdin"], "foo")
+        .setIn(["console", "stdout"], "bar")
+        ;
+
+    it("handles CLEAR_STDIN", () => {
+        const state = reducer(withStdinStdout, actions.clearStdin());
+        expect(state).to.be.ok;
+        expect(state.getIn(["console", "stdin"])).to.equal("");
+        expect(state.getIn(["console", "stdout"])).to.equal(
+            withStdinStdout.getIn(["console", "stdout"]));
+    });
+
+    it("handles CLEAR_STDOUT", () => {
+        const state = reducer(withStdinStdout, actions.clearStdout());
+        expect(state).to.be.ok;
+        expect(state.getIn(["console", "stdin"])).to.equal(
+            withStdinStdout.getIn(["console", "stdin"]));
+        expect(state.getIn(["console", "stdout"])).to.equal("");
+    });
+
 });

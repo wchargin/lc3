@@ -60,3 +60,15 @@ export function enqueueStdin(text) {
         text,
     };
 }
+
+export function clearStdin() {
+    return {
+        type: "CLEAR_STDIN",
+    };
+}
+
+export function clearStdout() {
+    return {
+        type: "CLEAR_STDOUT",
+    };
+}
