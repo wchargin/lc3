@@ -53,3 +53,10 @@ export function step() {
         type: "STEP",
     };
 }
+
+export function enqueueStdin(text) {
+    return {
+        type: "ENQUEUE_STDIN",
+        text,
+    };
+}

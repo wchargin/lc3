@@ -155,4 +155,18 @@ describe('reducer', () => {
 
     });
 
+    it("handles ENQUEUE_STDIN", () => {
+        const action = actions.enqueueStdin("echo");
+
+        const state2 = reducer(initialState, action);
+        expect(state2).to.be.ok;
+        expect(state2.get("lc3")).to.equal(initialState.get("lc3"));
+        expect(state2.getIn(["console", "stdin"])).to.equal("echo");
+
+        const state3 = reducer(state2, action);
+        expect(state3).to.be.ok;
+        expect(state3.get("lc3")).to.equal(initialState.get("lc3"));
+        expect(state3.getIn(["console", "stdin"])).to.equal("echoecho");
+    });
+
 });

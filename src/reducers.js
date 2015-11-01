@@ -51,6 +51,10 @@ function step(state) {
     return state.update("lc3", lc3 => lc3.step());
 }
 
+function enqueueStdin(state, text) {
+    return state.updateIn(["console", "stdin"], oldText => oldText + text);
+}
+
 export default function reducer(state = initialState, action) {
 
     switch (action.type) {
@@ -70,6 +74,8 @@ export default function reducer(state = initialState, action) {
             return scrollBy(state, action.delta);
         case "STEP":
             return step(state);
+        case "ENQUEUE_STDIN":
+            return enqueueStdin(state, action.text);
     }
 
     return state;
