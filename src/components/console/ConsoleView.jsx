@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import * as actions from '../../actions';
 
 import Console from './Console';
+import StdinStatus from './StdinStatus';
 
 class MemoryView extends Component {
 
