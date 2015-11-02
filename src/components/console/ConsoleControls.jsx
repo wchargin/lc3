@@ -13,6 +13,13 @@ import Utils from '../../core/utils';
 export default class ConsoleControls extends Component {
 
     render() {
+        const newlineItems = {
+            "LF": <span>Use <tt>x0A</tt></span>,
+            "CR": <span>Use <tt>x0D</tt></span>,
+            "ignore": <span>Leave unchanged</span>,
+        };
+        const activeMode = this.props.newlineMode;
+
         return <ButtonToolbar>
             <ButtonGroup>
                 <Button onClick={this.props.onClearStdin}>
@@ -22,17 +29,18 @@ export default class ConsoleControls extends Component {
                     Clear Standard Output
                 </Button>
             </ButtonGroup>
-            {/*
             <DropdownButton
                 title="Newline Mode"
                 id="newline-mode"
                 dropup
             >
-                <MenuItem>Use <tt>x0A</tt></MenuItem>
-                <MenuItem>Use <tt>x0D</tt></MenuItem>
-                <MenuItem>Leave unchanged</MenuItem>
+                {Object.keys(newlineItems).map(mode =>
+                    <MenuItem
+                        key={mode}
+                        active={activeMode === mode}
+                        onSelect={() => this.props.onSetNewlineMode(mode)}
+                    >{newlineItems[mode]}</MenuItem>)}
             </DropdownButton>
-            */}
         </ButtonToolbar>;
     }
 
@@ -41,4 +49,6 @@ export default class ConsoleControls extends Component {
 ConsoleControls.propTypes = {
     onClearStdout: PropTypes.func.isRequired,
     onClearStdin: PropTypes.func.isRequired,
+    newlineMode: PropTypes.string.isRequired,
+    onSetNewlineMode: PropTypes.func.isRequired,
 };

@@ -24,6 +24,8 @@ class MemoryView extends Component {
             <ConsoleControls
                 onClearStdin={this.props.onClearStdin}
                 onClearStdout={this.props.onClearStdout}
+                newlineMode={this.props.console.get("newlineMode")}
+                onSetNewlineMode={this.props.onSetNewlineMode}
             />
         </div>;
     }
@@ -42,6 +44,7 @@ function mapDispatchToProps(dispatch) {
         onEnqueueStdin: (text) => dispatch(actions.enqueueStdin(text)),
         onClearStdin: () => dispatch(actions.clearStdin()),
         onClearStdout: () => dispatch(actions.clearStdout()),
+        onSetNewlineMode: (mode) => dispatch(actions.setNewlineMode(mode)),
     };
 }
 
