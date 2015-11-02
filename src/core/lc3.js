@@ -185,6 +185,7 @@ export default class LC3 extends Record({
     step() {
         const instructionValue = this.memory.get(this.registers.pc);
         return this
+            .setIn(["batchState", "interactedWithIO"], false)
             .updateIn(["registers", "pc"], x => x + 1)
             .setIn(["registers", "ir"], instructionValue)
             ._execute(instructionValue)
@@ -288,7 +289,9 @@ export default class LC3 extends Record({
     readMemory(address) {
         const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;
         if (address === KBDR) {
-            return this.updateIn(["memory", KBSR], kbsr => kbsr & 0x7FFF);
+            return this
+                .updateIn(["memory", KBSR], kbsr => kbsr & 0x7FFF)
+                .setIn(["batchState", "interactedWithIO"], true);
         } else {
             return this;
         }
@@ -299,7 +302,8 @@ export default class LC3 extends Record({
         if (address === DDR) {
             return this.update("memory", m => m
                 .set(address, value)
-                .update(DSR, dsr => dsr & 0x7FFF));
+                .update(DSR, dsr => dsr & 0x7FFF))
+                .setIn(["batchState", "interactedWithIO"], true);
         } else {
             return this.setIn(["memory", address], value);
         }
