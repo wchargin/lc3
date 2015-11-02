@@ -7,6 +7,12 @@ import * as actions from '../../actions';
 
 class StatusView extends Component {
 
+    shouldComponentUpdate(newProps, newState) {
+        return this.props.lc3.get("registers") !== newProps.lc3.get("registers") ||
+            this.props.viewOptions !== newProps.viewOptions;
+    }
+
+
     render() {
         return <div className="status-view">
             <h2>Status</h2>

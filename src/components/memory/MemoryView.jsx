@@ -21,6 +21,12 @@ class MemoryView extends Component {
         };
     }
 
+    shouldComponentUpdate(newProps, newState) {
+        return this.props.lc3.get("memory") !== newProps.lc3.get("memory") ||
+            this.props.lc3.get("registers") !== newProps.lc3.get("registers") ||
+            this.props.viewOptions !== newProps.viewOptions;
+    }
+
     render() {
         const {lc3, viewOptions} = this.props;
 

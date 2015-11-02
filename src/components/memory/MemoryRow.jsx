@@ -25,6 +25,12 @@ export class MemoryHeaderRow extends Component {
 
 export class MemoryRow extends Component {
 
+    shouldComponentUpdate(newProps, newState) {
+        return this.props.address !== newProps.address ||
+            this.props.value !== newProps.value ||
+            this.props.active !== newProps.active;
+    }
+
     render() {
         const setPC = <DropdownButton
             title=""

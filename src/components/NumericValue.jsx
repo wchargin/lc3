@@ -21,6 +21,14 @@ import {
 
 export default class NumericValue extends Component {
 
+    shouldComponentUpdate(newProps, newState) {
+        return this.props.value !== newProps.value ||
+            this.props.signed !== newProps.signed ||
+            this.props.id !== newProps.id ||
+            this.props.showTooltip !== newProps.showTooltip ||
+            this.props.editable !== newProps.editable;
+    }
+
     render() {
         const {value} = this.props;
         const hexString = Utils.toHexString(value);
