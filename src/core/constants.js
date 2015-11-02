@@ -17,8 +17,17 @@ export const WORD_BITS = 16;
  */
 export const MAX_STANDARD_MEMORY = 0xFE00;
 
+export const HARDWARE_ADDRESSES = {
+    "KBSR": 0xFE00,
+    "KBDR": 0xFE02,
+    "DSR": 0xFE04,
+    "DDR": 0xFE06,
+    "MCR": 0xFFFE,
+};
+
 export default {
     MEMORY_SIZE,
     WORD_BITS,
     MAX_STANDARD_MEMORY,
+    HARDWARE_ADDRESSES,
 };
