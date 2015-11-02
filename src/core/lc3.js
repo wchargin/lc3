@@ -61,12 +61,50 @@ function createConsole() {
     });
 }
 
+/*
+ * We use batch mode when you click "Next", "Return", or "Finish";
+ * each of these will cause the LC-3 to repeatedly execute instructions
+ * until it reaches the termination condition
+ * (e.g., the machine returns from a subroutine).
+ *
+ * Practically, however, we also need to *delay* execution
+ * after you execute a large number of consecutive instructions
+ * or execute an instruction that depends on I/O,
+ * so that the DOM remains responsive and users can provide input.
+ *
+ * So the batchState fields are as follows:
+ *   - running:
+ *         whether batch mode is currently running,
+ *         and a batch step should be invoked again after some time has passed;
+ *         this is true when you first enter batch mode,
+ *         or when you have hit the instruction cap,
+ *         or when you execute an I/O instruction
+ *   - currentSubroutineLevel:
+ *         the number of levels of nested subroutines in the current state;
+ *         i.e., what would be the number of stack frames
+ *         if we were dealing with function calls instead of subroutines
+ *   - targetSubroutineLevel:
+ *         the desired subroutine level;
+ *         when we reach this level or below,
+ *         we will exit batch mode immediately.
+ *   - interactedWithIO:
+ *         whether the last instruction executed depended on I/O
+ *         (this field is updated at every call to "step")
+ */
+export class BatchState extends Record({
+    running: false,
+    currentSubroutineLevel: 0,
+    targetSubroutineLevel: 0,
+    interactedWithIO: false,
+}) {}
+
 export default class LC3 extends Record({
     memory: createMemory(),
     registers: new RegisterSet(),
     symbolTable: createSymbolTable(),
     systemTraps: createSystemTraps(),
     console: createConsole(),
+    batchState: new BatchState(),
 }) {
 
     /*
