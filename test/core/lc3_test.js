@@ -548,6 +548,41 @@ describe('LC3', () => {
 
         });
 
+        describe("in managing the KBSR and KBDR", () => {
+            const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;
+            const result1 = execute(
+                0b0001000000100001,  // ADD R0, R0, #1
+                lc3
+                    .update("console", c => c.set("stdin","Hello"))
+                    .update("memory", m => m
+                        .set(KBSR, 0x1234)
+                        .set(KBDR, 0x5555)));
+
+            it("should process an instruction and KBSR/KBDR together", () =>
+                expect(result1.registers.r0).to.equal(lc3.registers.r0 + 1));
+            it("should set the high bit of the KBSR", () =>
+                expect(result1.memory.get(KBSR)).to.equal(0x1234 | 0x8000));
+            it("should set the least significant byte of the KBDR", () =>
+                expect(result1.memory.get(KBDR)).to.equal(0x5548));
+            it("should take a character off the stdin buffer", () =>
+                expect(result1.getIn(["console", "stdin"])).to.equal("ello"));
+
+
+            // Nothing more should happen.
+            const result2 = execute(0b0001000000100001,
+                result1.setIn(["memory", KBSR], 0x89AB));
+
+            it("should process an instruction when the KBSR is ready", () =>
+                expect(result2.registers.r0).to.equal(
+                    result1.registers.r0 + 1));
+            it("should not touch the KBSR while it is ready", () =>
+                expect(result2.memory.get(KBSR)).to.equal(0x89AB));
+            it("should not touch the KBDR while the KBSR is ready", () =>
+                expect(result2.memory.get(KBDR)).to.equal(0x5548));
+            it("should not touch stdin while the KBSR is ready", () =>
+                expect(result2.getIn(["console", "stdin"])).to.equal("ello"));
+        });
+
     });
 
     describe('step-many', () => {

@@ -117,9 +117,25 @@ export default class LC3 extends Record({
         return Utils.formatConditionCode(this.registers.psr);
     }
 
+    _stepStdin() {
+        const stdin = this.console.get("stdin");
+        const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;
+        if (stdin.length === 0 || (this.memory.get(KBSR) & 0x8000) !== 0) {
+            return this;
+        } else {
+            const first = stdin.charCodeAt(0) & 0xFF;
+            return this
+                .setIn(["console", "stdin"], stdin.substring(1))
+                .update("memory", m => m
+                    .update(KBSR, kbsr => kbsr | 0x8000)
+                    .update(KBDR, kbdr => (kbdr & 0xFF00) | first));
+        }
+    }
+
     _cycle() {
         const instructionValue = this.memory.get(this.registers.pc);
         return this
+            ._stepStdin()
             .updateIn(["registers", "pc"], x => x + 1)
             .setIn(["registers", "ir"], instructionValue)
             ._execute(instructionValue);
