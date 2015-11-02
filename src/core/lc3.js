@@ -202,16 +202,24 @@ export default class LC3 extends Record({
 
             case 0b0010:  // LD
             case 0b0110:  // LDR
-                return this._setRegisterCC(
-                    instruction.get("dr"), this.memory.get(address));
+                // TODO(william): Test this readMemory logic.
+                const val = this.memory.get(address);
+                const bound = this.readMemory(address);
+                return bound._setRegisterCC(instruction.get("dr"), val);
 
             case 0b1010:  // LDI
-                return this._setRegisterCC(
-                    instruction.get("dr"),
-                    this.memory.get(this.memory.get(address)));
+                // TODO(william): Test this readMemory logic.
+                const addr1 = this.memory.get(address);
+                const bound1 = this.readMemory(address);
+                const addr2 = bound1.memory.get(addr1);
+                const bound2 = bound1.readMemory(addr1);
+                return bound2._setRegisterCC(instruction.get("dr"), addr2);
 
             case 0b1110:  // LEA
-                return this._setRegisterCC(instruction.get("dr"), address);
+                // TODO(william): Test this readMemory logic.
+                return this
+                    .readMemory(address)
+                    ._setRegisterCC(instruction.get("dr"), address);
 
             case 0b1001:  // NOT
                 return this._setRegisterCC(
@@ -223,11 +231,13 @@ export default class LC3 extends Record({
 
             case 0b0011:  // ST
             case 0b0111:  // STR
-                return this.setIn(["memory", address],
+                // TODO(william): Test this writeMemory logic.
+                return this.writeMemory(address,
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1011:  // STI
-                return this.setIn(["memory", this.memory.get(address)],
+                // TODO(william): Test this writeMemory logic.
+                return this.writeMemory(this.memory.get(address),
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1111:  // TRAP
@@ -242,6 +252,30 @@ export default class LC3 extends Record({
 
             default:
                 throw new Error(`Unknown opcode: ${opcode}`);
+        }
+    }
+
+    /*
+     * Note: this does not return the contents of the memory location!
+     * It's only used for watching the memory-mapped device registers.
+     */
+    readMemory(address) {
+        const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;
+        if (address === KBDR) {
+            return this.updateIn(["memory", KBSR], kbsr => kbsr & 0x7FFF);
+        } else {
+            return this;
+        }
+    }
+
+    writeMemory(address, value) {
+        const {DSR, DDR} = Constants.HARDWARE_ADDRESSES;
+        if (address === DDR) {
+            return this.update("memory", m => m
+                .set(address, value)
+                .update(DSR, dsr => dsr & 0x7FFF));
+        } else {
+            return this.setIn(["memory", address], value);
         }
     }
 

@@ -618,6 +618,30 @@ describe('LC3', () => {
 
     });
 
+    describe("readMemory", () => {
+        it("watches you read the KBDR and clears the KBSR", () => {
+            const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;
+            const machine = new LC3()
+                .update("memory", m => m
+                    .set(KBSR, 0x9234)
+                    .set(KBDR, 0x4321));
+            expect(machine.readMemory(KBDR).memory.get(KBSR))
+                .to.equal(0x1234);
+        });
+    });
+
+    describe("writeMemory", () => {
+        it("watches you write to the DDR and clears the DSR", () => {
+            const {DSR, DDR} = Constants.HARDWARE_ADDRESSES;
+            const machine = new LC3()
+                .update("memory", m => m
+                    .set(DSR, 0x9234)
+                    .set(DDR, 0x4321));
+            expect(machine.writeMemory(DDR, 0x4321).memory.get(DSR))
+                .to.equal(0x1234);
+        });
+    });
+
     describe('step-many', () => {
 
         it("should be able to step through consecutive instructions", () => {
