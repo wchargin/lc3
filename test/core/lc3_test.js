@@ -206,6 +206,8 @@ describe('LC3', () => {
         const execute = (instruction, lc3 = new LC3()) => lc3
             .setIn(["memory", lc3.registers.pc], instruction)
             .step();
+        const expectIO = (machine, whether) =>
+            expect(machine.batchState.interactedWithIO).to.equal(whether);
 
         describe("should handle ADD", () => {
 
@@ -216,7 +218,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r2).to.equal(10);
                 expect(newMachine.registers.r3).to.equal(11);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("in immediate-mode with a negative argument", () => {
@@ -226,7 +228,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r2).to.equal(10);
                 expect(newMachine.registers.r3).to.equal(2);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("in immediate-mode with a negative result", () => {
@@ -236,7 +238,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r2).to.equal(4);
                 expect(newMachine.registers.r3).to.equal(-4 + 0x10000);
                 expect(newMachine.getConditionCode()).to.equal(-1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("in register mode", () => {
@@ -248,7 +250,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r5).to.equal(0xAB);
                 expect(newMachine.registers.r7).to.equal(0x89 + 0xAB);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -261,7 +263,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.r3).to.equal(0);
                 expect(newMachine.getConditionCode()).to.equal(0);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("in immediate-mode with a positive argument", () => {
@@ -271,7 +273,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r2).to.equal(0b1010);
                 expect(newMachine.registers.r3).to.equal(0b0010);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("in immediate-mode with a negative argument", () => {
@@ -281,7 +283,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r2).to.equal(0b1010);
                 expect(newMachine.registers.r3).to.equal(0b1000);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("in register mode", () => {
@@ -293,7 +295,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r5).to.equal(0xBCDE);
                 expect(newMachine.registers.r7).to.equal(0xABCD & 0xBCDE);
                 expect(newMachine.getConditionCode()).to.equal(-1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -306,8 +308,7 @@ describe('LC3', () => {
                 it("when the PSR is " + toHexString(psr), () => {
                     expect(newMachine.registers.pc).to.equal(
                         oldMachine.registers.pc + 1)
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(false);
+                    expectIO(newMachine, false);
                 });
             });
         });
@@ -325,8 +326,7 @@ describe('LC3', () => {
                    `when the PSR is ${toHexString(psr)}`,
                    () => {
                        expect(newMachine.registers.pc).to.equal(expectedPC);
-                       expect(newMachine.batchState.interactedWithIO)
-                           .to.equal(false);
+                       expectIO(newMachine, false);
                    });
             };
             test(0x8004, true);
@@ -347,8 +347,7 @@ describe('LC3', () => {
                    `when the PSR is ${toHexString(psr)}`,
                    () => {
                        expect(newMachine.registers.pc).to.equal(expectedPC);
-                       expect(newMachine.batchState.interactedWithIO)
-                           .to.equal(false);
+                       expectIO(newMachine, false);
                    });
             };
             test(0x8004, false);
@@ -363,7 +362,7 @@ describe('LC3', () => {
                 const instruction = 0b1100000011000000;  // JMP R3
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x1234);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("as JMP R7 (RET)", () => {
@@ -371,7 +370,7 @@ describe('LC3', () => {
                 const instruction = 0b1100000111000000;  // JMP R7 (RET)
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0xFDEC);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -386,7 +385,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x3330);
                 expect(newMachine.registers.r7).to.equal(0x3334);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("such as JSRR", () => {
@@ -398,7 +397,7 @@ describe('LC3', () => {
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x6666);
                 expect(newMachine.registers.r7).to.equal(0x999A);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -416,7 +415,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.pc).to.equal(0x3334);
                 expect(newMachine.registers.r3).to.equal(0x2345);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("such as LDI", () => {
@@ -432,7 +431,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.pc).to.equal(0x3334);
                 expect(newMachine.registers.r3).to.equal(0x890A);
                 expect(newMachine.getConditionCode()).to.equal(-1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("such as LDR", () => {
@@ -448,7 +447,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r1).to.equal(0x1235);
                 expect(newMachine.registers.r3).to.equal(0x2345);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -463,7 +462,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.pc).to.equal(pc + 1);
                 expect(newMachine.registers.r1).to.equal(expected);
                 expect(newMachine.getConditionCode()).to.equal(expectedCC);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             };
 
             // Sample LEA instructions with positive and negative offsets.
@@ -491,7 +490,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r3)
                     .to.equal(0b0101010101010101);
                 expect(newMachine.getConditionCode()).to.equal(1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("when the output is negative", () => {
@@ -505,7 +504,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r3)
                     .to.equal(0b1010101010101010);
                 expect(newMachine.getConditionCode()).to.equal(-1);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -523,7 +522,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.pc).to.equal(0x3334);
                 expect(newMachine.registers.r3).to.equal(0x2222);
                 expect(newMachine.memory.get(0x3330)).to.equal(0x2222);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("such as STI", () => {
@@ -540,7 +539,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r3).to.equal(0x2222);
                 expect(newMachine.memory.get(0x3330)).to.equal(0x2345);
                 expect(newMachine.memory.get(0x2345)).to.equal(0x2222);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
             it("such as STR", () => {
@@ -556,7 +555,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r1).to.equal(0x1235);
                 expect(newMachine.registers.r3).to.equal(0x2222);
                 expect(newMachine.memory.get(0x1234)).to.equal(0x2222);
-                expect(newMachine.batchState.interactedWithIO).to.equal(false);
+                expectIO(newMachine, false);
             });
 
         });
@@ -579,7 +578,7 @@ describe('LC3', () => {
                 expect(newMachine.registers.r7).to.equal(0x3334));
 
             it("without triggering an I/O interaction", () =>
-                expect(newMachine.batchState.interactedWithIO).to.equal(false));
+                expectIO(newMachine, false));
 
         });
 
@@ -668,8 +667,7 @@ describe('LC3', () => {
                     expect(newMachine.registers.r0).to.equal(first);
                     expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
                     expect(newMachine.memory.get(KBDR)).to.equal(second);
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("via an LDR", () => {
@@ -680,8 +678,7 @@ describe('LC3', () => {
                     expect(newMachine.registers.r0).to.equal(first);
                     expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
                     expect(newMachine.memory.get(KBDR)).to.equal(second);
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("via an LDI whose final address is the KBDR", () => {
@@ -692,8 +689,7 @@ describe('LC3', () => {
                     expect(newMachine.registers.r0).to.equal(first);
                     expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
                     expect(newMachine.memory.get(KBDR)).to.equal(second);
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("via an LDI that goes through the KBDR", () => {
@@ -720,8 +716,7 @@ describe('LC3', () => {
                     expect(newMachine.memory.get(KBSR)).to.equal(0x8765);
                     expect(newMachine.memory.get(KBDR)).to.equal(
                         0xFE00 | second);
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("via an STI that goes through the KBDR", () => {
@@ -746,8 +741,7 @@ describe('LC3', () => {
                     expect(newMachine.memory.get(KBSR)).to.equal(0x8765);
                     expect(newMachine.memory.get(KBDR)).to.equal(
                         0x4000 | second);
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("but not via LEAs, which don't really read memory", () => {
@@ -758,8 +752,7 @@ describe('LC3', () => {
                     expect(newMachine.registers.r0).to.equal(KBDR);
                     expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
                     expect(newMachine.memory.get(KBDR)).to.equal(first);
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(false);
+                    expectIO(newMachine, false);
                 });
 
             });
@@ -777,8 +770,7 @@ describe('LC3', () => {
                     const machine = baseMachine.setIn(["registers", "pc"], pc);
                     const newMachine = execute(instruction, machine);
                     expect(newMachine.console.get("stdout")).to.equal("LC-3");
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("via a STR", () => {
@@ -787,8 +779,7 @@ describe('LC3', () => {
                         .setNumeric(1, DDR - 1));
                     const newMachine = execute(instruction, machine);
                     expect(newMachine.console.get("stdout")).to.equal("LC-3");
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
 
                 it("via an STI", () => {
@@ -797,8 +788,7 @@ describe('LC3', () => {
                     const machine = baseMachine.setIn(["memory", pc + 1], DDR);
                     const newMachine = execute(instruction, machine);
                     expect(newMachine.console.get("stdout")).to.equal("LC-3");
-                    expect(newMachine.batchState.interactedWithIO)
-                        .to.equal(true);
+                    expectIO(newMachine, true);
                 });
             });
 
