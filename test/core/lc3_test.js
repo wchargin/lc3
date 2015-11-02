@@ -583,6 +583,39 @@ describe('LC3', () => {
                 expect(result2.getIn(["console", "stdin"])).to.equal("ello"));
         });
 
+        describe("in managing the DSR and DDR", () => {
+            const {DSR, DDR} = Constants.HARDWARE_ADDRESSES;
+            const result1 = execute(
+                0b0001000000100001,  // ADD R0, R0, #1
+                lc3
+                    .update("console", c => c.set("stdout", "LC-"))
+                    .update("memory", m => m
+                        .set(DSR, 0x1234)
+                        .set(DDR, 0x5533)));
+
+            it("should process an instruction and DSR/DDR together", () =>
+                expect(result1.registers.r0).to.equal(lc3.registers.r0 + 1));
+            it("should set the high bit of the DSR", () =>
+                expect(result1.memory.get(DSR)).to.equal(0x1234 | 0x8000));
+            it("should push a character onto the stdout buffer", () =>
+                expect(result1.getIn(["console", "stdout"])).to.equal("LC-3"));
+
+
+            // Nothing more should happen.
+            const result2 = execute(0b0001000000100001,
+                result1.setIn(["memory", DSR], 0x89AB));
+
+            it("should process an instruction when the DSR is ready", () =>
+                expect(result2.registers.r0).to.equal(
+                    result1.registers.r0 + 1));
+            it("should not touch the DSR while it is ready", () =>
+                expect(result2.memory.get(DSR)).to.equal(0x89AB));
+            it("should not touch the DDR while the DSR is ready", () =>
+                expect(result2.memory.get(DDR)).to.equal(0x5533));
+            it("should not touch stdout while the DSR is ready", () =>
+                expect(result2.getIn(["console", "stdout"])).to.equal("LC-3"));
+        });
+
     });
 
     describe('step-many', () => {

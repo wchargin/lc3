@@ -132,10 +132,23 @@ export default class LC3 extends Record({
         }
     }
 
+    _stepStdout() {
+        const {DSR, DDR} = Constants.HARDWARE_ADDRESSES;
+        if ((this.memory.get(DSR) & 0x8000) !== 0) {
+            return this;
+        } else {
+            const character = String.fromCharCode(this.memory.get(DDR) & 0xFF);
+            return this
+                .updateIn(["console", "stdout"], stdout => stdout + character)
+                .updateIn(["memory", DSR], dsr => dsr | 0x8000);
+        }
+    }
+
     _cycle() {
         const instructionValue = this.memory.get(this.registers.pc);
         return this
             ._stepStdin()
+            ._stepStdout()
             .updateIn(["registers", "pc"], x => x + 1)
             .setIn(["registers", "ir"], instructionValue)
             ._execute(instructionValue);
