@@ -777,64 +777,6 @@ describe('LC3', () => {
         });
     });
 
-    describe('step-many', () => {
-
-        it("should be able to step through consecutive instructions", () => {
-            const instructions = [
-                0b0101000000100000,  // AND R0, R0, #0
-                0b0001001000100100,  // ADD R1, R0, #4
-                0b0001010000100110,  // ADD R2, R0, #6
-                0b0001000001000010,  // ADD R0, R1, R2
-                0b1001000000111111,  // NOT R0, R0
-            ];
-            const oldMachine = new LC3()
-                .loadProgram(Map({
-                    orig: 0x4000,
-                    machineCode: List(instructions),
-                }))
-                .update("registers", rs => rs
-                    .setNumeric(0, 123)
-                    .setNumeric(1, 234)
-                    .setNumeric(2, 345));
-            const newMachine = oldMachine.step(5);
-            expect(newMachine.registers.pc).to.equal(0x4005);
-            expect(newMachine.registers.r0).to.equal(0xFFF5);
-            expect(newMachine.registers.r1).to.equal(0x0004);
-            expect(newMachine.registers.r2).to.equal(0x0006);
-        });
-
-        it("should be able to branch based on condition codes", () => {
-            const instructions = [
-                // R1 = 0; for (R0 = 3; R0 > 0; R0--) R1 += 10;
-                0b0101001001100000,  // AND R1, R1, #0
-                0b0001000001100011,  // ADD R0, R0, #3
-                0b0001001001101010,  // ADD R1, R1, #10
-                0b0001000000111111,  // ADD R0, R0, #-1
-                0b0000001111111101,  // BRzp #-3
-            ];
-            const oldMachine = new LC3()
-                .loadProgram(Map({
-                    orig: 0x4000,
-                    machineCode: List(instructions),
-                }))
-                .update("registers", rs => rs
-                    .setNumeric(0, 123)
-                    .setNumeric(1, 234)
-                    .setNumeric(2, 345));
-
-            const initializationSteps = 2;
-            const eachLoopSteps = 3;
-            const loopIterations = 3;
-            const steps = initializationSteps + eachLoopSteps * loopIterations;
-            const newMachine = oldMachine.step(steps);
-
-            expect(newMachine.registers.pc).to.equal(0x4005);
-            expect(newMachine.registers.r0).to.equal(0x0000);
-            expect(newMachine.registers.r1).to.equal(30);
-        });
-
-    });
-
     describe('formatInstructionAtAddress', () => {
 
         const lc3 = new LC3();
