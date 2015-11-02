@@ -10,11 +10,6 @@ const initialState = Map({
         topAddressShown: 0x3000,
         followPC: true,
     }),
-    console: Map({
-        stdout: "",
-        stdin: "",
-        newlineMode: "LF",
-    }),
 });
 
 function setPC(state, newPC) {
@@ -53,19 +48,19 @@ function step(state) {
 }
 
 function enqueueStdin(state, text) {
-    return state.updateIn(["console", "stdin"], oldText => oldText + text);
+    return state.updateIn(["lc3", "console", "stdin"], old => old + text);
 }
 
 function clearStdin(state) {
-    return state.setIn(["console", "stdin"], "");
+    return state.setIn(["lc3", "console", "stdin"], "");
 }
 
 function clearStdout(state) {
-    return state.setIn(["console", "stdout"], "");
+    return state.setIn(["lc3", "console", "stdout"], "");
 }
 
 function setNewlineMode(state, newlineMode) {
-    return state.setIn(["console", "newlineMode"], newlineMode);
+    return state.setIn(["lc3", "console", "newlineMode"], newlineMode);
 }
 
 export default function reducer(state = initialState, action) {

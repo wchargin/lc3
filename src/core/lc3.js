@@ -53,12 +53,20 @@ function createSystemTraps() {
         .set(0x25, "HALT");
 }
 
+function createConsole() {
+    return Map({
+        stdout: "",
+        stdin: "",
+        newlineMode: "LF",
+    });
+}
+
 export default class LC3 extends Record({
     memory: createMemory(),
     registers: new RegisterSet(),
     symbolTable: createSymbolTable(),
     systemTraps: createSystemTraps(),
-    consoleBuffer: "",
+    console: createConsole(),
 }) {
 
     /*

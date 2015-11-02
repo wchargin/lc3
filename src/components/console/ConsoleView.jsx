@@ -35,7 +35,7 @@ class MemoryView extends Component {
 function mapStateToProps(state) {
     return {
         memory: state.get("lc3").memory,
-        console: state.get("console"),
+        console: state.get("lc3").console,
     };
 }
 

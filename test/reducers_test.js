@@ -160,40 +160,38 @@ describe('reducer', () => {
 
         const state2 = reducer(initialState, action);
         expect(state2).to.be.ok;
-        expect(state2.get("lc3")).to.equal(initialState.get("lc3"));
-        expect(state2.getIn(["console", "stdin"])).to.equal("echo");
+        expect(state2.getIn(["lc3", "console", "stdin"])).to.equal("echo");
 
         const state3 = reducer(state2, action);
         expect(state3).to.be.ok;
-        expect(state3.get("lc3")).to.equal(initialState.get("lc3"));
-        expect(state3.getIn(["console", "stdin"])).to.equal("echoecho");
+        expect(state3.getIn(["lc3", "console", "stdin"])).to.equal("echoecho");
     });
 
     const withStdinStdout = initialState
-        .setIn(["console", "stdin"], "foo")
-        .setIn(["console", "stdout"], "bar")
+        .setIn(["lc3", "console", "stdin"], "foo")
+        .setIn(["lc3", "console", "stdout"], "bar")
         ;
 
     it("handles CLEAR_STDIN", () => {
         const state = reducer(withStdinStdout, actions.clearStdin());
         expect(state).to.be.ok;
-        expect(state.getIn(["console", "stdin"])).to.equal("");
-        expect(state.getIn(["console", "stdout"])).to.equal(
-            withStdinStdout.getIn(["console", "stdout"]));
+        expect(state.getIn(["lc3", "console", "stdin"])).to.equal("");
+        expect(state.getIn(["lc3", "console", "stdout"])).to.equal(
+            withStdinStdout.getIn(["lc3", "console", "stdout"]));
     });
 
     it("handles CLEAR_STDOUT", () => {
         const state = reducer(withStdinStdout, actions.clearStdout());
         expect(state).to.be.ok;
-        expect(state.getIn(["console", "stdin"])).to.equal(
-            withStdinStdout.getIn(["console", "stdin"]));
-        expect(state.getIn(["console", "stdout"])).to.equal("");
+        expect(state.getIn(["lc3", "console", "stdin"])).to.equal(
+            withStdinStdout.getIn(["lc3", "console", "stdin"]));
+        expect(state.getIn(["lc3", "console", "stdout"])).to.equal("");
     });
 
     describe("SET_NEWLINE_MODE", () => {
         const test = value => it(`handles '${value}'`, () =>
             expect(reducer(initialState, actions.setNewlineMode(value))
-                    .getIn(["console", "newlineMode"])).to.equal(value));
+                    .getIn(["lc3", "console", "newlineMode"])).to.equal(value));
         test("CR");
         test("LF");
         test("ignore");

@@ -39,9 +39,9 @@ describe('LC3', () => {
             expect(symbolTable).to.be.ok;
         });
 
-        it("starts with an empty console buffer", () => {
-            const consoleBuffer = lc3.consoleBuffer;
-            expect(consoleBuffer).to.equal("");
+        it("starts with an empty stdin and stdout", () => {
+            expect(lc3.console.get("stdin")).to.equal("");
+            expect(lc3.console.get("stdout")).to.equal("");
         });
 
     });
