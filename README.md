@@ -16,6 +16,11 @@ All of this means that **it's easier for other people to contribute**! If there'
 
 **Note** that this project doesn't currently have a live site, because it's not production-ready. Please continue to use the old simulator for now, or, if you really want to, clone this repository, then `npm install` and `npm start`.
 
+## Contributing
+
+Anyone can contribute!
+Please see the [contributors' guide](CONTRIBUTING.md) for more information.
+
 ## License
 
 MIT
