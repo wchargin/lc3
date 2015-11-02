@@ -203,16 +203,17 @@ export default class LC3 extends Record({
 
             case 0b0010:  // LD
             case 0b0110:  // LDR
-                const val = this.memory.get(address);
-                const bound = this.readMemory(address);
-                return bound._setRegisterCC(instruction.get("dr"), val);
+                const addrLD = this.memory.get(address);
+                const boundLD = this.readMemory(address);
+                return boundLD._setRegisterCC(instruction.get("dr"), addrLD);
 
             case 0b1010:  // LDI
-                const addr1 = this.memory.get(address);
-                const bound1 = this.readMemory(address);
-                const addr2 = bound1.memory.get(addr1);
-                const bound2 = bound1.readMemory(addr1);
-                return bound2._setRegisterCC(instruction.get("dr"), addr2);
+                const addrLDI1 = this.memory.get(address);
+                const boundLDI1 = this.readMemory(address);
+                const addrLDI2 = boundLDI1.memory.get(addrLDI1);
+                const boundLDI2 = boundLDI1.readMemory(addrLDI1);
+                return boundLDI2
+                    ._setRegisterCC(instruction.get("dr"), addrLDI2);
 
             case 0b1110:  // LEA
                 return this._setRegisterCC(instruction.get("dr"), address);
@@ -231,9 +232,9 @@ export default class LC3 extends Record({
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1011:  // STI
-                const addr = this.memory.get(address);
+                const addrSTI = this.memory.get(address);
                 const boundSTI = this.readMemory(address);
-                return boundSTI.writeMemory(addr,
+                return boundSTI.writeMemory(addrSTI,
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1111:  // TRAP
