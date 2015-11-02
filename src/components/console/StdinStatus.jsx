@@ -19,21 +19,19 @@ export default class StdinStatus extends Component {
         const length = stdin.length;
 
         const showStdin = this.state.showStdin && length !== 0;
-        const showHide = <a
-            role="button"
-            href="javascript:void 0"
-            onClick={this._toggleStdin.bind(this)}
-        >
-            {this.state.showStdin ? "hide" : "show"}
-        </a>;
 
-        const rawText = <a
-            role="button"
-            href="javascript:void 0"
-            onClick={this._toggleRaw.bind(this)}
-        >
-            {this.state.showRaw ? "show text" : "show raw"}
-        </a>;
+        const makeButton = (handler, text) =>
+            <a
+                role="button"
+                href="javascript:void 0"
+                onClick={handler.bind(this)}
+            >{text}</a>;
+
+        const {showRaw} = this.state;
+        const showHide = makeButton(this._toggleStdin,
+            showStdin ? "hide" : "show");
+        const rawText = showStdin && makeButton(this._toggleRaw,
+            showRaw ? "show text" : "show raw");
 
 
         const noun = length === 1 ? "byte" : "bytes";
@@ -41,7 +39,10 @@ export default class StdinStatus extends Component {
             <strong>empty</strong> :
             <span>
                 <strong>buffered</strong>
-                {" "}({length} {noun}; {showHide}, {rawText})
+                {" "}({length} {noun};
+                {" "}{showHide}
+                {showStdin && ", "}{rawText}
+                )
             </span>;
 
         const kbdrByte = formatByte(kbdr);
