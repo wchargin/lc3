@@ -227,12 +227,11 @@ export default class LC3 extends Record({
 
             case 0b0011:  // ST
             case 0b0111:  // STR
-                // TODO(william): Test this writeMemory logic.
                 return this.writeMemory(address,
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1011:  // STI
-                // TODO(william): Test this writeMemory logic.
+                // TODO(william): Make this readMemory on the indirection!
                 return this.writeMemory(this.memory.get(address),
                     this.registers.getNumeric(instruction.get("sr")));
 

@@ -693,6 +693,38 @@ describe('LC3', () => {
 
             });
 
+            describe("and clear the DSR when you write to the DDR", () => {
+                const baseMachine = execute(
+                    0x0000,  // NOP; just trigger the stdin handling
+                    lc3
+                        .setIn(["console", "stdout"], "LC-")
+                        .update("registers", rs => rs.setNumeric(0, 0x0033)));
+
+                it("via a ST", () => {
+                    const instruction = 0b0011000011111111;  // ST R0, xFF
+                    const pc = DDR - 0x100;
+                    const machine = baseMachine.setIn(["registers", "pc"], pc);
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.console.get("stdout")).to.equal("LC-3");
+                });
+
+                it("via a STR", () => {
+                    const instruction = 0b0111000001000001;  // STR R0, R1, #1
+                    const machine = baseMachine.update("registers", rs => rs
+                        .setNumeric(1, DDR - 1));
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.console.get("stdout")).to.equal("LC-3");
+                });
+
+                it("via an STI", () => {
+                    const instruction = 0b1011000000000000;  // STI R0, #0
+                    const pc = baseMachine.registers.pc;
+                    const machine = baseMachine.setIn(["memory", pc + 1], DDR);
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.console.get("stdout")).to.equal("LC-3");
+                });
+            });
+
         });
 
     });
