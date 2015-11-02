@@ -114,6 +114,10 @@ const actionCreatorDescriptions = {
     clearStdout: {
         type: "CLEAR_STDOUT",
     },
+    setNewlineMode: {
+        type: "SET_NEWLINE_MODE",
+        parameters: ["newlineMode"],
+    }
 };
 
 const actionCreators = createActionCreators(actionCreatorDescriptions);

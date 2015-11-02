@@ -13,6 +13,7 @@ const initialState = Map({
     console: Map({
         stdout: "",
         stdin: "",
+        newlineMode: "LF",
     }),
 });
 
@@ -63,6 +64,10 @@ function clearStdout(state) {
     return state.setIn(["console", "stdout"], "");
 }
 
+function setNewlineMode(state, newlineMode) {
+    return state.setIn(["console", "newlineMode"], newlineMode);
+}
+
 export default function reducer(state = initialState, action) {
 
     switch (action.type) {
@@ -88,6 +93,8 @@ export default function reducer(state = initialState, action) {
             return clearStdin(state);
         case "CLEAR_STDOUT":
             return clearStdout(state);
+        case "SET_NEWLINE_MODE":
+            return setNewlineMode(state, action.newlineMode);
     }
 
     return state;

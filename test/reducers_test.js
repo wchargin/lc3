@@ -190,4 +190,13 @@ describe('reducer', () => {
         expect(state.getIn(["console", "stdout"])).to.equal("");
     });
 
+    describe("SET_NEWLINE_MODE", () => {
+        const test = value => it(`handles '${value}'`, () =>
+            expect(reducer(initialState, actions.setNewlineMode(value))
+                    .getIn(["console", "newlineMode"])).to.equal(value));
+        test("CR");
+        test("LF");
+        test("ignore");
+    })
+
 });
