@@ -616,6 +616,85 @@ describe('LC3', () => {
                 expect(result2.getIn(["console", "stdout"])).to.equal("LC-3"));
         });
 
+        describe("should properly watch memory-mapped device registers", () => {
+            const {KBSR, KBDR, DSR, DDR} = Constants.HARDWARE_ADDRESSES;
+
+            describe("and clear the KBSR when you read the KBDR", () => {
+                const baseMachine = execute(
+                    0x0000,  // NOP; just trigger the stdin handling
+                    lc3.setIn(["console", "stdin"], "LC-3"));
+                const [first, second] = [0x004C, 0x0043];  // 'L', 'C'
+
+                it("via a LD", () => {
+                    const instruction = 0b0010000011111111;  // LD R0, xFF
+                    const pc = KBDR - 0x100;
+                    const machine = baseMachine.setIn(["registers", "pc"], pc);
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.registers.r0).to.equal(first);
+                    expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
+                    expect(newMachine.memory.get(KBDR)).to.equal(second);
+                });
+
+                it("via an LDR", () => {
+                    const instruction = 0b0110000001000001;  // LDR R0, R1, #1
+                    const machine = baseMachine.update("registers", rs => rs
+                        .setNumeric(1, KBDR - 1));
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.registers.r0).to.equal(first);
+                    expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
+                    expect(newMachine.memory.get(KBDR)).to.equal(second);
+                });
+
+                it("via an LDI whose final address is the KBDR", () => {
+                    const instruction = 0b1010000000000000;  // LDI R0, #0
+                    const machine = baseMachine.setIn(
+                        ["memory", baseMachine.registers.pc + 1], KBDR);
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.registers.r0).to.equal(first);
+                    expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
+                    expect(newMachine.memory.get(KBDR)).to.equal(second);
+                });
+
+                it("via an LDI that goes through the KBDR", () => {
+                    const instruction = 0b1010000011111111;  // LDI R0, xFF
+                    const pc = KBDR - 0x100;
+                    const machine = baseMachine
+                        .setIn(["registers", "pc"], pc)
+                        .update("memory", m => m
+                            .set(KBDR, KBSR)  // why not?
+                            .set(KBSR, 0x8765));
+                    const newMachine = execute(instruction, machine);
+
+                    // The process should be:
+                    //  1. Read KBDR as the first indirection.
+                    //  2. Because the KBDR was read, clear the KBSR.
+                    //  3. Use the address from the first read,
+                    //     which is the value stored in the KBDR,
+                    //     which is the address of the KBSR,
+                    //     to perform the next read, reading the KBSR.
+                    //     We should see the cleared value.
+                    //  4. Automatically load another character from stdin,
+                    //     readying the KBSR.
+                    expect(newMachine.registers.r0).to.equal(0x0765);
+                    expect(newMachine.memory.get(KBSR)).to.equal(0x8765);
+                    expect(newMachine.memory.get(KBDR)).to.equal(
+                        0xFE00 | second);
+                });
+
+                it("but not via LEAs, which don't really read memory", () => {
+                    const instruction = 0b1110000011111111;  // LEA R0, xFF
+                    const pc = KBDR - 0x100;
+                    const machine = baseMachine.setIn(["registers", "pc"], pc);
+                    const newMachine = execute(instruction, machine);
+                    expect(newMachine.registers.r0).to.equal(KBDR);
+                    expect(newMachine.memory.get(KBSR)).to.equal(0x8000);
+                    expect(newMachine.memory.get(KBDR)).to.equal(first);
+                });
+
+            });
+
+        });
+
     });
 
     describe("readMemory", () => {

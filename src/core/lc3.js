@@ -203,13 +203,11 @@ export default class LC3 extends Record({
 
             case 0b0010:  // LD
             case 0b0110:  // LDR
-                // TODO(william): Test this readMemory logic.
                 const val = this.memory.get(address);
                 const bound = this.readMemory(address);
                 return bound._setRegisterCC(instruction.get("dr"), val);
 
             case 0b1010:  // LDI
-                // TODO(william): Test this readMemory logic.
                 const addr1 = this.memory.get(address);
                 const bound1 = this.readMemory(address);
                 const addr2 = bound1.memory.get(addr1);
@@ -217,10 +215,7 @@ export default class LC3 extends Record({
                 return bound2._setRegisterCC(instruction.get("dr"), addr2);
 
             case 0b1110:  // LEA
-                // TODO(william): Test this readMemory logic.
-                return this
-                    .readMemory(address)
-                    ._setRegisterCC(instruction.get("dr"), address);
+                return this._setRegisterCC(instruction.get("dr"), address);
 
             case 0b1001:  // NOT
                 return this._setRegisterCC(
