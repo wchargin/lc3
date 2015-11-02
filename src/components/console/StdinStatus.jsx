@@ -48,13 +48,45 @@ export default class StdinStatus extends Component {
                 The KBSR is {kbsrState}.
             </p>
             <Collapse in={showStdin}>
-                <div><pre>{this.props.stdin.replace(/\r/g, "\n")}</pre></div>
+                <div>{this._formatStdin(this.props.stdin)}</div>
             </Collapse>
         </div>;
     }
 
     _toggleStdin() {
         this.setState({ showStdin: !this.state.showStdin });
+    }
+
+    /**
+     * Given a string representing the current standard input,
+     * replace all the instances of "\r" with a colored <CR> indicator.
+     */
+    _formatStdin(stdin) {
+        const splitOnCR = stdin.split("\r");
+
+        const joinerStyle = {
+            color: "#337ab7",  // Bootstrap primary color
+        }
+        const joiner = <tt style={joinerStyle}>{"<CR>"}</tt>;
+
+        let parts = new Array(splitOnCR.length * 2 - 1);
+        for (let i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) {
+                parts[i] = splitOnCR[i / 2];
+            } else {
+                parts[i] = joiner;
+            }
+        }
+
+        const style = {
+            fontFamily: "monospace",  // override Menlo or whatever
+        };
+        return React.createElement(
+            "pre",
+            {style},
+            ...parts,
+            <span>&nbsp;</span>
+        );
     }
 
 }
