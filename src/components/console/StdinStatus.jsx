@@ -9,7 +9,7 @@ export default class StdinStatus extends Component {
     constructor() {
         super();
         this.state = {
-            showStdin: false,
+            showStdin: true,
             showRaw: false,
         };
     }
