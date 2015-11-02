@@ -224,12 +224,18 @@ export default class LC3 extends Record({
                 }
 
             case 0b1100:  // JMP, RET
-                return this.setIn(["registers", "pc"], address);
+                return this
+                    .setIn(["registers", "pc"], address)
+                    .updateIn(["batchState", "currentSubroutineLevel"],
+                        x => (instruction.get("baseR") === 7) ? (x - 1) : x);
 
             case 0b0100:  // JSR, JSRR
-                return this.update("registers", rs => rs
-                    .set("r7", rs.get("pc"))
-                    .set("pc", address));
+                return this
+                    .update("registers", rs => rs
+                        .set("r7", rs.get("pc"))
+                        .set("pc", address))
+                    .updateIn(["batchState", "currentSubroutineLevel"],
+                        x => x + 1);
 
             case 0b0010:  // LD
             case 0b0110:  // LDR

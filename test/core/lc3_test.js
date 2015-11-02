@@ -358,18 +358,26 @@ describe('LC3', () => {
         describe("should handle JMP", () => {
 
             it("as JMP R3", () => {
-                const oldMachine = lc3.setIn(["registers", "r3"], 0x1234);
+                const oldMachine = lc3
+                    .setIn(["registers", "r3"], 0x1234)
+                    .setIn(["batchState", "currentSubroutineLevel"], 10);
                 const instruction = 0b1100000011000000;  // JMP R3
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x1234);
+                expect(newMachine.batchState.currentSubroutineLevel)
+                    .to.equal(10);  // no change (not a RET)
                 expectIO(newMachine, false);
             });
 
             it("as JMP R7 (RET)", () => {
-                const oldMachine = lc3.setIn(["registers", "r7"], 0xFDEC);
+                const oldMachine = lc3
+                    .setIn(["registers", "r7"], 0xFDEC)
+                    .setIn(["batchState", "currentSubroutineLevel"], 10);
                 const instruction = 0b1100000111000000;  // JMP R7 (RET)
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0xFDEC);
+                expect(newMachine.batchState.currentSubroutineLevel)
+                    .to.equal(9);
                 expectIO(newMachine, false);
             });
 
@@ -378,25 +386,33 @@ describe('LC3', () => {
         describe("should handle subroutine instructions", () => {
 
             it("such as JSR", () => {
-                const oldMachine = lc3.update("registers", rs => rs
-                    .setNumeric(7, 0x8888)
-                    .set("pc", 0x3333));
+                const oldMachine = lc3
+                    .update("registers", rs => rs
+                        .setNumeric(7, 0x8888)
+                        .set("pc", 0x3333))
+                    .setIn(["batchState", "currentSubroutineLevel"], 10);
                 const instruction = 0b0100111111111100;  // JSR #-4
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x3330);
                 expect(newMachine.registers.r7).to.equal(0x3334);
+                expect(newMachine.batchState.currentSubroutineLevel)
+                    .to.equal(11);
                 expectIO(newMachine, false);
             });
 
             it("such as JSRR", () => {
-                const oldMachine = lc3.update("registers", rs => rs
-                    .setNumeric(4, 0x6666)
-                    .setNumeric(7, 0x8888)
-                    .set("pc", 0x9999));
+                const oldMachine = lc3
+                    .update("registers", rs => rs
+                        .setNumeric(4, 0x6666)
+                        .setNumeric(7, 0x8888)
+                        .set("pc", 0x9999))
+                    .setIn(["batchState", "currentSubroutineLevel"], 10);
                 const instruction = 0b0100000100000000;  // JSRR R4
                 const newMachine = execute(instruction, oldMachine);
                 expect(newMachine.registers.pc).to.equal(0x6666);
                 expect(newMachine.registers.r7).to.equal(0x999A);
+                expect(newMachine.batchState.currentSubroutineLevel)
+                    .to.equal(11);
                 expectIO(newMachine, false);
             });
 
