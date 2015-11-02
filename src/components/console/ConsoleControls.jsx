@@ -13,33 +13,42 @@ import Utils from '../../core/utils';
 export default class ConsoleControls extends Component {
 
     render() {
-        const newlineItems = {
-            "LF": <span>Use <tt>x0A</tt></span>,
-            "CR": <span>Use <tt>x0D</tt></span>,
-            "ignore": <span>Leave unchanged</span>,
+        const newlineTypes = {
+            "LF": {
+                menuItem: <span>Use <tt>x0A</tt></span>,
+                title: <span>Newlines are <tt>x0A</tt></span>,
+            },
+            "CR": {
+                menuItem: <span>Use <tt>x0D</tt></span>,
+                title: <span>Newlines are <tt>x0D</tt></span>,
+            },
+            "ignore": {
+                menuItem: <span>Leave unchanged</span>,
+                title: <span>Newlines ignored</span>,
+            },
         };
         const activeMode = this.props.newlineMode;
 
         return <ButtonToolbar>
             <ButtonGroup>
                 <Button onClick={this.props.onClearStdin}>
-                    Clear Standard Input
+                    Clear standard input
                 </Button>
                 <Button onClick={this.props.onClearStdout}>
-                    Clear Standard Output
+                    Clear standard output
                 </Button>
             </ButtonGroup>
             <DropdownButton
-                title="Newline Mode"
+                title={newlineTypes[activeMode].title}
                 id="newline-mode"
                 dropup
             >
-                {Object.keys(newlineItems).map(mode =>
+                {Object.keys(newlineTypes).map(type =>
                     <MenuItem
-                        key={mode}
-                        active={activeMode === mode}
-                        onSelect={() => this.props.onSetNewlineMode(mode)}
-                    >{newlineItems[mode]}</MenuItem>)}
+                        key={type}
+                        active={activeMode === type}
+                        onSelect={() => this.props.onSetNewlineMode(type)}
+                    >{newlineTypes[type].menuItem}</MenuItem>)}
             </DropdownButton>
         </ButtonToolbar>;
     }
