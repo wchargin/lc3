@@ -10,6 +10,7 @@ export default class StdinStatus extends Component {
         super();
         this.state = {
             showStdin: false,
+            showRaw: false,
         };
     }
 
@@ -26,11 +27,21 @@ export default class StdinStatus extends Component {
             {this.state.showStdin ? "hide" : "show"}
         </a>;
 
+        const rawText = <a
+            role="button"
+            href="javascript:void 0"
+            onClick={this._toggleRaw.bind(this)}
+        >
+            {this.state.showRaw ? "show text" : "show raw"}
+        </a>;
+
+
         const noun = length === 1 ? "byte" : "bytes";
         const stdinState = (length === 0) ?
             <strong>empty</strong> :
             <span>
-                <strong>buffered</strong> ({length} {noun}; {showHide})
+                <strong>buffered</strong>
+                {" "}({length} {noun}; {showHide}, {rawText})
             </span>;
 
         const kbdrByte = formatByte(kbdr);
@@ -57,36 +68,48 @@ export default class StdinStatus extends Component {
         this.setState({ showStdin: !this.state.showStdin });
     }
 
+    _toggleRaw() {
+        this.setState({ showRaw: !this.state.showRaw });
+    }
+
     /**
      * Given a string representing the current standard input,
      * replace all the instances of "\r" with a colored <CR> indicator.
      */
     _formatStdin(stdin) {
-        const splitOnCR = stdin.split("\r");
-
-        const joinerStyle = {
-            color: "#337ab7",  // Bootstrap primary color
-        }
-        const joiner = <tt style={joinerStyle}>{"<CR>"}</tt>;
-
-        let parts = new Array(splitOnCR.length * 2 - 1);
-        for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 0) {
-                parts[i] = splitOnCR[i / 2];
-            } else {
-                parts[i] = joiner;
-            }
-        }
-
         const style = {
             fontFamily: "monospace",  // override Menlo or whatever
         };
-        return React.createElement(
-            "pre",
-            {style},
-            ...parts,
-            <span>&nbsp;</span>
-        );
+
+        if (this.state.showRaw) {
+            const formatChar = c =>
+                Utils.toHexString(c.charCodeAt(0), 2).substring(1);
+            return <pre style={style}>
+                {stdin.split("").map(formatChar).join(" ")}
+            </pre>;
+        } else {
+            const splitOnCR = stdin.split("\r");
+
+            const joinerStyle = {
+                color: "#337ab7",  // Bootstrap primary color
+            }
+            const joiner = <tt style={joinerStyle}>{"<CR>"}</tt>;
+
+            let parts = new Array(splitOnCR.length * 2 - 1);
+            for (let i = 0; i < parts.length; i++) {
+                if (i % 2 === 0) {
+                    parts[i] = splitOnCR[i / 2];
+                } else {
+                    parts[i] = joiner;
+                }
+            }
+            return React.createElement(
+                "pre",
+                {style},
+                ...parts,
+                <span>&nbsp;</span>
+            );
+        }
     }
 
 }
