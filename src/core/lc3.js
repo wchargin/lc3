@@ -147,11 +147,12 @@ export default class LC3 extends Record({
     _cycle() {
         const instructionValue = this.memory.get(this.registers.pc);
         return this
-            ._stepStdin()
-            ._stepStdout()
             .updateIn(["registers", "pc"], x => x + 1)
             .setIn(["registers", "ir"], instructionValue)
-            ._execute(instructionValue);
+            ._execute(instructionValue)
+            ._stepStdin()
+            ._stepStdout()
+            ;
     }
 
     step(n = 1) {
