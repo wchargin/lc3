@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import shallowEquals from 'shallow-equals';
 
 import RegisterView from './RegisterView';
 import ControlButtons from './ControlButtons';
@@ -8,8 +9,8 @@ import * as actions from '../../actions';
 class StatusView extends Component {
 
     shouldComponentUpdate(newProps, newState) {
-        return this.props.lc3.get("registers") !== newProps.lc3.get("registers") ||
-            this.props.viewOptions !== newProps.viewOptions;
+        return !shallowEquals(this.props, newProps) ||
+            !shallowEquals(this.state, newState);
     }
 
 
@@ -17,7 +18,7 @@ class StatusView extends Component {
         return <div className="status-view">
             <h2>Status</h2>
             <RegisterView
-                registers={this.props.lc3.registers}
+                registers={this.props.registers}
                 onSetRegister={this.props.onSetRegister}
             />
             <ControlButtons
@@ -30,7 +31,7 @@ class StatusView extends Component {
 
 function mapStateToProps(state) {
     return {
-        lc3: state.get("lc3"),
+        registers: state.get("lc3").registers,
         viewOptions: state.get("viewOptions"),
     };
 }

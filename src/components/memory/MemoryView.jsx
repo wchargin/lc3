@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import shallowEquals from 'shallow-equals';
 
 import * as actions from '../../actions';
 
@@ -22,9 +23,22 @@ class MemoryView extends Component {
     }
 
     shouldComponentUpdate(newProps, newState) {
-        return this.props.lc3.get("memory") !== newProps.lc3.get("memory") ||
-            this.props.lc3.get("registers") !== newProps.lc3.get("registers") ||
-            this.props.viewOptions !== newProps.viewOptions;
+        const diffend = (props, state) => ({
+            state,
+            props: {
+                ...props,
+              lc3: null,
+            },
+            lc3: {
+                memory: props.lc3.memory,
+                symbolTable: props.lc3.symbolTable,
+                registers: props.lc3.registers,
+            },
+        });
+        return !shallowEquals(
+            diffend(this.props, this.state),
+            diffend(newProps, newState),
+            shallowEquals);  // compare one level recursively
     }
 
     render() {

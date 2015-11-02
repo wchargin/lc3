@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import shallowEquals from 'shallow-equals';
 
 import {DropdownButton, MenuItem} from 'react-bootstrap';
 import NumericValue from '../NumericValue';
@@ -26,9 +27,8 @@ export class MemoryHeaderRow extends Component {
 export class MemoryRow extends Component {
 
     shouldComponentUpdate(newProps, newState) {
-        return this.props.address !== newProps.address ||
-            this.props.value !== newProps.value ||
-            this.props.active !== newProps.active;
+        return !shallowEquals(this.props, newProps) ||
+            !shallowEquals(this.state, newState);
     }
 
     render() {
