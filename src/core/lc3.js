@@ -231,8 +231,9 @@ export default class LC3 extends Record({
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1011:  // STI
-                // TODO(william): Make this readMemory on the indirection!
-                return this.writeMemory(this.memory.get(address),
+                const addr = this.memory.get(address);
+                const boundSTI = this.readMemory(address);
+                return boundSTI.writeMemory(addr,
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1111:  // TRAP

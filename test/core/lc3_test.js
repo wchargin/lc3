@@ -681,6 +681,30 @@ describe('LC3', () => {
                         0xFE00 | second);
                 });
 
+                it("via an STI that goes through the KBDR", () => {
+                    const instruction = 0b1011000011111111;  // STI R0, xFF
+                    const pc = KBDR - 0x100;
+                    const machine = baseMachine
+                        .setIn(["registers", "pc"], pc)
+                        .update("memory", m => m
+                            .set(KBDR, 0x4000)
+                            .set(KBSR, 0x8765));
+                    const newMachine = execute(instruction, machine);
+
+                    // The process should be:
+                    //  1. Read KBDR as the first indirection.
+                    //  2. Because the KBDR was read, clear the KBSR.
+                    //  3. Use the address from the first read,
+                    //     which is the value stored in the KBDR,
+                    //     which is the address of the KBSR,
+                    //     to perform the store, writing into x4000.
+                    //  4. Automatically load another character from stdin,
+                    //     readying the KBSR.
+                    expect(newMachine.memory.get(KBSR)).to.equal(0x8765);
+                    expect(newMachine.memory.get(KBDR)).to.equal(
+                        0x4000 | second);
+                });
+
                 it("but not via LEAs, which don't really read memory", () => {
                     const instruction = 0b1110000011111111;  // LEA R0, xFF
                     const pc = KBDR - 0x100;
