@@ -859,21 +859,6 @@ describe('LC3', () => {
             expect(newMachine.batchState.interactedWithIO).to.equal(false);
         });
 
-        it("pauses batch mode after interacting with I/O", () => {
-            // Read from the KBDR to trigger an I/O interaction.
-            const ldi = 0b1010001000000000;  // LDI R1, #0
-            const machine = baseMachine
-                .update("memory", m => m
-                    .set(baseMachine.registers.pc + 3, ldi)
-                    .set(baseMachine.registers.pc + 4,
-                        Constants.HARDWARE_ADDRESSES.KBDR));
-
-            const newMachine = machine.stepBatch();
-            expect(newMachine.registers.r0).to.equal(3);
-            expect(newMachine.batchState.running).to.equal(true);
-            expect(newMachine.batchState.interactedWithIO).to.equal(true);
-        });
-
         after("restore BATCH_MODE_LIMIT", () => {
             Constants.BATCH_MODE_LIMIT = oldBatchModeLimit;
         });

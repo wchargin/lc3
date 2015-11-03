@@ -238,9 +238,6 @@ export default class LC3 extends Record({
         for (let i = 0; i < Constants.BATCH_MODE_LIMIT; i++) {
             machine = machine.step();
             const {batchState} = machine;
-            if (batchState.interactedWithIO) {
-                return machine;
-            }
             if (batchState.currentSubroutineLevel <=
                     batchState.targetSubroutineLevel) {
                 return machine
