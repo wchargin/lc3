@@ -33,11 +33,13 @@ class StatusView extends Component {
             <RegisterView
                 registers={this.props.registers}
                 onSetRegister={this.props.onSetRegister}
+                batch={this.props.batch}
             />
             <ControlButtons
                 onStep={this.props.onStep}
                 onEnterBatchMode={this.props.onEnterBatchMode}
                 onExitBatchMode={this.props.onExitBatchMode}
+                batch={this.props.batch}
             />
         </div>;
     }

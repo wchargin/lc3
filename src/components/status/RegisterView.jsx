@@ -11,7 +11,7 @@ import NumericValue from '../NumericValue';
 class Register extends Component {
 
     render() {
-        return <Col xs={6} sm={3}>
+        return <Col xs={6} sm={3} style={this.props.style}>
             <b>{this.props.name}:</b>
             {" "}
             {this.props.children}
@@ -23,16 +23,18 @@ class Register extends Component {
 export default class RegisterView extends Component {
 
     render() {
-        const {registers} = this.props;
+        const {registers, batch} = this.props;
+        const style = {opacity: (batch ? 0.65 : undefined)};
 
         const makeNumericRegister = (name, signed) =>
-            <Register name={name.toUpperCase()} key={name}>
+            <Register name={name.toUpperCase()} key={name} style={style}>
                 <NumericValue
                     value={registers[name]}
                     signed={signed}
                     id={name}
-                    editable={true}
+                    editable={!batch}
                     onEdit={(value) => this.props.onSetRegister(name, value)}
+                    showTooltip={!batch}
                 />
             </Register>;
 
@@ -41,7 +43,7 @@ export default class RegisterView extends Component {
                 makeNumericRegister(name, true))}
             {RegisterSet.specialRegisterNames.map(name =>
                 makeNumericRegister(name, false))}
-            <Register name="CC">
+            <Register name="CC" style={style}>
                 {Utils.formatConditionCode(registers.psr)}
             </Register>
         </Panel>;
@@ -51,6 +53,7 @@ export default class RegisterView extends Component {
 
 RegisterView.propTypes = {
     registers: PropTypes.instanceOf(RegisterSet).isRequired,
+    batch: PropTypes.bool,
 
     // (name, value) => ()
     onSetRegister: PropTypes.func.isRequired,
