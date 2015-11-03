@@ -23,6 +23,20 @@ class MemoryView extends Component {
     }
 
     shouldComponentUpdate(newProps, newState) {
+        /*
+         * We don't want to update all the time in batch mode.
+         * During batch mode, we'll gray out the interface,
+         * so we only need to re-render twice:
+         * when we exit and when we leave.
+         */
+        const batch = pr => pr.lc3.batchState.running;
+        if (batch(this.props) !== batch(newProps)) {
+            return true;
+        }
+        if (batch(this.props) && batch(newProps)) {
+            return false;
+        }
+
         const diffend = (props, state) => ({
             state,
             props: {
@@ -43,16 +57,19 @@ class MemoryView extends Component {
 
     render() {
         const {lc3, viewOptions} = this.props;
+        const batch = lc3.batchState.running;
 
         const header = <MemoryNav
             onScrollToPC={this.props.onScrollToPC}
             onScrollBy={this.props.onScrollBy}
             symbolTable={this.props.lc3.symbolTable}
             onScrollTo={this.props.onScrollTo}
+            batch={batch}
         />;
         const footer = <IOToolbar
             onShowRaw={() => this.setState({ showRawModal: true })}
             onShowAssemble={() => this.setState({ showAssembleModal: true })}
+            batch={batch}
         />;
 
         return <div className="memory-view">
@@ -63,6 +80,7 @@ class MemoryView extends Component {
                     topRow={viewOptions.get("topAddressShown")}
                     onSetPC={this.props.onSetPC}
                     onSetMemory={this.props.onSetMemory}
+                    batch={batch}
                     fill
                 />
             </Panel>

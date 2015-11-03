@@ -30,6 +30,7 @@ export default class MemoryTable extends Component {
                 onSetPC={() => this.props.onSetPC(address)}
                 onSetValue={(value) => this.props.onSetMemory(address, value)}
                 key={index}
+                batch={this.props.batch}
             />;
         });
 

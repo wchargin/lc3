@@ -5,14 +5,15 @@ export default class IOToolbar extends Component {
 
     render() {
         // TODO(william): Add the rest of the input/export logic
+        const disabled = this.props.batch;
         return <ButtonGroup justified>
             <ButtonGroup>
-            <Button onClick={this.props.onShowRaw}>
+            <Button onClick={this.props.onShowRaw} disabled={disabled}>
                 Raw
             </Button>
             </ButtonGroup>
             <ButtonGroup>
-            <Button onClick={this.props.onShowAssemble}>
+            <Button onClick={this.props.onShowAssemble} disabled={disabled}>
                 Assemble
             </Button>
             </ButtonGroup>

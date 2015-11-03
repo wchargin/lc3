@@ -5,17 +5,27 @@ import MemorySearch from './MemorySearch';
 export default class MemoryNav extends Component {
 
     render() {
+        const disabled = this.props.batch;
         const scrollDelta = 1;
         const groupStyle = { float: "none" };
         return <ButtonToolbar className="center-block">
             <ButtonGroup style={groupStyle}>
-                <Button onClick={() => this.props.onScrollBy(-scrollDelta)}>
+                <Button
+                    onClick={() => this.props.onScrollBy(-scrollDelta)}
+                    disabled={disabled}
+                >
                     <Glyphicon glyph="chevron-up" alt="Scroll memory up" />
                 </Button>
-                <Button onClick={() => this.props.onScrollBy(scrollDelta)}>
+                <Button
+                    onClick={() => this.props.onScrollBy(scrollDelta)}
+                    disabled={disabled}
+                >
                     <Glyphicon glyph="chevron-down" alt="Scroll memory down" />
                 </Button>
-                <Button onClick={this.props.onScrollToPC}>
+                <Button
+                    onClick={this.props.onScrollToPC}
+                    disabled={disabled}
+                >
                     Jump to PC
                 </Button>
                 <OverlayTrigger
@@ -33,7 +43,7 @@ export default class MemoryNav extends Component {
                     }
                     onEntering={() => this.refs.search.focus()}
                 >
-                    <Button>Jump to&hellip;</Button>
+                    <Button disabled={disabled}>Jump to&hellip;</Button>
                 </OverlayTrigger>
             </ButtonGroup>
         </ButtonToolbar>;
