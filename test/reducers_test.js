@@ -197,4 +197,69 @@ describe('reducer', () => {
         test("ignore");
     })
 
+    describe("with batch-mode-related actions", () => {
+        const oldBatchModeLimit = Constants.BATCH_MODE_LIMIT;
+        before("mock out BATCH_MODE_LIMIT", () => {
+            Constants.BATCH_MODE_LIMIT = 4;
+        });
+
+        const addInstruction = 0b0001000000100001;  // ADD R0, R0, #1
+        const lc3 = initialState.get("lc3");
+        const baseMachine = lc3
+            .update("memory", m => m
+                .set(lc3.registers.pc + 0, addInstruction)
+                .set(lc3.registers.pc + 1, addInstruction)
+                .set(lc3.registers.pc + 2, addInstruction)
+                .set(lc3.registers.pc + 3, addInstruction)
+                .set(lc3.registers.pc + 4, addInstruction))
+            .update("batchState", bs => bs
+                .set("running", false)
+                .set("currentSubroutineLevel", 10)
+                .set("targetSubroutineLevel", 4))
+            .update("registers", rs => rs
+                .setNumeric(0, 0x0000));
+        const baseState = initialState.set("lc3", baseMachine);
+
+        it("enters batch mode with CONTINUE", () => {
+            const action = actions.enterBatchMode("CONTINUE");
+            expect(reducer(baseState, action).get("lc3")).to.equal(
+                baseMachine.enterBatchMode());
+        });
+
+        it("enters batch mode with NEXT", () => {
+            const action = actions.enterBatchMode("NEXT");
+            expect(reducer(baseState, action).get("lc3")).to.equal(
+                baseMachine.enterBatchModeForNext());
+        });
+
+        it("enters batch mode with FINISH", () => {
+            const action = actions.enterBatchMode("FINISH");
+            expect(reducer(baseState, action).get("lc3")).to.equal(
+                baseMachine.enterBatchModeForFinish());
+        });
+
+        it("enters batch mode with FOREVER", () => {
+            const action = actions.enterBatchMode("RUN");
+            expect(reducer(baseState, action).get("lc3")).to.equal(
+                baseMachine.enterBatchModeForRunForever());
+        });
+
+        it("exits batch mode", () => {
+            const action = actions.exitBatchMode();
+            expect(reducer(baseState
+                    .setIn(["lc3", "batchState", "running"], true),
+            action).get("lc3")).to.equal(baseMachine);
+        });
+
+        it("takes a batch step", () => {
+            const state1 = reducer(baseState, actions.enterBatchMode("RUN"));
+            const state2 = reducer(state1, actions.stepBatch());
+            expect(state2.get("lc3")).to.equal(state1.get("lc3").stepBatch());
+        });
+
+        after("restore BATCH_MODE_LIMIT", () => {
+            Constants.BATCH_MODE_LIMIT = oldBatchModeLimit;
+        });
+    });
+
 });

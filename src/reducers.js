@@ -47,6 +47,33 @@ function step(state) {
     return state.update("lc3", lc3 => lc3.step());
 }
 
+function stepBatch(state) {
+    return state.update("lc3", lc3 => lc3.stepBatch());
+}
+
+function enterBatchMode(state, style) {
+    switch (style) {
+        case "CONTINUE":
+            return state.update("lc3", lc3 => lc3
+                .enterBatchMode());
+        case "NEXT":
+            return state.update("lc3", lc3 => lc3
+                .enterBatchModeForNext());
+        case "FINISH":
+            return state.update("lc3", lc3 => lc3
+                .enterBatchModeForFinish());
+        case "RUN":
+            return state.update("lc3", lc3 => lc3
+                .enterBatchModeForRunForever());
+        default:
+            throw new Error(`Unrecognized batch mode style: ${style}`);
+    }
+}
+
+function exitBatchMode(state) {
+    return state.update("lc3", lc3 => lc3.exitBatchMode());
+}
+
 function enqueueStdin(state, text) {
     return state.updateIn(["lc3", "console", "stdin"], old => old + text);
 }
@@ -82,6 +109,12 @@ export default function reducer(state = initialState, action) {
             return scrollBy(state, action.delta);
         case "STEP":
             return step(state);
+        case "STEP_BATCH":
+            return stepBatch(state);
+        case "ENTER_BATCH_MODE":
+            return enterBatchMode(state, action.style);
+        case "EXIT_BATCH_MODE":
+            return exitBatchMode(state);
         case "ENQUEUE_STDIN":
             return enqueueStdin(state, action.text);
         case "CLEAR_STDIN":

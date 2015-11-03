@@ -104,6 +104,16 @@ const actionCreatorDescriptions = {
     step: {
         type: "STEP",
     },
+    stepBatch: {
+        type: "STEP_BATCH",
+    },
+    enterBatchMode: {
+        type: "ENTER_BATCH_MODE",
+        parameters: ["style"],
+    },
+    exitBatchMode: {
+        type: "EXIT_BATCH_MODE",
+    },
     enqueueStdin: {
         type: "ENQUEUE_STDIN",
         parameters: ["text"],
@@ -117,7 +127,7 @@ const actionCreatorDescriptions = {
     setNewlineMode: {
         type: "SET_NEWLINE_MODE",
         parameters: ["newlineMode"],
-    }
+    },
 };
 
 const actionCreators = createActionCreators(actionCreatorDescriptions);
