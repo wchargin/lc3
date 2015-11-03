@@ -42,7 +42,7 @@ function createActionCreator(description) {
         if (args.length !== parameters.length) {
             throw new Error(
                 `Expected ${parameters.length} arguments ` +
-                `in action creator ${type}, `
+                `in action creator ${type}, ` +
                 `but found ${args.length}`);
         }
         return parameters.reduce((acc, key, idx) => {
