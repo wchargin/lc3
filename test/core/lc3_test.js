@@ -582,7 +582,8 @@ describe('LC3', () => {
                 .update("memory", m => m.set(0x0020, 0x0234))
                 .update("registers", rs => rs
                     .set("pc", 0x3333)
-                    .setNumeric(7, 0x8888));
+                    .setNumeric(7, 0x8888))
+                .setIn(["batchState", "currentSubroutineLevel"], 10);
             const instruction = 0b1111000000100000;  // TRAP x20
             const newMachine = execute(instruction, oldMachine);
 
@@ -595,6 +596,10 @@ describe('LC3', () => {
 
             it("without triggering an I/O interaction", () =>
                 expectIO(newMachine, false));
+
+            it("and count as a subroutine call", () =>
+                expect(newMachine.batchState.currentSubroutineLevel)
+                    .to.equal(11));
 
         });
 

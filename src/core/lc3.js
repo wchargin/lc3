@@ -325,9 +325,12 @@ export default class LC3 extends Record({
                     this.registers.getNumeric(instruction.get("sr")));
 
             case 0b1111:  // TRAP
-                return this.update("registers", rs => rs
-                    .setNumeric(7, rs.pc)
-                    .set("pc", this.memory.get(address)));
+                return this
+                    .update("registers", rs => rs
+                        .setNumeric(7, rs.pc)
+                        .set("pc", this.memory.get(address)))
+                    .updateIn(["batchState", "currentSubroutineLevel"],
+                        x => x + 1);
 
             case 0b1101:  // RSRV
                 throw new Error(
