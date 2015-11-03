@@ -62,7 +62,7 @@ export class MemoryRow extends Component {
                     value={this.props.value}
                     signed={true}
                     id={"value-" + this.props.address}
-                    editable={true}
+                    editable={!disabled}
                     onEdit={this.props.onSetValue}
                     showTooltip={!disabled}
                 />
