@@ -1,4 +1,4 @@
-import {describe, it} from 'mocha';
+import {describe, it, before, after} from 'mocha';
 import {expect} from 'chai';
 
 import {Map, List} from 'immutable';
@@ -810,6 +810,73 @@ describe('LC3', () => {
 
         });
 
+    });
+
+    describe("stepBatch", () => {
+        const lc3 = new LC3();
+        const oldBatchModeLimit = Constants.BATCH_MODE_LIMIT;
+        before("mock out BATCH_MODE_LIMIT", () => {
+            Constants.BATCH_MODE_LIMIT = 4;
+        });
+
+        const addInstruction = 0b0001000000100001;  // ADD R0, R0, #1
+        const baseMachine = lc3
+            .update("memory", m => m
+                .set(lc3.registers.pc + 0, addInstruction)
+                .set(lc3.registers.pc + 1, addInstruction)
+                .set(lc3.registers.pc + 2, addInstruction)
+                .set(lc3.registers.pc + 3, addInstruction)
+                .set(lc3.registers.pc + 4, addInstruction))
+            .update("batchState", bs => bs
+                .set("running", true)
+                .set("targetSubroutineLevel", 0)
+                .set("currentSubroutineLevel", 1))
+            .update("registers", rs => rs
+                .setNumeric(0, 0x0000));
+
+        it("exits batch mode after hitting the subroutine criterion", () => {
+            const ret = 0b1100000111000000;  // JMP R7 = RET
+            const machine = baseMachine
+                .setIn(["memory", baseMachine.registers.pc + 2], ret)
+                .update("registers", rs => rs.setNumeric(7, 0x4000));
+
+            const newMachine = machine.stepBatch();
+            expect(newMachine.registers.pc).to.equal(0x4000);
+            expect(newMachine.registers.r0).to.equal(2);
+            expect(newMachine.batchState.running).to.equal(false);
+            expect(newMachine.batchState.interactedWithIO).to.equal(false);
+        });
+
+        it("pauses batch mode after hitting the instruction limit", () => {
+            const machine = baseMachine;
+
+            const newMachine = machine.stepBatch();
+            expect(newMachine.registers.pc).to.equal(
+                baseMachine.registers.pc + Constants.BATCH_MODE_LIMIT);
+            expect(newMachine.registers.r0).to.equal(
+                Constants.BATCH_MODE_LIMIT);
+            expect(newMachine.batchState.running).to.equal(true);
+            expect(newMachine.batchState.interactedWithIO).to.equal(false);
+        });
+
+        it("pauses batch mode after interacting with I/O", () => {
+            // Read from the KBDR to trigger an I/O interaction.
+            const ldi = 0b1010001000000000;  // LDI R1, #0
+            const machine = baseMachine
+                .update("memory", m => m
+                    .set(baseMachine.registers.pc + 3, ldi)
+                    .set(baseMachine.registers.pc + 4,
+                        Constants.HARDWARE_ADDRESSES.KBDR));
+
+            const newMachine = machine.stepBatch();
+            expect(newMachine.registers.r0).to.equal(3);
+            expect(newMachine.batchState.running).to.equal(true);
+            expect(newMachine.batchState.interactedWithIO).to.equal(true);
+        });
+
+        after("restore BATCH_MODE_LIMIT", () => {
+            Constants.BATCH_MODE_LIMIT = oldBatchModeLimit;
+        });
     });
 
     describe("readMemory", () => {

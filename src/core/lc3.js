@@ -195,6 +195,31 @@ export default class LC3 extends Record({
     }
 
     /*
+     * Complete a single batch mode step.
+     * This will perform one or more calls to step(),
+     * stopping after a maximum number of iterations,
+     * or when the target subroutine level is met,
+     * or when an I/O instruction is hit
+     * (see the documentation on BatchState for more information).
+     */
+    stepBatch() {
+        let machine = this;
+        for (let i = 0; i < Constants.BATCH_MODE_LIMIT; i++) {
+            machine = machine.step();
+            const {batchState} = machine;
+            if (batchState.interactedWithIO) {
+                return machine;
+            }
+            if (batchState.currentSubroutineLevel <=
+                    batchState.targetSubroutineLevel) {
+                return machine
+                    .setIn(["batchState", "running"], false);
+            }
+        }
+        return machine;
+    }
+
+    /*
      * Execute the given instruction, provided as a (binary) number.
      * This does *not* correspond to the full instruction cycle!
      * In particular, it does not include the "fetch" phase,

@@ -25,6 +25,12 @@ export const HARDWARE_ADDRESSES = {
     "MCR": 0xFFFE,
 };
 
+/*
+ * The maximum number of instructions
+ * that can be executed before exiting batch mode.
+ */
+export const BATCH_MODE_LIMIT = 0x1000;
+
 export default {
     MEMORY_SIZE,
     WORD_BITS,
