@@ -879,6 +879,91 @@ describe('LC3', () => {
         });
     });
 
+    describe("enterBatchMode", () => {
+        const machine = new LC3()
+            .update("batchState", bs => bs
+                .set("running", false)
+                .set("currentSubroutineLevel", 10)
+                .set("targetSubroutineLevel", 5)
+                .set("interactedWithIO", true));
+        const newMachine = machine.enterBatchMode();
+
+        it("should set batchState.running to true", () => {
+            expect(newMachine.batchState.running).to.be.true;
+        });
+
+        it("should leave the other batchState properties alone", () => {
+            expect(newMachine.batchState.currentSubroutineLevel).to.equal(10);
+            expect(newMachine.batchState.targetSubroutineLevel).to.equal(5);
+            expect(newMachine.batchState.interactedWithIO).to.equal(true);
+        });
+
+        it("should not execute any instructions", () => {
+            expect(newMachine.registers.pc).to.equal(machine.registers.pc);
+        });
+    });
+
+    describe("exitBatchMode", () => {
+        const machine = new LC3()
+            .update("batchState", bs => bs
+                .set("running", true)
+                .set("currentSubroutineLevel", 10)
+                .set("targetSubroutineLevel", 5)
+                .set("interactedWithIO", true));
+        const newMachine = machine.exitBatchMode();
+
+        it("should set batchState.running to false", () => {
+            expect(newMachine.batchState.running).to.be.false;
+        });
+
+        it("should leave the other batchState properties alone", () => {
+            expect(newMachine.batchState.currentSubroutineLevel).to.equal(10);
+            expect(newMachine.batchState.targetSubroutineLevel).to.equal(5);
+            expect(newMachine.batchState.interactedWithIO).to.equal(true);
+        });
+
+        it("should not execute any instructions", () => {
+            expect(newMachine.registers.pc).to.equal(machine.registers.pc);
+        });
+    });
+
+    describe("enterBatchMode[...] helpers", () => {
+        const machine = new LC3()
+            .update("batchState", bs => bs
+                .set("running", false)
+                .set("currentSubroutineLevel", 10)
+                .set("targetSubroutineLevel", 5)
+                .set("interactedWithIO", true));
+
+        describe("enterBatchModeForNext", () => {
+            const newMachine = machine.enterBatchModeForNext();
+            it("should enter batch mode", () =>
+                expect(newMachine.batchState.running).to.be.true);
+            it("should set the target level to the current level", () =>
+                expect(newMachine.batchState.targetSubroutineLevel)
+                    .to.equal(10));
+        });
+
+        describe("enterBatchModeForFinish", () => {
+            const newMachine = machine.enterBatchModeForFinish();
+            it("should enter batch mode", () =>
+                expect(newMachine.batchState.running).to.be.true);
+            it("should set the target level one below the current level", () =>
+                expect(newMachine.batchState.targetSubroutineLevel)
+                    .to.equal(9));
+        });
+
+        describe("enterBatchModeForRunForever", () => {
+            const newMachine = machine.enterBatchModeForRunForever();
+            it("should enter batch mode", () =>
+                expect(newMachine.batchState.running).to.be.true);
+            it("should set the target level to negative infinity", () =>
+                expect(newMachine.batchState.targetSubroutineLevel)
+                    .to.equal(-Infinity));
+        });
+
+    });
+
     describe("readMemory", () => {
         it("watches you read the KBDR and clears the KBSR", () => {
             const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;

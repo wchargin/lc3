@@ -155,6 +155,37 @@ export default class LC3 extends Record({
         return Utils.formatConditionCode(this.registers.psr);
     }
 
+    enterBatchMode() {
+        return this.setIn(["batchState", "running"], true);
+    }
+
+    exitBatchMode() {
+        return this.setIn(["batchState", "running"], false);
+    }
+
+    enterBatchModeForNext() {
+        return this
+            .enterBatchMode()
+            .update("batchState", bs => bs
+                .set("targetSubroutineLevel",
+                    bs.get("currentSubroutineLevel")));
+    }
+
+    enterBatchModeForFinish() {
+        return this
+            .enterBatchMode()
+            .update("batchState", bs => bs
+                .set("targetSubroutineLevel",
+                    bs.get("currentSubroutineLevel") - 1));
+    }
+
+    enterBatchModeForRunForever() {
+        return this
+            .enterBatchMode()
+            .update("batchState", bs => bs
+                .set("targetSubroutineLevel", -Infinity));
+    }
+
     _stepStdin() {
         const stdin = this.console.get("stdin");
         const {KBSR, KBDR} = Constants.HARDWARE_ADDRESSES;
