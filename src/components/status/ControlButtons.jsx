@@ -10,6 +10,23 @@ export default class ControlButtons extends Component {
                 <Button onClick={() => this.props.onStep()}>
                     Step
                 </Button>
+                <Button onClick={() => this.props.onEnterBatchMode("NEXT")}>
+                    Next
+                </Button>
+                <Button onClick={() => this.props.onEnterBatchMode("FINISH")}>
+                    Finish
+                </Button>
+                <Button onClick={() => this.props.onEnterBatchMode("RUN")}>
+                    Run
+                </Button>
+            </ButtonGroup>
+            <ButtonGroup>
+                <Button onClick={() => this.props.onExitBatchMode()}>
+                    Pause
+                </Button>
+                <Button onClick={() => this.props.onEnterBatchMode("CONTINUE")}>
+                    Continue
+                </Button>
             </ButtonGroup>
         </ButtonToolbar>;
     }

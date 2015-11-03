@@ -36,6 +36,8 @@ class StatusView extends Component {
             />
             <ControlButtons
                 onStep={this.props.onStep}
+                onEnterBatchMode={this.props.onEnterBatchMode}
+                onExitBatchMode={this.props.onExitBatchMode}
             />
         </div>;
     }
@@ -55,6 +57,8 @@ function mapDispatchToProps(dispatch) {
         onStep: () => dispatch(actions.step()),
         onSetRegister: (name, value) =>
             dispatch(actions.setRegister(name, value)),
+        onEnterBatchMode: (style) => dispatch(actions.enterBatchMode(style)),
+        onExitBatchMode: () => dispatch(actions.exitBatchMode()),
     };
 }
 
