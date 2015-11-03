@@ -29,7 +29,7 @@ export const HARDWARE_ADDRESSES = {
  * The maximum number of instructions
  * that can be executed before exiting batch mode.
  */
-export const BATCH_MODE_LIMIT = 0x1000;
+export const BATCH_MODE_LIMIT = 0x100;
 
 export default {
     MEMORY_SIZE,
