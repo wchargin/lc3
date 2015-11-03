@@ -36,4 +36,5 @@ export default {
     WORD_BITS,
     MAX_STANDARD_MEMORY,
     HARDWARE_ADDRESSES,
+    BATCH_MODE_LIMIT,
 };
