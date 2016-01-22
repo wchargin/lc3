@@ -424,6 +424,21 @@ describe('assemble', () => {
             programLength: 2,
         }));
 
+        it("uses the right string offset with lowercase directives", good([
+            ".orig x3000",
+            "lbl add r1,r2,r3",
+            'txt .stringz "hello"',
+            "lbl2 add r1,r2,r3",
+            ".end"
+        ])({
+            symbolTable: {
+                "lbl": 0x3000,
+                "txt": 0x3001,
+                "lbl2": 0x3007,
+            },
+            programLength: 8,
+        }));
+
         it("lets your instructions go up to the last memory cell", good([
             ".ORIG xFFFE",
             "JSRR R0",

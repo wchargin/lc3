@@ -328,7 +328,7 @@ export function isValidLabelName(label) {
  * You should process those separately.
  */
 export function determineRequiredMemory(command, operand) {
-    switch (command) {
+    switch (command.toUpperCase()) {
         case ".FILL":
             return 1;
         case ".BLKW":
@@ -405,7 +405,7 @@ export function buildSymbolTable(lines, orig, begin) {
                             `but found ${operands.length}`);
                     }
                 };
-                switch (command) {
+                switch (command.toUpperCase()) {
                     case ".BLKW":
                     case ".FILL":
                         ensureUnary();
