@@ -1,6 +1,15 @@
 # lc3: a better LC-3 simulator
 
-This project is an online implementation of the LC-3 microcomputer, in the form of a single-page web application. It's the successor to [`lc3web`](https://github.com/wchargin/lc3web).
+> This project was an exploration to become more familiar with React
+> applications. I'm not actively developing it anymore, nor did I get it
+> to be as good as the original. Please consult [`lc3web`][lc3web] for
+> all your LC-3 simulation needs.
+>
+> Below is the original README.
+
+This project is an online implementation of the LC-3 microcomputer, in the form of a single-page web application. It's the successor to [`lc3web`][lc3web].
+
+[lc3web]: https://github.com/wchargin/lc3web
 
 The goal of the original `lc3web` project was to make it easier to write and execute LC-3 programs without having to use platform-specific tools that all seemed to be missing a few key features. The end result works pretty well, but it became increasingly complex throughout its development.
 
